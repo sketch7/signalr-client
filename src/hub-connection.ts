@@ -20,7 +20,7 @@ export class HubConnection<THub> {
 
 	constructor(connectionOption: HubConnectionOptions) {
 		this._hubConnection = new SignalRHubConnection(connectionOption.endpointUri, connectionOption.options);
-		this._source = `[${connectionOption.name}] HubConnection ::`;
+		this._source = `[${connectionOption.key}] HubConnection ::`;
 	}
 
 	connect(): Observable<void> {

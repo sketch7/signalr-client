@@ -14,7 +14,7 @@ export interface ConnectionState {
 }
 
 export interface HubConnectionOptions {
-	name: string;
+	key: string;
 	endpointUri: string;
 	options?: ConnectionOptions;
 	data?: Dictionary<string>;
