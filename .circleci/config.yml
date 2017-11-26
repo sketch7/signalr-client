@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      - image: node:8.6.0
+    steps:
+      - run:
+          name: Print environment versions
+          command: |
+            NPM_V=$(npm -v)
+            echo npm version':' $NPM_V
+      - checkout
+      - run:
+          name: Package Install
+          command: |
+            echo -e "$NPM_USER\n$NPM_PWD\n$NPM_EMAIL" | npm login --scope=@ssv
+            npm i
+            npm i gulp -g
+      - run:
+          name: build
+          command: npm run build -- --rel
+      - run:
+          name: test
+          command: npm test
+      - deploy:
+          name: Publish NPM
+          command: |
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+              echo -e "\e[33m Branch does not publish -- exit!"
+              exit
+            fi
+            . ./.circleci/utils.sh
+           
+            PACKAGE_VERSION=$(node -p "require('./package.json').version")
+            
+            print_title "publish..."
+            npm publish
+
+            print_title "git tag"
+            git tag $PACKAGE_VERSION
+            git push --tags

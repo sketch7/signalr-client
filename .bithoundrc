@@ -1,0 +1,20 @@
+{
+  "ignore": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/**-min-**",
+    "**/**-min.**",
+    "**/**.min.**",
+    "bower_components/**",
+    "dist/**",
+    "_artifact/**",
+    "typings/**"
+  ],
+  "test": [
+    "**/test/**",
+    "**/tests/**",
+    "**/spec/**",
+    "**/specs/**",
+	"**/*.spec.ts"
+  ]
+}

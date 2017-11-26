@@ -1,0 +1,12 @@
+{
+	"extends": "./node_modules/@ssv/tools/tsconfig.base.json",
+	"compilerOptions": {
+		"types": [
+			"jest"
+		]
+	},
+	"include": [
+		"src/**/*",
+		"test/**/*"
+	]
+}
