@@ -10,6 +10,11 @@
 [![bitHound Overall Score](https://www.bithound.io/github/sketch7/ssv.signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/ssv.signalr-client)
 [![npm version](https://badge.fury.io/js/ssv.signalr-client.svg)](https://badge.fury.io/js/ssv.signalr-client)
 
+SignalR client library build on top of `@aspnet/signalr-client. This gives you more features and easier to use.
+
+## Features:
+* todo 
+
 
 **Quick links**
 
@@ -23,7 +28,7 @@ npm install @ssv/signalr-client --save
 ```
 
 ## Usage
-
+**TODO**
 
 
 ## Getting Started
