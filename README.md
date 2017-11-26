@@ -10,7 +10,6 @@
 [![bitHound Overall Score](https://www.bithound.io/github/sketch7/ssv.signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/ssv.signalr-client)
 [![npm version](https://badge.fury.io/js/ssv.signalr-client.svg)](https://badge.fury.io/js/ssv.signalr-client)
 
-ssv core components, utilities and services
 
 **Quick links**
 

@@ -1,8 +1,7 @@
-﻿import { Dictionary, Selectable } from "./collection";
-import * as collection from "./collection";
-export {
-	collection,
+﻿import { HubConnection } from "./hub-connection";
+import { HubConnectionFactory } from "./hub-connection.factory";
 
-	Dictionary,
-	Selectable
+export {
+	HubConnection,
+	HubConnectionFactory
 };
