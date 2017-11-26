@@ -1,5 +1,5 @@
 import { HubConnection as SignalRHubConnection } from "@aspnet/signalr-client";
-import { fromPromise } from "rxjs/Observable/fromPromise";
+import { fromPromise } from "rxjs/observable/fromPromise";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
