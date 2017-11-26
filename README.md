@@ -1,14 +1,14 @@
-[projectUri]: https://github.com/sketch7/ssv.signalr-client
-[projectGit]: https://github.com/sketch7/ssv.signalr-client.git
+[projectUri]: https://github.com/sketch7signalr-client
+[projectGit]: https://github.com/sketch7/signalr-client.git
 [changeLog]: ./CHANGELOG.md
 [releaseWorkflowWiki]: ./docs/RELEASE-WORKFLOW.md
 
 [npm]: https://www.npmjs.com
 
-# ssv.signalr-client
-[![CircleCI](https://circleci.com/gh/sketch7/ssv.signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/ssv.signalr-client)
-[![bitHound Overall Score](https://www.bithound.io/github/sketch7/ssv.signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/ssv.signalr-client)
-[![npm version](https://badge.fury.io/js/ssv.signalr-client.svg)](https://badge.fury.io/js/ssv.signalr-client)
+# @ssv/signalr-client
+[![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
+[![bitHound Overall Score](https://www.bithound.io/github/sketch7/signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/signalr-client)
+[![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
 SignalR client library built on top of `@aspnet/signalr-client`. This gives you more features and easier to use.
 
@@ -50,7 +50,7 @@ npm install -g git gulp yarn
 
 #### Cloning Repo
 
-- Run `git clone https://github.com/sketch7/ssv.signalr-client.git`
+- Run `git clone https://github.com/sketch7/signalr-client.git`
 
 
 ### Project Setup
