@@ -63,18 +63,14 @@ npm install
 
 ### Building the code
 
-```
-gulp build
-// or
+```bash
 npm run build
 ```
 In order to view all other tasks invoke `gulp` or check the gulp tasks directly.
 
 ### Running the tests
 
-```
-gulp test
-// or
+```bash
 npm test
 ```
 
@@ -83,25 +79,23 @@ npm test
 
 #### Trigger gulp watch
 Handles compiling of changes.
-```
-gulp watch
-// or
+
+```bash
 npm start
 ```
 
 
 #### Running Continuous Tests
 Spawns test runner and keep watching for changes.
-```
-gulp tdd
-// or
+
+```bash
 npm run tdd
 ```
 
 
 ### Preparation for Release
 
-```
+```bash
 npm run prepare-release -- --bump major|minor|patch|prerelease (default: patch)
 ```
 Check out the [release workflow guide][releaseWorkflowWiki] in order to guide you creating a release and publishing it.
