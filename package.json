@@ -1,7 +1,7 @@
 {
   "name": "@ssv/signalr-client",
   "version": "0.1.0",
-  "description": "ssv core components, utilities and services",
+  "description": "SignalR client library built on top of `@aspnet/signalr-client. This gives you more features and easier to use.",
   "keywords": [
     "sketch7",
     "core",
@@ -53,7 +53,10 @@
     "typescript": "^2.6.1",
     "yargs": "^10.0.3"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@aspnet/signalr-client": "^1.0.0-alpha2-final",
+    "rxjs": "5.5.2"
+  },
   "peerDependencies": {},
   "jest": {
     "transform": {
