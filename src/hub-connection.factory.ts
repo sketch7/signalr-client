@@ -1,6 +1,6 @@
+import { Dictionary } from "./utils/dictionary";
 import { HubConnectionOptions } from "./hub-connection.model";
 import { HubConnection } from "./hub-connection";
-import { Dictionary } from "./core/collection";
 
 export class HubConnectionFactory {
 
@@ -25,7 +25,7 @@ export class HubConnectionFactory {
 		if (hub) {
 			return hub;
 		}
-		throw new Error(`${this.source} get :: connnection key not found '${key}'`);
+		throw new Error(`${this.source} get :: connection key not found '${key}'`);
 	}
 
 	remove(key: string) {
