@@ -1,4 +1,4 @@
-import { tap, map, filter, switchMap, skipUntil, debounceTime, take, delay } from "rxjs/operators";
+import { tap, map, filter, switchMap, skipUntil, take, delay } from "rxjs/operators";
 import { HubConnection as SignalRHubConnection } from "@aspnet/signalr-client";
 import { fromPromise } from "rxjs/observable/fromPromise";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
