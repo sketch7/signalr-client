@@ -9,7 +9,11 @@
     "realtime",
     "push",
     "rxjs",
-    "real-time"
+    "real-time",
+    "angular",
+    "aurelia",
+    "vue",
+    "react"
   ],
   "scripts": {
     "start": "gulp watch",
@@ -55,7 +59,7 @@
   },
   "dependencies": {
     "@aspnet/signalr-client": "^1.0.0-alpha2-final",
-    "rxjs": "5.5.2"
+    "rxjs": "~5.5.3"
   },
   "peerDependencies": {},
   "jest": {
