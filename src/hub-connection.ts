@@ -3,8 +3,6 @@ import { HubConnection as SignalRHubConnection } from "@aspnet/signalr-client";
 import { fromPromise } from "rxjs/observable/fromPromise";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
-import { empty } from "rxjs/observable/empty";
-import { of } from "rxjs/observable/of";
 import { Observer } from "rxjs/Observer";
 
 import { ConnectionState, ConnectionStatus, HubConnectionOptions } from "./hub-connection.model";
@@ -13,7 +11,7 @@ import { Dictionary } from "./utils/dictionary";
 import { emptyNext } from "./utils/rxjs";
 
 const connectedState: ConnectionState = { status: ConnectionStatus.connected };
-const connectionReadyState: ConnectionState = { status: ConnectionStatus.connectionReady };
+const connectionReadyState: ConnectionState = { status: ConnectionStatus.ready };
 const disconnectedState: ConnectionState = { status: ConnectionStatus.disconnected };
 
 export class HubConnection<THub> {
@@ -30,8 +28,7 @@ export class HubConnection<THub> {
 
 		this.hubConnectionOptions$ = new BehaviorSubject<HubConnectionOptions>(connectionOption);
 
-		this.hubConnectionOptions$
-			.pipe(
+		const reconnection$ = this.hubConnectionOptions$.pipe(
 			// debounceTime(10),
 			map(connectionOpts => [connectionOpts, this._connectionState$.value.status] as [HubConnectionOptions, ConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
@@ -42,15 +39,16 @@ export class HubConnection<THub> {
 				tap(() => this._connectionState$.next(connectionReadyState)),
 				filter(() => prevConnectionStatus === ConnectionStatus.connected),
 				switchMap(() => this.openConnection())
-			)
 			))
-			.subscribe();
+		);
+
+		reconnection$.subscribe();
 	}
 
 	connect(): Observable<void> {
 		if (this._connectionState$.value.status === ConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
-			return empty();
+			return emptyNext();
 		}
 
 		return emptyNext().pipe(
@@ -60,15 +58,16 @@ export class HubConnection<THub> {
 						this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
 					}
 				}),
-				skipUntil(this._connectionState$.pipe(filter(x => x.status === ConnectionStatus.connectionReady))),
+				skipUntil(this._connectionState$.pipe(filter(x => x.status === ConnectionStatus.ready))),
 				take(1)
 			)),
 			switchMap(() => this.openConnection())
 		);
 	}
 
-	setData(data: Dictionary<string>) {
+	setData(data: Dictionary<string> | undefined | null) {
 		if (!data) {
+			this.clearData();
 			return;
 		}
 		const connection = this.hubConnectionOptions$.value;
@@ -108,7 +107,7 @@ export class HubConnection<THub> {
 				}
 			};
 		});
-		return of(null).pipe(
+		return emptyNext().pipe(
 			switchMap(() => this.connectionState$.pipe(
 				skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
 				take(1)
@@ -138,10 +137,9 @@ export class HubConnection<THub> {
 	}
 
 	private openConnection() {
-		return fromPromise(this.hubConnection.start())
-			.pipe(
+		return fromPromise(this.hubConnection.start()).pipe(
+			tap(() => this._connectionState$.next(connectedState)),
 			tap(() => {
-				this._connectionState$.next(connectedState);
 				this.hubConnection.onclose(err => {
 					if (err) {
 						console.error(`${this.source} session disconnected with errors`, err);
@@ -151,7 +149,8 @@ export class HubConnection<THub> {
 						this._connectionState$.next(disconnectedState);
 					}
 				});
-			})
-			); // todo: retry
+			}),
+			take(1)
+		); // todo: retry
 	}
 }
