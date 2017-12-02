@@ -81,11 +81,11 @@ export class HubConnection<THub> {
 		this.hubConnectionOptions$.next(connection);
 	}
 
-	on<TResult>(methodName: keyof THub): Observable<TResult> {
+	on<TResult>(topicName: keyof THub): Observable<TResult> {
 		return Observable.create((observer: Observer<TResult>): (() => void) | void => {
 			const updateEvent = (latestValue: TResult) => observer.next(latestValue);
-			this.hubConnection.on(methodName, updateEvent);
-			return () => this.hubConnection.off(methodName, updateEvent);
+			this.hubConnection.on(topicName, updateEvent);
+			return () => this.hubConnection.off(topicName, updateEvent);
 		});
 	}
 
