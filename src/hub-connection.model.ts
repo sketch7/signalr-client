@@ -1,8 +1,9 @@
 import { IHubConnectionOptions } from "@aspnet/signalr-client/dist/src/IHubConnectionOptions";
 
-import { Dictionary } from "./core/collection";
+import { Dictionary } from "./utils/dictionary";
 
 export enum ConnectionStatus {
+	ready,
 	connected,
 	disconnected
 }

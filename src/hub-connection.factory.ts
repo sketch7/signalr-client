@@ -1,18 +1,19 @@
+import { Dictionary } from "./utils/dictionary";
 import { HubConnectionOptions } from "./hub-connection.model";
 import { HubConnection } from "./hub-connection";
-import { Dictionary } from "./core/collection";
 
 export class HubConnectionFactory {
 
+	private source = "HubConnectionFactory ::";
 	private hubConnections: Dictionary<HubConnection<any>> = {};
 
 	create(...connectionOptions: HubConnectionOptions[]): this {
 		for (const connectionOption of connectionOptions) {
 			if (!connectionOption.key) {
-				throw new Error(`HubConnectionFactory :: create :: connection key not set`);
+				throw new Error(`${this.source} create :: connection key not set`);
 			}
 			if (!connectionOption.endpointUri) {
-				throw new Error(`HubConnectionFactory :: create :: connection endpointUri not set for ${connectionOption.key}`);
+				throw new Error(`${this.source} create :: connection endpointUri not set for ${connectionOption.key}`);
 			}
 			this.hubConnections[connectionOption.key] = new HubConnection<any>(connectionOption);
 		}
@@ -24,7 +25,7 @@ export class HubConnectionFactory {
 		if (hub) {
 			return hub;
 		}
-		throw new Error(`HubConnectionFactory :: get :: connnection key not found '${key}'`);
+		throw new Error(`${this.source} get :: connection key not found '${key}'`);
 	}
 
 	remove(key: string) {

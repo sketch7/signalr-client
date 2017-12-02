@@ -1,78 +1,156 @@
+import { tap, map, filter, switchMap, skipUntil, take, delay } from "rxjs/operators";
 import { HubConnection as SignalRHubConnection } from "@aspnet/signalr-client";
 import { fromPromise } from "rxjs/observable/fromPromise";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
-import { tap } from "rxjs/operators";
 
 import { ConnectionState, ConnectionStatus, HubConnectionOptions } from "./hub-connection.model";
+import { buildQueryString } from "./utils/query-string";
+import { Dictionary } from "./utils/dictionary";
+import { emptyNext } from "./utils/rxjs";
 
 const connectedState: ConnectionState = { status: ConnectionStatus.connected };
+const connectionReadyState: ConnectionState = { status: ConnectionStatus.ready };
 const disconnectedState: ConnectionState = { status: ConnectionStatus.disconnected };
 
 export class HubConnection<THub> {
 
 	get connectionState$() { return this._connectionState$.asObservable(); }
 
-	private _source: string;
-	private _hubConnection: SignalRHubConnection;
+	private source: string;
+	private hubConnection: SignalRHubConnection;
+	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
 
 	constructor(connectionOption: HubConnectionOptions) {
-		this._hubConnection = new SignalRHubConnection(connectionOption.endpointUri, connectionOption.options);
-		this._source = `[${connectionOption.key}] HubConnection ::`;
+		this.source = `[${connectionOption.key}] HubConnection ::`;
+
+		this.hubConnectionOptions$ = new BehaviorSubject<HubConnectionOptions>(connectionOption);
+
+		const reconnection$ = this.hubConnectionOptions$.pipe(
+			// debounceTime(10),
+			map(connectionOpts => [connectionOpts, this._connectionState$.value.status] as [HubConnectionOptions, ConnectionStatus]),
+			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
+				map(() => buildQueryString(connectionOpts.data)),
+				tap(queryString =>
+					this.hubConnection = new SignalRHubConnection(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options)
+				),
+				tap(() => this._connectionState$.next(connectionReadyState)),
+				filter(() => prevConnectionStatus === ConnectionStatus.connected),
+				switchMap(() => this.openConnection())
+			))
+		);
+
+		reconnection$.subscribe();
 	}
 
 	connect(): Observable<void> {
-		return fromPromise(this._hubConnection.start())
-			.pipe(
-			tap(() => {
-				this._connectionState$.next(connectedState);
+		if (this._connectionState$.value.status === ConnectionStatus.connected) {
+			console.warn(`${this.source} session already connected`);
+			return emptyNext();
+		}
 
-				this._hubConnection.onclose(err => {
-
-					if (err) {
-						console.error(`${this._source} session closed with errors`, err);
-						this._connectionState$.next({ status: ConnectionStatus.disconnected, reason: "error", data: err });
-					} else {
-						this._connectionState$.next(disconnectedState);
+		return emptyNext().pipe(
+			switchMap(() => this._connectionState$.pipe(
+				tap(x => {
+					if (x.status === ConnectionStatus.disconnected) {
+						this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
 					}
-				});
-			})
-			); // .catchError();
+				}),
+				skipUntil(this._connectionState$.pipe(filter(x => x.status === ConnectionStatus.ready))),
+				take(1)
+			)),
+			switchMap(() => this.openConnection())
+		);
+	}
+
+	setData(data: Dictionary<string> | undefined | null) {
+		if (!data) {
+			this.clearData();
+			return;
+		}
+		const connection = this.hubConnectionOptions$.value;
+		connection.data = { ...connection.data, ...data } as Dictionary<string>;
+		this.hubConnectionOptions$.next(connection);
+	}
+
+	clearData() {
+		const connection = this.hubConnectionOptions$.value;
+		connection.data = undefined;
+		this.hubConnectionOptions$.next(connection);
 	}
 
 	on<TResult>(methodName: keyof THub): Observable<TResult> {
 		return Observable.create((observer: Observer<TResult>): (() => void) | void => {
 			const updateEvent = (latestValue: TResult) => observer.next(latestValue);
-			this._hubConnection.on(methodName, updateEvent);
-			return () => this._hubConnection.off(methodName, updateEvent);
+			this.hubConnection.on(methodName, updateEvent);
+			return () => this.hubConnection.off(methodName, updateEvent);
 		});
 	}
 
 	stream<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
-		return Observable.create((observer: Observer<TResult>): (() => void) | void => {
-			this._hubConnection.stream<TResult>(methodName, ...args).subscribe({
+		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
+			this.hubConnection.stream<TResult>(methodName, ...args).subscribe({
 				closed: false,
 				next: item => observer.next(item),
-				error: err => observer.error(err),
+				error: err => {
+					if (err && err.message !== "Invocation cancelled due to connection being closed.") {
+						observer.error(err);
+					}
+				},
 				complete: () => observer.complete()
 			});
-			return () => this.send("StreamUnsubscribe", methodName, ...args);
+			return () => {
+				if (this._connectionState$.value.status === ConnectionStatus.connected) {
+					this.send("StreamUnsubscribe", methodName, ...args);
+				}
+			};
 		});
+		return emptyNext().pipe(
+			switchMap(() => this.connectionState$.pipe(
+				skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
+				take(1)
+			)),
+			tap(() => console.log(`${this.source} stream - start`)),
+			switchMap(() => stream$) // todo: retry after reconnection
+		);
 	}
 
 	send(methodName: keyof THub | "StreamUnsubscribe", ...args: any[]): Observable<void> {
-		return fromPromise(this._hubConnection.send(methodName, ...args));
+		return fromPromise(this.hubConnection.send(methodName, ...args));
 	}
 
 	invoke<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
-		return fromPromise<TResult>(this._hubConnection.invoke(methodName, ...args));
+		return fromPromise<TResult>(this.hubConnection.invoke(methodName, ...args));
 	}
 
 	disconnect() {
-		if (this._connectionState$.value.status === ConnectionStatus.connected) {
-			this._hubConnection.stop();
+		if (this._connectionState$.value.status === ConnectionStatus.disconnected) {
+			return emptyNext();
 		}
+
+		return emptyNext().pipe(
+			tap(() => this.hubConnection.stop()),
+			delay(200) // workaround since signalr are returning void and internally firing a callback for disconnect
+		);
+	}
+
+	private openConnection() {
+		return fromPromise(this.hubConnection.start()).pipe(
+			tap(() => this._connectionState$.next(connectedState)),
+			tap(() => {
+				this.hubConnection.onclose(err => {
+					if (err) {
+						console.error(`${this.source} session disconnected with errors`, err);
+						this._connectionState$.next({ status: ConnectionStatus.disconnected, reason: "error", data: err });
+					} else {
+						console.warn(`${this.source} session disconnected`);
+						this._connectionState$.next(disconnectedState);
+					}
+				});
+			}),
+			take(1)
+		); // todo: retry
 	}
 }
