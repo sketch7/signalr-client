@@ -165,7 +165,8 @@ export class HubConnection<THub> {
 						this._connectionState$.next(disconnectedState);
 					}
 				});
-			})
+			}),
+			first()
 		);
 	}
 }

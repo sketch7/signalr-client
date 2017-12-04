@@ -23,15 +23,15 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
     * Multiple hub connections state management
     * Connection state notifications 
     * Sending extra connection details easily and keeps the current connection state
-    * Subscriptions are handled through `RxJS` streams.
+    * Subscriptions are handled through `RxJS` streams
     * Reconnection strategies:
         * Random
         * BackOff
         * Custom
     * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
     * Contains minimal dependencies (`SignalR` and `RxJS` only)
-    * `No constraints` with any frameworks.
-    * Designed to be straight forward integrations with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
+    * `No constraints` with any framework.
+    * Designed to be straight forward integrated with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
 
 * Samples
     * Real world integration (***coming soon***):
