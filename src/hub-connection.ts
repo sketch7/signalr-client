@@ -7,7 +7,7 @@ import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
 
 import { ConnectionState, ConnectionStatus, HubConnectionOptions, ReconnectionStrategyOptions } from "./hub-connection.model";
-import { getDelay } from "./reconnection-strategy";
+import { getReconnectionDelay } from "./reconnection-strategy";
 import { buildQueryString } from "./utils/query-string";
 import { Dictionary } from "./utils/dictionary";
 import { emptyNext } from "./utils/rxjs";
@@ -147,7 +147,7 @@ export class HubConnection<THub> {
 				scan((errorCount: number) => ++errorCount, 0),
 				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
-					const delayRetries = getDelay(this.retry, retryCount);
+					const delayRetries = getReconnectionDelay(this.retry, retryCount);
 					// tslint:disable-next-line:no-console
 					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);

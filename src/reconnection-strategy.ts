@@ -1,7 +1,7 @@
 import { ReconnectionStrategyOptions, BackOffStrategyOptions, RandomStrategyOptions } from "./hub-connection.model";
 import { random } from "./utils/math";
 
-export function getDelay(retryOptions: ReconnectionStrategyOptions, retryCount: number): number {
+export function getReconnectionDelay(retryOptions: ReconnectionStrategyOptions, retryCount: number): number {
 	if (retryOptions.customStrategy) {
 		return retryOptions.customStrategy(retryOptions, retryCount);
 	}
