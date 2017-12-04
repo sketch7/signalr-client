@@ -55,7 +55,7 @@ This will retreive a hub connection by Key.
 
 | Parameters | Type     | Default | Required | Description             |
 |------------|----------|---------|----------|-------------------------|
-| THub       | `THub`   | -       | yes      | THub returned response. |
+| THub       | `THub`   | -       | yes      | Response type.          |
 | key        | `string` | -       | yes      | Unique identifier.      |
 
 *Return* `HubConnection<THub>`
@@ -101,7 +101,7 @@ Iterates on all available connections and disconnects.
 ### Properties
 
 ### `connectionState$`
-Allow you subscribe for connection state updates.
+Subscribes for connection state updates.
 
 *Return* `Observable<ConnectionState>`
 
@@ -121,8 +121,8 @@ Connect with the specific hub connection.
 
 
 ### `setData`
-Allow you to send data with a specific connection as query string. 
-When calling this method it will automatically disconnects, sets data and depending the previous connection state it will either reconnect or not. 
+Send data with a specific connection as query string. 
+When calling this method, it will automatically disconnects, sets data and depending the previous connection state it will either reconnect or not. 
 
 *notes* 
 * If before calling this method the connection was disconnected, this will only set the data.
@@ -138,7 +138,7 @@ When calling this method it will automatically disconnects, sets data and depend
 
 ### `clearData`
 This will clear all the connection data. 
-When calling this method it will automatically disconnects, removes all data and depending the previous connection state it will either reconnect or not. 
+When calling this method, it will automatically disconnects, removes all data and depending the previous connection state it will either reconnect or not. 
 
 *note* If before calling this method the connection was disconnected, this will only set the data.
 
