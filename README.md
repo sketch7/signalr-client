@@ -28,12 +28,12 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
     * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
     * Contains minimal dependencies (`SignalR` and `RxJS` only)
     * `No constraints` with any frameworks.
-    * Designed to be straight forward integrations with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc..
+    * Designed to be straight forward integrations with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
 
 * Samples
     * Real world integration (***coming soon***):
-        * client: Angular
-        * server: Microsoft Orleans integrated with SignalR
+        * Client: Angular
+        * Server: Microsoft Orleans integrated with SignalR
 
 ## Installation
 
@@ -47,7 +47,7 @@ Check out the [API Documentation Page][apiWiki].
 
 
 ## Usage
-There are `three simple steps` which you need to do:
+There are `three simple steps`:
 
 1. Register `HubConnectionFactory` in your DI eco system
 2. In application bootstrap:
@@ -61,7 +61,7 @@ There are `three simple steps` which you need to do:
 
 You're all set! Now it's fully integrated with your Angular application.
 
-Continue from the [vanilla usage - step 2](#usage).
+Continue from the [vanilla usage - step 2](#usage) onwards.
 
 ***Example***
 ```ts
