@@ -22,5 +22,23 @@ export interface HubConnectionOptions {
 }
 
 export interface ConnectionOptions extends IHubConnectionOptions {
+	retry?: ReconnectionStrategyOptions;
+}
 
+export interface ReconnectionStrategyOptions {
+	maximumAttempts?: number;
+	customStrategy?: (retryOptions: ReconnectionStrategyOptions, retryCount: number) => number;
+	randomStrategy?: RandomStrategyOptions;
+	backOffStrategy?: BackOffStrategyOptions;
+}
+
+export interface RandomStrategyOptions {
+	min: number;
+	max: number;
+	intervalMs: number;
+}
+
+export interface BackOffStrategyOptions {
+	delayRetriesMs: number;
+	maxDelayRetriesMs: number;
 }
