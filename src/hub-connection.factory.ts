@@ -36,6 +36,14 @@ export class HubConnectionFactory {
 		}
 	}
 
+	connectAll() {
+		// tslint:disable-next-line:forin
+		for (const hubKey in this.hubConnections) {
+			const hub = this.hubConnections[hubKey];
+			hub.connect();
+		}
+	}
+
 	disconnectAll() {
 		// tslint:disable-next-line:forin
 		for (const hubKey in this.hubConnections) {

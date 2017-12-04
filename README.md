@@ -1,9 +1,10 @@
-[projectUri]: https://github.com/sketch7signalr-client
+[projectUri]: https://github.com/sketch7/signalr-client
 [projectGit]: https://github.com/sketch7/signalr-client.git
 [changeLog]: ./CHANGELOG.md
-[releaseWorkflowWiki]: ./docs/RELEASE-WORKFLOW.md
+[developmentWorkflowWiki]: ./docs/DEVELOPMENT-WORKFLOW.md
+[apiWiki]: ./docs/API.md
 
-[npm]: https://www.npmjs.com
+[npm]: https://www.npmjs.com/package/@ssv/signalr-client
 
 # @ssv/signalr-client
 [![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
@@ -12,13 +13,27 @@
 
 SignalR client library built on top of `@aspnet/signalr-client`. This gives you more features and easier to use.
 
-## Features:
-* todo 
-
-
 **Quick links**
 
-[Change logs][changeLog] | [Project Repository][projectUri]
+[Change logs][changeLog] | [Project Repository][projectUri] | [API Documentation][apiWiki]
+
+## Features:
+* General
+    * Fully `Typescript` and `ReactiveX`
+    * Multiple hub connections state management
+    * Connection state notifications 
+    * Sending extra connection details easily and keeps the current connection state
+    * Subscriptions are handled through `RxJS` streams.
+    * Reconnection strategies (***in development***)
+    * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
+    * Contains minimal dependencies (`SignalR` and `RxJS` only)
+    * `No constraints` with any frameworks.
+    * Designed to be straight forward integrations with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
+
+* Samples
+    * Real world integration (***coming soon***):
+        * Client: Angular
+        * Server: Microsoft Orleans integrated with SignalR
 
 ## Installation
 
@@ -27,75 +42,97 @@ Get library via [npm]
 npm install @ssv/signalr-client --save
 ```
 
+## API Documentation
+Check out the [API Documentation Page][apiWiki].
+
+
 ## Usage
-**TODO**
+There are `three simple steps`:
 
+1. Register `HubConnectionFactory` in your DI eco system
+2. In application bootstrap:
+    * Register one or more hub connections (by injecting `HubConnectionFactory` and using `create`)
+3. Somewhere in your components/services you need:
+    * Inject `HubConnectionFactory` and call method `get` by passing the `key` for a specific hub connection, this will return `HubConnection`
+    * Use `HubConnection` to use enhanced signalr features.
 
-## Getting Started
+## Angular Adapter
+1. Register `HubConnectionFactory` as a `Provider`.
 
-### Setup Machine for Development
-Install/setup the following:
+You're all set! Now it's fully integrated with your Angular application.
 
-- NodeJS v9+
-- Visual Studio Code or similar code editor
-- TypeScript 2.6+
-- Git + SourceTree, SmartGit or similar (optional)
-- Ensure to install **global NPM modules** using the following:
+Continue from the [vanilla usage - step 2](#usage) onwards.
 
+***Example***
+```ts
+import { HubConnectionFactory } from "@ssv/signalr-client";
 
-```bash
-npm install -g git gulp yarn
+@NgModule({
+	declarations: [
+        ....
+	],
+	imports: [
+        ....
+	],
+	providers: [
+		HubConnectionFactory,
+		....
+	]
+})
+export class AppModule {
+
+    constructor(factory: HubConnectionFactory) {
+		factory.create(
+			{ key: "hero", endpointUri: "/hero" },
+			{ key: "user", endpointUri: "/userNotifications" }
+		);
+	}
+}
+```
+
+*sample usage in components:*
+```ts
+import { ISubscription } from "rxjs/Subscription";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
+
+@Component({
+	selector: "hero-detail",
+	templateUrl: "./hero-detail.component.html"
+})
+export class HeroDetailComponent implements OnInit, OnDestroy {
+
+	private hubConnection: HubConnection<HeroHub>;
+	private singed$$: ISubscription;
+
+	constructor(hubFactory: HubConnectionFactory) {
+		this.hubConnection = hubFactory.get<HeroHub>("hero");
+	}
+
+	ngOnInit(): void {
+		this.singed$$ = this.hubConnection.stream<Hero>("GetUpdates", "singed")
+		.subscribe(x => console.log(`stream :: singed :: update received`, x));
+	}
+
+	ngOnDestroy(): void {
+		if (this.singed$$) {
+			this.singed$$.unsubscribe();
+		}
+	}
+}
+
+export interface HeroHub {
+	GetUpdates: string;
+}
+
+export interface Hero {
+	id: string;
+	name: string;
+	health: number;
+}
 ```
 
 
-#### Cloning Repo
+### Contributions
 
-- Run `git clone https://github.com/sketch7/signalr-client.git`
-
-
-### Project Setup
-The following process need to be executed in order to get started.
-
-```bash
-npm install
-```
-
-
-### Building the code
-
-```bash
-npm run build
-```
-In order to view all other tasks invoke `gulp` or check the gulp tasks directly.
-
-### Running the tests
-
-```bash
-npm test
-```
-
-
-### Development utils
-
-#### Trigger gulp watch
-Handles compiling of changes.
-
-```bash
-npm start
-```
-
-
-#### Running Continuous Tests
-Spawns test runner and keep watching for changes.
-
-```bash
-npm run tdd
-```
-
-
-### Preparation for Release
-
-```bash
-npm run prepare-release -- --bump major|minor|patch|prerelease (default: patch)
-```
-Check out the [release workflow guide][releaseWorkflowWiki] in order to guide you creating a release and publishing it.
+Check out the [development guide][developmentWorkflowWiki].
