@@ -28,7 +28,7 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
     * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
     * Contains minimal dependencies (`SignalR` and `RxJS` only)
     * `No constraints` with any frameworks.
-    * Designed to be very straight forward integrations `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc..
+    * Designed to be straight forward integrations with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc..
 
 * Samples
     * Real world integration (***coming soon***):
