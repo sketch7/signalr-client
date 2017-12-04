@@ -1,3 +1,13 @@
+<a name="0.3.2"></a>
+## [0.3.2](https://github.com/sketch7/signalr-client/compare/0.3.1...0.3.2) (2017-12-04)
+
+
+### Features
+
+* **hub connection:** implemented reconnection strategies ([12cd84d](https://github.com/sketch7/signalr-client/commit/12cd84d))
+
+
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/sketch7/signalr-client/compare/0.3.0...0.3.1) (2017-12-02)
 
