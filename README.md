@@ -49,13 +49,11 @@ Check out the [API Documentation Page][apiWiki].
 ## Usage
 There are `three simple steps` which you need to do:
 
-1. Register `HubConnectionFactory` in your DI eco system.
-2. In your bootstrapping require `HubConnectionFactory`.
-    * Register one or more hub connections (by using `create`).
-    * `Key` and `endpointUri` are required.
+1. Register `HubConnectionFactory` in your DI eco system
+2. In application bootstrap:
+    * Register one or more hub connections (by injecting `HubConnectionFactory` and using `create`)
 3. Somewhere in your components/services you need:
-    * Require `HubConnectionFactory`
-    * From the `HubConnectionFactory` use `get` passing the `key` for a specific connection, this will return `HubConnection`
+    * Inject `HubConnectionFactory` and call method `get` by passing the `key` for a specific hub connection, this will return `HubConnection`
     * Use `HubConnection` to use enhanced signalr features.
 
 ## Angular Adapter
