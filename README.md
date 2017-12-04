@@ -17,26 +17,25 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
 
 [Change logs][changeLog] | [Project Repository][projectUri] | [API Documentation][apiWiki]
 
-## Features:
-* General
-    * Fully `Typescript` and `ReactiveX`
-    * Multiple hub connections state management
-    * Connection state notifications 
-    * Sending extra connection details easily and keeps the current connection state
-    * Subscriptions are handled through `RxJS` streams
-    * Reconnection strategies:
-        * Random
-        * BackOff
-        * Custom
-    * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
-    * Contains minimal dependencies (`SignalR` and `RxJS` only)
-    * `No constraints` with any framework.
-    * Designed to be straight forward integrated with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
+## Features
+* Fully `TypeScript` and `ReactiveX`
+* Multiple hub connections state management
+* Connection state notifications 
+* Update connection details easily without losing current connection state
+* Subscriptions are handled through `RxJS` streams
+* Reconnection strategies
+    * Random
+    * BackOff
+    * Custom
+* Auto re-subscriptions after getting disconnected and re-connected (***in development***)
+* Contains minimal dependencies (`SignalR` and `RxJS` only)
+* `No constraints` with any framework
+* Designed to be straight forward integrated with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
 
-* Samples
-    * Real world integration (***coming soon***):
-        * Client: Angular
-        * Server: Microsoft Orleans integrated with SignalR
+## Samples
+* Real world example (***coming soon***):
+    * Client: Angular
+    * Server: Microsoft Orleans integrated with SignalR
 
 ## Installation
 
@@ -57,29 +56,23 @@ There are `three simple steps`:
     * Register one or more hub connections (by injecting `HubConnectionFactory` and using `create`)
 3. Somewhere in your components/services you need:
     * Inject `HubConnectionFactory` and call method `get` by passing the `key` for a specific hub connection, this will return `HubConnection`
-    * Use `HubConnection` to use enhanced signalr features.
+    * Use `HubConnection` to use enhanced signalr features
 
 ## Angular Adapter
-1. Register `HubConnectionFactory` as a `Provider`.
+1. Register `HubConnectionFactory` as a `Provider`
 
 You're all set! Now it's fully integrated with your Angular application.
 
-Continue from the [vanilla usage - step 2](#usage) onwards.
+Continue from the [vanilla usage - step 2](#usage) onwards
 
 ***Example***
 ```ts
 import { HubConnectionFactory } from "@ssv/signalr-client";
 
 @NgModule({
-	declarations: [
-        ....
-	],
-	imports: [
-        ....
-	],
 	providers: [
 		HubConnectionFactory,
-		....
+		...
 	]
 })
 export class AppModule {
