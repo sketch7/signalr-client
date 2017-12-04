@@ -1,6 +1,14 @@
 ﻿import { HubConnection } from "./hub-connection";
 import { HubConnectionFactory } from "./hub-connection.factory";
-import { ConnectionStatus, ConnectionState, HubConnectionOptions, ConnectionOptions } from "./hub-connection.model";
+import {
+	ConnectionStatus,
+	ConnectionState,
+	HubConnectionOptions,
+	ConnectionOptions,
+	ReconnectionStrategyOptions,
+	RandomStrategyOptions,
+	BackOffStrategyOptions
+} from "./hub-connection.model";
 
 export {
 	HubConnection,
@@ -9,5 +17,8 @@ export {
 	ConnectionStatus,
 	ConnectionState,
 	ConnectionOptions,
-	HubConnectionOptions
+	HubConnectionOptions,
+	ReconnectionStrategyOptions,
+	RandomStrategyOptions,
+	BackOffStrategyOptions
 };

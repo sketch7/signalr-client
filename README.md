@@ -24,7 +24,10 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
     * Connection state notifications 
     * Sending extra connection details easily and keeps the current connection state
     * Subscriptions are handled through `RxJS` streams.
-    * Reconnection strategies (***in development***)
+    * Reconnection strategies:
+        * Random
+        * BackOff
+        * Custom
     * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
     * Contains minimal dependencies (`SignalR` and `RxJS` only)
     * `No constraints` with any frameworks.

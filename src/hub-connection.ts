@@ -1,11 +1,13 @@
-import { tap, map, filter, switchMap, skipUntil, take, delay } from "rxjs/operators";
+import { tap, map, filter, switchMap, skipUntil, take, delay, first, retryWhen, scan, delayWhen, defaultIfEmpty } from "rxjs/operators";
 import { HubConnection as SignalRHubConnection } from "@aspnet/signalr-client";
 import { fromPromise } from "rxjs/observable/fromPromise";
+import { timer } from "rxjs/observable/timer";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
 
-import { ConnectionState, ConnectionStatus, HubConnectionOptions } from "./hub-connection.model";
+import { ConnectionState, ConnectionStatus, HubConnectionOptions, ReconnectionStrategyOptions } from "./hub-connection.model";
+import { getDelay } from "./reconnection-strategy";
 import { buildQueryString } from "./utils/query-string";
 import { Dictionary } from "./utils/dictionary";
 import { emptyNext } from "./utils/rxjs";
@@ -20,12 +22,14 @@ export class HubConnection<THub> {
 
 	private source: string;
 	private hubConnection: SignalRHubConnection;
+	private retry: ReconnectionStrategyOptions;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
 
 	constructor(connectionOption: HubConnectionOptions) {
 		this.source = `[${connectionOption.key}] HubConnection ::`;
 
+		this.retry = connectionOption.options && connectionOption.options.retry ? connectionOption.options.retry : {};
 		this.hubConnectionOptions$ = new BehaviorSubject<HubConnectionOptions>(connectionOption);
 
 		const reconnection$ = this.hubConnectionOptions$.pipe(
@@ -59,7 +63,7 @@ export class HubConnection<THub> {
 					}
 				}),
 				skipUntil(this._connectionState$.pipe(filter(x => x.status === ConnectionStatus.ready))),
-				take(1)
+				first()
 			)),
 			switchMap(() => this.openConnection())
 		);
@@ -110,7 +114,7 @@ export class HubConnection<THub> {
 		return emptyNext().pipe(
 			switchMap(() => this.connectionState$.pipe(
 				skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
-				take(1)
+				first()
 			)),
 			tap(() => console.log(`${this.source} stream - start`)),
 			switchMap(() => stream$) // todo: retry after reconnection
@@ -137,7 +141,19 @@ export class HubConnection<THub> {
 	}
 
 	private openConnection() {
-		return fromPromise(this.hubConnection.start()).pipe(
+		return emptyNext().pipe(
+			switchMap(() => fromPromise(this.hubConnection.start())),
+			retryWhen((errors: Observable<any>) => errors.pipe(
+				scan((errorCount: number) => ++errorCount, 0),
+				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
+				delayWhen((retryCount: number) => {
+					const delayRetries = getDelay(this.retry, retryCount);
+					// tslint:disable-next-line:no-console
+					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
+					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
+					return timer(delayRetries);
+				})
+			)),
 			tap(() => this._connectionState$.next(connectedState)),
 			tap(() => {
 				this.hubConnection.onclose(err => {
@@ -149,8 +165,7 @@ export class HubConnection<THub> {
 						this._connectionState$.next(disconnectedState);
 					}
 				});
-			}),
-			take(1)
-		); // todo: retry
+			})
+		);
 	}
 }
