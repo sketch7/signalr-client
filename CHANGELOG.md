@@ -1,3 +1,13 @@
+<a name="0.3.3"></a>
+## [0.3.3](https://github.com/sketch7/signalr-client/compare/0.3.2...0.3.3) (2017-12-05)
+
+
+### Features
+
+* **reconnection strategy:** add `randomBackOffStrategy` ([3bd046c](https://github.com/sketch7/signalr-client/commit/3bd046c))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/sketch7/signalr-client/compare/0.3.1...0.3.2) (2017-12-04)
 
