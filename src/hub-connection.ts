@@ -12,6 +12,7 @@ import { buildQueryString } from "./utils/query-string";
 import { Dictionary } from "./utils/dictionary";
 import { emptyNext } from "./utils/rxjs";
 
+const errorReasonName = "error";
 const connectedState: ConnectionState = { status: ConnectionStatus.connected };
 const connectionReadyState: ConnectionState = { status: ConnectionStatus.ready };
 const disconnectedState: ConnectionState = { status: ConnectionStatus.disconnected };
@@ -32,7 +33,7 @@ export class HubConnection<THub> {
 		this.retry = connectionOption.options && connectionOption.options.retry ? connectionOption.options.retry : {};
 		this.hubConnectionOptions$ = new BehaviorSubject<HubConnectionOptions>(connectionOption);
 
-		const reconnection$ = this.hubConnectionOptions$.pipe(
+		const connection$ = this.hubConnectionOptions$.pipe(
 			// debounceTime(10),
 			map(connectionOpts => [connectionOpts, this._connectionState$.value.status] as [HubConnectionOptions, ConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
@@ -46,7 +47,13 @@ export class HubConnection<THub> {
 			))
 		);
 
-		reconnection$.subscribe();
+		const reconnect$ = this._connectionState$.pipe(
+			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+			switchMap(() => this.connect())
+		);
+
+		reconnect$.subscribe();
+		connection$.subscribe();
 	}
 
 	connect(): Observable<void> {
@@ -159,7 +166,7 @@ export class HubConnection<THub> {
 				this.hubConnection.onclose(err => {
 					if (err) {
 						console.error(`${this.source} session disconnected with errors`, err);
-						this._connectionState$.next({ status: ConnectionStatus.disconnected, reason: "error", data: err });
+						this._connectionState$.next({ status: ConnectionStatus.disconnected, reason: errorReasonName, data: err });
 					} else {
 						console.warn(`${this.source} session disconnected`);
 						this._connectionState$.next(disconnectedState);
