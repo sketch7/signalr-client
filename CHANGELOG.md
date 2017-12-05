@@ -1,3 +1,13 @@
+<a name="0.3.4"></a>
+## [0.3.4](https://github.com/sketch7/signalr-client/compare/0.3.3...0.3.4) (2017-12-05)
+
+
+### Bug Fixes
+
+* **hub connection:** reconnection now triggers after server fails ([b8e369c](https://github.com/sketch7/signalr-client/commit/b8e369c))
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/sketch7/signalr-client/compare/0.3.2...0.3.3) (2017-12-05)
 
