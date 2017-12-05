@@ -28,6 +28,7 @@ export interface ConnectionOptions extends IHubConnectionOptions {
 export interface ReconnectionStrategyOptions {
 	maximumAttempts?: number;
 	customStrategy?: (retryOptions: ReconnectionStrategyOptions, retryCount: number) => number;
+	randomBackOffStrategy?: RandomStrategyOptions;
 	randomStrategy?: RandomStrategyOptions;
 	backOffStrategy?: BackOffStrategyOptions;
 }
