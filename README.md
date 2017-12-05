@@ -24,9 +24,10 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
 * Update connection details easily without losing current connection state
 * Subscriptions are handled through `RxJS` streams
 * Reconnection strategies
-    * Random
-    * BackOff
-    * Custom
+    * Random strategy
+    * BackOff strategy
+    * Random BackOff strategy
+    * Custom strategy
 * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
 * Contains minimal dependencies (`SignalR` and `RxJS` only)
 * `No constraints` with any framework
@@ -36,6 +37,7 @@ SignalR client library built on top of `@aspnet/signalr-client`. This gives you 
 * Real world example (***coming soon***):
     * Client: Angular
     * Server: Microsoft Orleans integrated with SignalR
+* [Angular basic example](#angular-basic-example)
 
 ## Installation
 
@@ -65,7 +67,7 @@ You're all set! Now it's fully integrated with your Angular application.
 
 Continue from the [vanilla usage - step 2](#usage) onwards
 
-***Example***
+### Angular Basic Example
 ```ts
 import { HubConnectionFactory } from "@ssv/signalr-client";
 
