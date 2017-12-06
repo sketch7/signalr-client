@@ -11,27 +11,27 @@
 [![bitHound Overall Score](https://www.bithound.io/github/sketch7/signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/signalr-client)
 [![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
-SignalR client library built on top of `@aspnet/signalr-client`. This gives you more features and easier to use.
+SignalR client library built on top of ***@aspnet/signalr-client***. This gives you more features and easier to use.
 
 **Quick links**
 
 [Change logs][changeLog] | [Project Repository][projectUri] | [API Documentation][apiWiki]
 
 ## Features
-* Fully `TypeScript` and `ReactiveX`
+* Fully ***TypeScript*** and ***ReactiveX***
 * Multiple hub connections state management
 * Connection state notifications 
 * Update connection details easily without losing current connection state
-* Subscriptions are handled through `RxJS` streams
+* Subscriptions are handled through ***RxJS*** streams
 * Reconnection strategies
     * Random strategy
     * BackOff strategy
     * Random BackOff strategy
     * Custom strategy
 * Auto re-subscriptions after getting disconnected and re-connected (***in development***)
-* Contains minimal dependencies (`SignalR` and `RxJS` only)
-* `No constraints` with any framework
-* Designed to be straight forward integrated with `any framework` such as [Angular](#angular-adapter), `Aurelia`, `React`, `Vue`, etc...
+* Contains minimal dependencies (***SignalR*** and ***RxJS*** only)
+* ***No constraints*** with any framework
+* Designed to be straight forward integrated with ***any framework*** such as *[Angular](#angular-adapter)*, *Aurelia*, *React*, *Vue*, etc...
 
 ## Samples
 * Real world example (***coming soon***):
