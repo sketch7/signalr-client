@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@aspnet/signalr-client": "^1.0.0-alpha2-final",
-    "rxjs": "~5.5.3"
+    "rxjs": "^5.5.0"
   },
   "peerDependencies": {},
   "jest": {
