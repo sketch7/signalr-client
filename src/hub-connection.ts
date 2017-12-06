@@ -92,12 +92,19 @@ export class HubConnection<THub> {
 		this.hubConnectionOptions$.next(connection);
 	}
 
-	on<TResult>(topicName: keyof THub): Observable<TResult> {
-		return Observable.create((observer: Observer<TResult>): (() => void) | void => {
+	on<TResult>(methodName: keyof THub): Observable<TResult> {
+		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
 			const updateEvent = (latestValue: TResult) => observer.next(latestValue);
-			this.hubConnection.on(topicName, updateEvent);
-			return () => this.hubConnection.off(topicName, updateEvent);
+			this.hubConnection.on(methodName, updateEvent);
+			return () => this.hubConnection.off(methodName, updateEvent);
 		});
+
+		return emptyNext().pipe(
+			switchMap(() => this.connectionState$.pipe(
+				filter(() => this._connectionState$.value.status === ConnectionStatus.connected),
+			)),
+			switchMap(() => stream$)
+		);
 	}
 
 	stream<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
@@ -113,18 +120,30 @@ export class HubConnection<THub> {
 				complete: () => observer.complete()
 			});
 			return () => {
-				if (this._connectionState$.value.status === ConnectionStatus.connected) {
-					this.send("StreamUnsubscribe", methodName, ...args);
-				}
+				emptyNext().pipe(
+					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
+					filter(() => this._connectionState$.value.status === ConnectionStatus.connected),
+					switchMap(() => this.send("StreamUnsubscribe", methodName, ...args)),
+					first()
+				);
 			};
 		});
+
 		return emptyNext().pipe(
 			switchMap(() => this.connectionState$.pipe(
 				skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
 				first()
 			)),
-			tap(() => console.log(`${this.source} stream - start`)),
-			switchMap(() => stream$) // todo: retry after reconnection
+			switchMap(() => stream$.pipe(
+				retryWhen((errors: Observable<any>) => errors.pipe(
+					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
+					delayWhen(() =>
+						this.connectionState$.pipe(
+							skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
+							first()
+						))
+				))
+			))
 		);
 	}
 
@@ -155,8 +174,7 @@ export class HubConnection<THub> {
 				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
 					const delayRetries = getReconnectionDelay(this.retry, retryCount);
-					// tslint:disable-next-line:no-console
-					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
+					console.warn(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
 					return timer(delayRetries);
 				})

@@ -28,7 +28,7 @@ SignalR client library built on top of ***@aspnet/signalr-client***. This gives 
     * BackOff strategy
     * Random BackOff strategy
     * Custom strategy
-* Auto re-subscriptions after getting disconnected and re-connected (***in development***)
+* Auto re-subscriptions after getting disconnected and re-connected
 * Contains minimal dependencies (***SignalR*** and ***RxJS*** only)
 * ***No constraints*** with any framework
 * Designed to be straight forward integrated with ***any framework*** such as *[Angular](#angular-adapter)*, *Aurelia*, *React*, *Vue*, etc...
@@ -51,7 +51,7 @@ Check out the [API Documentation Page][apiWiki].
 
 
 ## Usage
-There are `three simple steps`:
+There are ***three simple steps***:
 
 1. Register `HubConnectionFactory` in your DI eco system
 2. In application bootstrap:
@@ -61,7 +61,7 @@ There are `three simple steps`:
     * Use `HubConnection` to use enhanced signalr features
 
 ## Angular Adapter
-1. Register `HubConnectionFactory` as a `Provider`
+1. Register `HubConnectionFactory` as a ***Provider***
 
 You're all set! Now it's fully integrated with your Angular application.
 
