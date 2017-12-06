@@ -1,3 +1,13 @@
+<a name="0.3.5"></a>
+## [0.3.5](https://github.com/sketch7/signalr-client/compare/0.3.4...0.3.5) (2017-12-06)
+
+
+### Bug Fixes
+
+* **package:**  rxjs reference now uses `caret` instead `tilde` ([0b03f63](https://github.com/sketch7/signalr-client/commit/0b03f63))
+
+
+
 <a name="0.3.4"></a>
 ## [0.3.4](https://github.com/sketch7/signalr-client/compare/0.3.3...0.3.4) (2017-12-05)
 
