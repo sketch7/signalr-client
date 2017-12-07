@@ -1,3 +1,13 @@
+<a name="0.3.6"></a>
+## [0.3.6](https://github.com/sketch7/signalr-client/compare/0.3.5...0.3.6) (2017-12-07)
+
+
+### Features
+
+* **hub connection:** auto re-subscriptions after getting disconnected and re-connected ([94102ae](https://github.com/sketch7/signalr-client/commit/94102ae))
+
+
+
 <a name="0.3.5"></a>
 ## [0.3.5](https://github.com/sketch7/signalr-client/compare/0.3.4...0.3.5) (2017-12-06)
 
