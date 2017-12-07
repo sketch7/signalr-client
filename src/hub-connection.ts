@@ -24,6 +24,7 @@ export class HubConnection<THub> {
 	private source: string;
 	private hubConnection: SignalRHubConnection;
 	private retry: ReconnectionStrategyOptions;
+	private waitUntilConnect$: Observable<ConnectionState>;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
 
@@ -54,6 +55,11 @@ export class HubConnection<THub> {
 
 		reconnect$.subscribe();
 		connection$.subscribe();
+
+		this.waitUntilConnect$ = this.connectionState$.pipe(
+			skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
+			first()
+		);
 	}
 
 	connect(): Observable<void> {
@@ -101,7 +107,7 @@ export class HubConnection<THub> {
 
 		return emptyNext().pipe(
 			switchMap(() => this.connectionState$.pipe(
-				filter(() => this._connectionState$.value.status === ConnectionStatus.connected),
+				filter(() => this._connectionState$.value.status === ConnectionStatus.connected)
 			)),
 			switchMap(() => stream$)
 		);
@@ -130,18 +136,11 @@ export class HubConnection<THub> {
 		});
 
 		return emptyNext().pipe(
-			switchMap(() => this.connectionState$.pipe(
-				skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
-				first()
-			)),
+			switchMap(() => this.waitUntilConnect$),
 			switchMap(() => stream$.pipe(
 				retryWhen((errors: Observable<any>) => errors.pipe(
 					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
-					delayWhen(() =>
-						this.connectionState$.pipe(
-							skipUntil(this.connectionState$.pipe(filter(x => x.status === ConnectionStatus.connected))),
-							first()
-						))
+					delayWhen(() => this.waitUntilConnect$)
 				))
 			))
 		);
@@ -174,7 +173,8 @@ export class HubConnection<THub> {
 				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
 					const delayRetries = getReconnectionDelay(this.retry, retryCount);
-					console.warn(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
+					// tslint:disable-next-line:no-console
+					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
 					return timer(delayRetries);
 				})
