@@ -101,20 +101,20 @@ import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
 export class HeroDetailComponent implements OnInit, OnDestroy {
 
 	private hubConnection: HubConnection<HeroHub>;
-	private singed$$: ISubscription;
+	private hero$$: ISubscription;
 
 	constructor(hubFactory: HubConnectionFactory) {
 		this.hubConnection = hubFactory.get<HeroHub>("hero");
 	}
 
 	ngOnInit(): void {
-		this.singed$$ = this.hubConnection.stream<Hero>("GetUpdates", "singed")
-		.subscribe(x => console.log(`stream :: singed :: update received`, x));
+		this.hero$$ = this.hubConnection.stream<Hero>("GetUpdates", "singed")
+		.subscribe(x => console.log(`hero stream :: singed :: update received`, x));
 	}
 
 	ngOnDestroy(): void {
-		if (this.singed$$) {
-			this.singed$$.unsubscribe();
+		if (this.hero$$) {
+			this.hero$$.unsubscribe();
 		}
 	}
 }
