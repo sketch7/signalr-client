@@ -1,7 +1,8 @@
 {
   "name": "@ssv/signalr-client",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "SignalR client library built on top of @aspnet/signalr-client. This gives you more features and easier to use.",
+  "homepage": "https://github.com/sketch7/signalr-client",
   "keywords": [
     "sketch7",
     "signalr",
@@ -36,6 +37,9 @@
     "type": "git",
     "url": "https://github.com/sketch7/signalr-client"
   },
+  "bugs": {
+    "url": "https://github.com/sketch7/signalr-client/issues"
+  },
   "devDependencies": {
     "@ssv/tools": "^0.6.12",
     "@types/jest": "^21.1.8",
@@ -43,8 +47,6 @@
     "gulp": "^3.9.1",
     "gulp-bump": "^2.8.0",
     "gulp-conventional-changelog": "^1.1.7",
-    "gulp-git": "^2.4.2",
-    "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^2.6.1",
     "gulp-util": "^3.0.8",
     "jest": "^21.2.1",

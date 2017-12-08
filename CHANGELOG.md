@@ -1,3 +1,8 @@
+<a name="0.3.8"></a>
+## [0.3.8](https://github.com/sketch7/signalr-client/compare/0.3.7...0.3.8) (2017-12-08)
+
+
+
 <a name="0.3.7"></a>
 ## [0.3.7](https://github.com/sketch7/signalr-client/compare/0.3.6...0.3.7) (2017-12-08)
 
