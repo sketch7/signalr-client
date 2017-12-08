@@ -23,7 +23,7 @@ function randomStrategyDelay(randomStrategy: RandomStrategyOptions) {
 
 function randomBackOffStrategyDelay(randomStrategy: RandomStrategyOptions, retryCount: number) {
 	let maxValue = Math.min(retryCount, randomStrategy.max);
-	maxValue = randomStrategy.min >= maxValue ? (maxValue + 2) : maxValue;
+	maxValue = randomStrategy.min >= maxValue ? (randomStrategy.min + 2) : maxValue;
 	return random(randomStrategy.min, maxValue) * randomStrategy.intervalMs;
 }
 
