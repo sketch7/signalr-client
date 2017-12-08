@@ -176,16 +176,16 @@ export class HubConnection<THub> {
 				scan((errorCount: number) => ++errorCount, 0),
 				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
-					const delayRetries = getReconnectionDelay(this.retry, retryCount);
+					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
 					// tslint:disable-next-line:no-console
-					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries });
+					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
 					this._connectionState$.next({
 						status: ConnectionStatus.connecting,
 						reason: "reconnecting",
-						data: { retryCount, maximumAttempts: this.retry.maximumAttempts, delayRetries }
+						data: { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs }
 					});
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
-					return timer(delayRetries);
+					return timer(nextRetryMs);
 				})
 			)),
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
