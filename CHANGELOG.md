@@ -1,7 +1,26 @@
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/sketch7/signalr-client/compare/0.3.8...0.4.0) (2017-12-08)
+
+
+### Code Refactoring
+
+* **hub connection:** rework connection status + spit into two states. ([37aece7](https://github.com/sketch7/signalr-client/commit/37aece7))
+* **hub connection:** rework internal flow
+
+### BREAKING CHANGES
+
+* **hub connection:** ConnectionStatus `ready` has been renamed to `connecting`
+
+### Bug Fixes
+
+* **hub connection:** fix `stream` dipose
+
 <a name="0.3.8"></a>
 ## [0.3.8](https://github.com/sketch7/signalr-client/compare/0.3.7...0.3.8) (2017-12-08)
 
+### Maintenance
 
+* **packages:** cleaned up dependencies
 
 <a name="0.3.7"></a>
 ## [0.3.7](https://github.com/sketch7/signalr-client/compare/0.3.6...0.3.7) (2017-12-08)
