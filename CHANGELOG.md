@@ -1,3 +1,13 @@
+<a name="0.3.7"></a>
+## [0.3.7](https://github.com/sketch7/signalr-client/compare/0.3.6...0.3.7) (2017-12-08)
+
+
+### Bug Fixes
+
+* **reconnection strategy:** fix calculation in `randomBackOffStrategyDelay` ([3d58a12](https://github.com/sketch7/signalr-client/commit/3d58a12))
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/sketch7/signalr-client/compare/0.3.5...0.3.6) (2017-12-07)
 
