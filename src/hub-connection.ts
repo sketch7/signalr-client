@@ -45,7 +45,6 @@ export class HubConnection<THub> {
 		this.hubConnectionOptions$ = new BehaviorSubject<HubConnectionOptions>(connectionOption);
 
 		const connection$ = this.hubConnectionOptions$.pipe(
-			// debounceTime(10),
 			map(connectionOpts => [connectionOpts, this.internalConnStatus$.value] as [HubConnectionOptions, InternalConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
 				map(() => buildQueryString(connectionOpts.data)),
@@ -110,12 +109,7 @@ export class HubConnection<THub> {
 			return () => this.hubConnection.off(methodName, updateEvent);
 		});
 
-		return emptyNext().pipe(
-			switchMap(() => this.waitUntilConnect$.pipe(
-				filter(() => this._connectionState$.value.status === ConnectionStatus.connected)
-			)),
-			switchMap(() => stream$)
-		);
+		return this.activateStreamWithRetry(stream$);
 	}
 
 	stream<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
@@ -139,15 +133,7 @@ export class HubConnection<THub> {
 			};
 		});
 
-		return this.waitUntilConnect$.pipe(
-			switchMap(() => stream$.pipe(
-				retryWhen((errors: Observable<any>) => errors.pipe(
-					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
-					tap(() => console.log(`${this.source} stream - retrying >> INIT !...`)),
-					delayWhen(() => this.waitUntilConnect$)
-				))
-			))
-		);
+		return this.activateStreamWithRetry(stream$);
 	}
 
 	send(methodName: keyof THub | "StreamUnsubscribe", ...args: any[]): Observable<void> {
@@ -165,7 +151,7 @@ export class HubConnection<THub> {
 
 		return emptyNext().pipe(
 			tap(() => this.hubConnection.stop()),
-			delay(200) // workaround since signalr are returning void and internally firing a callback for disconnect
+			delay(200) // workaround - signalr are returning void and internally firing a callback for disconnect
 		);
 	}
 
@@ -194,7 +180,7 @@ export class HubConnection<THub> {
 				this.hubConnection.onclose(err => {
 					this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 					if (err) {
-						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message});
+						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
 						this._connectionState$.next({
 							status: ConnectionStatus.disconnected,
 							reason: errorReasonName,
@@ -209,4 +195,16 @@ export class HubConnection<THub> {
 			first()
 		);
 	}
+
+	private activateStreamWithRetry<TResult>(stream$: Observable<TResult>): Observable<TResult> {
+		return this.waitUntilConnect$.pipe(
+			switchMap(() => stream$.pipe(
+				retryWhen((errors: Observable<any>) => errors.pipe(
+					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
+					delayWhen(() => this.waitUntilConnect$)
+				))
+			))
+		);
+	}
+
 }
