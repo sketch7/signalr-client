@@ -1,3 +1,11 @@
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/sketch7/signalr-client/compare/0.4.0...0.4.1) (2017-12-10)
+
+### Code Refactoring
+
+* **hub connection:**: now `on` and `stream` share same process to activate stream with retries
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/sketch7/signalr-client/compare/0.3.8...0.4.0) (2017-12-08)
 
