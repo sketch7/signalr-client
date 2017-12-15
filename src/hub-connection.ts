@@ -66,10 +66,13 @@ export class HubConnection<THub> {
 		connection$.subscribe();
 	}
 
-	connect(): Observable<void> {
+	connect(setData?: Dictionary<string>): Observable<void> {
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
 			return emptyNext();
+		}
+		if (setData) {
+			this.setData(setData);
 		}
 
 		return emptyNext().pipe(
@@ -96,9 +99,17 @@ export class HubConnection<THub> {
 		this.hubConnectionOptions$.next(connection);
 	}
 
-	clearData() {
+	clearData(...keys: string[]) {
 		const connection = this.hubConnectionOptions$.value;
-		connection.data = undefined;
+
+		if (keys && connection.data) {
+			// tslint:disable-next-line:forin
+			for (const key in keys) {
+				delete connection.data[key];
+			}
+		} else {
+			connection.data = undefined;
+		}
 		this.hubConnectionOptions$.next(connection);
 	}
 
