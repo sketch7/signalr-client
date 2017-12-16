@@ -103,8 +103,7 @@ export class HubConnection<THub> {
 		const connection = this.hubConnectionOptions$.value;
 
 		if (keys && connection.data) {
-			// tslint:disable-next-line:forin
-			for (const key in keys) {
+			for (const key of keys) {
 				delete connection.data[key];
 			}
 		} else {
