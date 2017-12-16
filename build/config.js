@@ -12,14 +12,7 @@ module.exports = {
 	},
 	src: {
 		root: srcRoot,
-		ts: `./${srcRoot}/**/*.ts`,
-		testTs: `./${srcRoot}/**/*.spec.ts`,
-		karmaConfig: "karma.conf.js"
-	},
-	test: {
-		reporters: ["mocha"],
-		browsers: ["Chrome"],
-		setup: "test/test-setup.ts"
+		ts: `./${srcRoot}/**/*.ts`
 	},
 	buildTargets: [
 		"es2015",
