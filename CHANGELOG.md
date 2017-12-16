@@ -1,3 +1,18 @@
+<a name="0.4.2"></a>
+## [0.4.2](https://github.com/sketch7/signalr-client/compare/0.4.1...0.4.2) (2017-12-16)
+
+
+### Bug Fixes
+
+* **hub connection:** disconnects only when the connection status is set to `Connected` ([84cde61](https://github.com/sketch7/signalr-client/commit/84cde61))
+
+
+### Features
+
+* **hub connection:** `connect` has an optional parameter to `setData` before it connects ([99a6b8e](https://github.com/sketch7/signalr-client/commit/99a6b8e))
+* **hub connection:** `clearData` has an optional parameter remove by keys or it will remove all ([99a6b8e](https://github.com/sketch7/signalr-client/commit/99a6b8e))
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/sketch7/signalr-client/compare/0.4.0...0.4.1) (2017-12-10)
 
