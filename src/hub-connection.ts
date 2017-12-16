@@ -156,7 +156,7 @@ export class HubConnection<THub> {
 	}
 
 	disconnect() {
-		if (this.internalConnStatus$.value === InternalConnectionStatus.disconnected) {
+		if (this.internalConnStatus$.value !== InternalConnectionStatus.connected) {
 			return emptyNext();
 		}
 
