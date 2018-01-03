@@ -1,6 +1,6 @@
 {
   "name": "@ssv/signalr-client",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "SignalR client library built on top of @aspnet/signalr-client. This gives you more features and easier to use.",
   "homepage": "https://github.com/sketch7/signalr-client",
   "keywords": [
@@ -53,15 +53,17 @@
     "jest-environment-node-debug": "^2.0.0",
     "require-dir": "^0.3.2",
     "run-sequence": "^2.2.0",
+    "rxjs": "^5.5.0",
     "ts-jest": "^21.2.4",
     "typescript": "^2.6.2",
     "yargs": "^10.0.3"
   },
   "dependencies": {
-    "@aspnet/signalr-client": "^1.0.0-alpha2-final",
+    "@aspnet/signalr-client": "^1.0.0-alpha2-final"
+  },
+  "peerDependencies": {
     "rxjs": "^5.5.0"
   },
-  "peerDependencies": {},
   "jest": {
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
