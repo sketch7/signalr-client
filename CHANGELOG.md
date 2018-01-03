@@ -1,3 +1,13 @@
+<a name="0.4.3"></a>
+## [0.4.3](https://github.com/sketch7/signalr-client/compare/0.4.2...0.4.3) (2018-01-03)
+
+
+### Bug Fixes
+
+* **references:** switched `rxjs` reference from `dependencies` to `peerDependencies` ([ccaa7cf](https://github.com/sketch7/signalr-client/commit/ccaa7cf))
+
+
+
 <a name="0.4.2"></a>
 ## [0.4.2](https://github.com/sketch7/signalr-client/compare/0.4.1...0.4.2) (2017-12-16)
 
