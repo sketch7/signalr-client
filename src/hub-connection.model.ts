@@ -1,4 +1,4 @@
-import { IHubConnectionOptions } from "@aspnet/signalr-client/dist/src/IHubConnectionOptions";
+import { IHubConnectionOptions } from "@aspnet/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 
