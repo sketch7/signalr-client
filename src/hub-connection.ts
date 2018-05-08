@@ -2,7 +2,10 @@ import {
 	tap, map, filter, switchMap, skipUntil, take, delay, first,
 	retryWhen, scan, delayWhen, defaultIfEmpty, distinctUntilChanged
 } from "rxjs/operators";
-import { HubConnection as SignalRHubConnection } from "@aspnet/signalr";
+import {
+	HubConnection as SignalRHubConnection,
+	HubConnectionBuilder as SignalRHubConnectionBuilder
+} from "@aspnet/signalr";
 import { fromPromise } from "rxjs/observable/fromPromise";
 import { timer } from "rxjs/observable/timer";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
@@ -49,7 +52,9 @@ export class HubConnection<THub> {
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
 				map(() => buildQueryString(connectionOpts.data)),
 				tap(queryString =>
-					this.hubConnection = new SignalRHubConnection(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options)
+					this.hubConnection = new SignalRHubConnectionBuilder()
+							.withUrl(`${connectionOpts.endpointUri}${queryString}`,	connectionOpts.options as any)
+							.build() // hack since signalr typings are shit.
 				),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
