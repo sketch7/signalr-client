@@ -6,11 +6,7 @@ import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
-import { fromPromise } from "rxjs/observable/fromPromise";
-import { timer } from "rxjs/observable/timer";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { Observable } from "rxjs/Observable";
-import { Observer } from "rxjs/Observer";
+import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -30,7 +26,7 @@ export class HubConnection<THub> {
 	get connectionState$() { return this._connectionState$.asObservable(); }
 
 	private source: string;
-	private hubConnection: SignalRHubConnection;
+	private hubConnection!: SignalRHubConnection;
 	private retry: ReconnectionStrategyOptions;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);

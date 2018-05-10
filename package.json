@@ -53,7 +53,7 @@
     "jest-environment-node-debug": "^2.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
-    "rxjs": "^5.5.10",
+    "rxjs": "^6.1.0",
     "ts-jest": "^22.4.5",
     "typescript": "^2.8.3",
     "yargs": "^11.0.0"
@@ -62,7 +62,7 @@
     "@aspnet/signalr": "^1.0.0-rc1-update1"
   },
   "peerDependencies": {
-    "rxjs": "^5.5.0"
+    "rxjs": "^6.0.0"
   },
   "jest": {
     "transform": {
