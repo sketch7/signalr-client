@@ -56,7 +56,7 @@
     "rxjs": "^5.5.10",
     "ts-jest": "^22.4.5",
     "typescript": "^2.8.3",
-    "yargs": "^10.1.2"
+    "yargs": "^11.0.0"
   },
   "dependencies": {
     "@aspnet/signalr": "^1.0.0-rc1-update1"
