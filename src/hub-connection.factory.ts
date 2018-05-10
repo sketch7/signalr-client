@@ -1,3 +1,5 @@
+import { HttpTransportType } from "@aspnet/signalr";
+
 import { Dictionary } from "./utils/dictionary";
 import { HubConnectionOptions } from "./hub-connection.model";
 import { HubConnection } from "./hub-connection";
@@ -15,6 +17,14 @@ export class HubConnectionFactory {
 			if (!connectionOption.endpointUri) {
 				throw new Error(`${this.source} create :: connection endpointUri not set for ${connectionOption.key}`);
 			}
+			if (!connectionOption.options) {
+				connectionOption.options = {
+					transport: HttpTransportType.WebSockets
+				};
+			} else if (!connectionOption.options.transport) {
+				connectionOption.options.transport = HttpTransportType.WebSockets;
+			}
+
 			this.hubConnections[connectionOption.key] = new HubConnection<any>(connectionOption);
 		}
 		return this;
