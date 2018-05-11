@@ -1,5 +1,10 @@
 <a name="0.5.0"></a>
-# [0.5.0](https://github.com/sketch7/signalr-client/compare/0.4.3...0.5.0) (2018-03-08)
+# [0.5.0](https://github.com/sketch7/signalr-client/compare/0.4.3...0.5.0) (2018-05-11)
+
+
+### Features
+
+* **signalr:** upgrade from `^1.0.0-alpha2-final` to `1.0.0-rc1-update1` ([2838c0b](https://github.com/sketch7/signalr-client/commit/2838c0b))
 
 
 
