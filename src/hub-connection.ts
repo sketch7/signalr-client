@@ -165,10 +165,7 @@ export class HubConnection<THub> {
 			return emptyNext();
 		}
 
-		return emptyNext().pipe(
-			tap(() => this.hubConnection.stop()),
-			delay(200) // workaround - signalr are returning void and internally firing a callback for disconnect
-		);
+		return fromPromise(this.hubConnection.stop());
 	}
 
 	private openConnection() {
