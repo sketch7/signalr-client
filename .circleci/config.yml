@@ -14,7 +14,6 @@ jobs:
       - run:
           name: Package Install
           command: |
-            echo -e "$NPM_USER\n$NPM_PWD\n$NPM_EMAIL" | npm login --scope=@ssv
             npm i
             npm i gulp -g
       - run:
@@ -32,6 +31,8 @@ jobs:
             fi
             . ./.circleci/utils.sh
            
+            echo -e "$NPM_USER\n$NPM_PWD\n$NPM_EMAIL" | npm login --scope=@ssv
+
             PACKAGE_VERSION=$(node -p "require('./package.json').version")
             
             print_title "publish..."

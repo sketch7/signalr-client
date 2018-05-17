@@ -2,7 +2,11 @@ import {
 	tap, map, filter, switchMap, skipUntil, take, delay, first,
 	retryWhen, scan, delayWhen, defaultIfEmpty, distinctUntilChanged
 } from "rxjs/operators";
-import { HubConnection as SignalRHubConnection } from "@aspnet/signalr";
+import {
+	HubConnection as SignalRHubConnection,
+	HubConnectionBuilder as SignalRHubConnectionBuilder
+} from "@aspnet/signalr";
+// import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
 import { fromPromise } from "rxjs/observable/fromPromise";
 import { timer } from "rxjs/observable/timer";
 import { BehaviorSubject } from "rxjs/BehaviorSubject";
@@ -27,7 +31,7 @@ export class HubConnection<THub> {
 	get connectionState$() { return this._connectionState$.asObservable(); }
 
 	private source: string;
-	private hubConnection: SignalRHubConnection;
+	private hubConnection!: SignalRHubConnection;
 	private retry: ReconnectionStrategyOptions;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
@@ -49,7 +53,9 @@ export class HubConnection<THub> {
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
 				map(() => buildQueryString(connectionOpts.data)),
 				tap(queryString =>
-					this.hubConnection = new SignalRHubConnection(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options)
+					this.hubConnection = new SignalRHubConnectionBuilder()
+							.withUrl(`${connectionOpts.endpointUri}${queryString}`,	connectionOpts.options as any) // hack since signalr typings are incorrect.
+							.build()
 				),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
@@ -159,10 +165,7 @@ export class HubConnection<THub> {
 			return emptyNext();
 		}
 
-		return emptyNext().pipe(
-			tap(() => this.hubConnection.stop()),
-			delay(200) // workaround - signalr are returning void and internally firing a callback for disconnect
-		);
+		return fromPromise(this.hubConnection.stop());
 	}
 
 	private openConnection() {
