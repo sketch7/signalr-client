@@ -6,12 +6,7 @@ import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
-// import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
-import { fromPromise } from "rxjs/observable/fromPromise";
-import { timer } from "rxjs/observable/timer";
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { Observable } from "rxjs/Observable";
-import { Observer } from "rxjs/Observer";
+import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,

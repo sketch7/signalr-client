@@ -1,3 +1,13 @@
+<a name="0.6.0"></a>
+## [0.6.0](https://github.com/sketch7/signalr-client/compare/0.5.0...0.6.0) (2018-05-23)
+
+
+### Features
+
+* **packages:** upgrade rxjs from `5.5.0` to `6.2.0` ([61db6fc](https://github.com/sketch7/signalr-client/commit/61db6fc))
+
+
+
 <a name="0.5.0"></a>
 # [0.5.0](https://github.com/sketch7/signalr-client/compare/0.4.3...0.5.0) (2018-05-11)
 
