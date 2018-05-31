@@ -1,3 +1,13 @@
+<a name="0.7.0"></a>
+# [0.7.0](https://github.com/sketch7/signalr-client/compare/0.6.0...0.7.0) (2018-05-31)
+
+
+### Features
+
+* **packages:** upgrade signalr from `1.0.0-rc1-update1` to `1.0.0` ([de1a927](https://github.com/sketch7/signalr-client/commit/de1a927))
+
+
+
 <a name="0.6.0"></a>
 ## [0.6.0](https://github.com/sketch7/signalr-client/compare/0.5.0...0.6.0) (2018-05-23)
 
