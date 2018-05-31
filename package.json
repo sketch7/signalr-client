@@ -46,20 +46,20 @@
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-bump": "^3.1.1",
-    "gulp-conventional-changelog": "^1.1.24",
+    "gulp-conventional-changelog": "^2.0.0",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-util": "^3.0.8",
-    "jest": "^22.4.4",
+    "jest": "^23.1.0",
     "jest-environment-node-debug": "^2.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
     "rxjs": "^6.2.0",
     "ts-jest": "^22.4.6",
-    "typescript": "^2.8.3",
+    "typescript": "^2.8.4",
     "yargs": "^11.0.0"
   },
   "dependencies": {
-    "@aspnet/signalr": "~1.0.0-rc1-update1"
+    "@aspnet/signalr": "~1.0.0"
   },
   "peerDependencies": {
     "rxjs": "^6.2.0"
