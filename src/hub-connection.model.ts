@@ -1,4 +1,4 @@
-import { IHttpConnectionOptions } from "@aspnet/signalr";
+import { IHttpConnectionOptions, IHubProtocol } from "@aspnet/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 
@@ -25,6 +25,7 @@ export interface HubConnectionOptions {
 	endpointUri: string;
 	options?: ConnectionOptions;
 	data?: Dictionary<string>;
+	protocol?: IHubProtocol;
 }
 
 export interface ConnectionOptions extends IHttpConnectionOptions {

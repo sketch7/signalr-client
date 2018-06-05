@@ -1,3 +1,13 @@
+<a name="0.7.1"></a>
+## [0.7.1](https://github.com/sketch7/signalr-client/compare/0.7.0...0.7.1) (2018-06-05)
+
+
+### Bug Fixes
+
+* **hub connection:** expose signalr connection protocol ([63c2993](https://github.com/sketch7/signalr-client/commit/63c2993))
+
+
+
 <a name="0.7.0"></a>
 # [0.7.0](https://github.com/sketch7/signalr-client/compare/0.6.0...0.7.0) (2018-05-31)
 
