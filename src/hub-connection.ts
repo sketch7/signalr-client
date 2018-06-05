@@ -47,10 +47,16 @@ export class HubConnection<THub> {
 			map(connectionOpts => [connectionOpts, this.internalConnStatus$.value] as [HubConnectionOptions, InternalConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
 				map(() => buildQueryString(connectionOpts.data)),
-				tap(queryString =>
-					this.hubConnection = new SignalRHubConnectionBuilder()
-							.withUrl(`${connectionOpts.endpointUri}${queryString}`,	connectionOpts.options as any) // hack since signalr typings are incorrect.
-							.build()
+				tap(queryString => {
+						let connectionBuilder = new SignalRHubConnectionBuilder()
+							.withUrl(`${connectionOpts.endpointUri}${queryString}`,	connectionOpts.options as any); // hack since signalr typings are incorrect.
+
+						if (connectionOpts.protocol) {
+							connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
+						}
+
+						this.hubConnection = connectionBuilder.build();
+					}
 				),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),

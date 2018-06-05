@@ -47,6 +47,7 @@ Allow you register one or more hub connections.
 | endpointUri | `string`             | -       | yes      | Hub endpoint uri which is mapped with signalr hub. eg: `/userNotifications`. |
 | options     | `ConnectionOptions`  | -       | no       | SignalR connection options.                                                  |
 | data        | `Dictionary<string>` | -       | no       | key value pair to be sent as query string to the server.                     |
+| protocol    | `IHubProtocol`       | -       | no       | Signalr connection protocol.                                                 |
 
 
 
