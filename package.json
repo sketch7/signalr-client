@@ -1,6 +1,6 @@
 {
   "name": "@ssv/signalr-client",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "SignalR client library built on top of @aspnet/signalr. This gives you more features and easier to use.",
   "homepage": "https://github.com/sketch7/signalr-client",
   "keywords": [
@@ -25,6 +25,7 @@
     "watch": "gulp watch",
     "lint": "gulp lint",
     "build": "gulp build",
+    "build:rel": "gulp build -- --rel",
     "bundle": "gulp bundle:ts",
     "prepare-release": "gulp prepare-release"
   },
