@@ -17,7 +17,6 @@
 * Methods
     * [`connect`](#connect)
     * [`setData`](#setdata)
-    * [`clearData`](#cleardata)
     * [`on`](#on)
     * [`stream`](#stream)
     * [`send`](#send)
@@ -41,18 +40,18 @@ Allow you register one or more hub connections.
 
 #### HubConnectionOptions
 
-| Name        | Type                 | Default | Required | Description                                                                  |
-|-------------|----------------------|---------|----------|------------------------------------------------------------------------------|
-| key         | `string`             | -       | yes      | Friendly name.                                                               |
-| endpointUri | `string`             | -       | yes      | Hub endpoint uri which is mapped with signalr hub. eg: `/userNotifications`. |
-| options     | `ConnectionOptions`  | -       | no       | SignalR connection options.                                                  |
-| data        | `Dictionary<string>` | -       | no       | key value pair to be sent as query string to the server.                     |
-| protocol    | `IHubProtocol`       | -       | no       | Signalr connection protocol.                                                 |
+| Name        | Type                       | Default | Required | Description                                                                                                             |
+|-------------|----------------------------|---------|----------|-------------------------------------------------------------------------------------------------------------------------|
+| key         | `string`                   | -       | yes      | Friendly name.                                                                                                          |
+| endpointUri | `string`                   | -       | yes      | Hub endpoint uri which is mapped with signalr hub. eg: `/userNotifications`.                                            |
+| options     | `ConnectionOptions`        | -       | no       | SignalR connection options.                                                                                             |
+| defaultData | `() => Dictionary<string>` | -       | no       | key value pair to be sent as query string to the server. This can be extended or overridden from `connect` or `setData` |
+| protocol    | `IHubProtocol`             | -       | no       | Signalr connection protocol.                                                                                            |
 
 
 
 ### `get`
-This will retreive a hub connection by Key.
+This will retrieve a hub connection by Key.
 
 | Parameters | Type     | Default | Required | Description             |
 |------------|----------|---------|----------|-------------------------|
@@ -113,9 +112,13 @@ Subscribes for connection state updates.
 ### `connect`
 Connect with the specific hub connection.
 
-| Parameters | Type | Default | Required | Description |
-|------------|------|---------|----------|-------------|
-| -          | -    | -       | -        | -           |
+*notes* 
+* The `data` function will be triggered on every reconnect. This will allow any data which is stale (example: auth token) will be refreshed.
+
+
+| Parameters | Type                        | Default | Required | Description                                                                                           |
+|------------|-----------------------------|---------|----------|-------------------------------------------------------------------------------------------------------|
+| data       | `() => Dictionary<string> ` | -       | -        | key value pair which will be sent as query string. This can will extend or override the `defaultData` |
 
 *Return* `Observable<void>`
 
@@ -127,25 +130,11 @@ When calling this method, it will automatically disconnects, sets data and depen
 
 *notes* 
 * If before calling this method the connection was disconnected, this will only set the data.
-* If `data` is passed `null` or `undefined`, it will clear data instead.
+* The `data` function will be triggered on every reconnect. This will allow any data which is stale (example: auth token) will be refreshed.
 
-| Parameters | Type                                    | Default | Required | Description                                        |
-|------------|-----------------------------------------|---------|----------|----------------------------------------------------|
-| data       | `Dictionary<string> | undefined | null` | -       | -        | key value pair which will be sent as query string. |
-
-*Return* `void`
-
-
-
-### `clearData`
-This will clear all the connection data. 
-When calling this method, it will automatically disconnects, removes all data and depending the previous connection state it will either reconnect or not. 
-
-*note* If before calling this method the connection was disconnected, this will only set the data.
-
-| Parameters | Type | Default | Required | Description |
-|------------|------|---------|----------|-------------|
-| -          | -    | -       | -        | -           |
+| Parameters | Type                        | Default | Required | Description                                                                                           |
+|------------|-----------------------------|---------|----------|-------------------------------------------------------------------------------------------------------|
+| data       | `() => Dictionary<string> ` | -       | -        | key value pair which will be sent as query string. This can will extend or override the `defaultData` |
 
 *Return* `void`
 

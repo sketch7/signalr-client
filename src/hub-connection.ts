@@ -7,6 +7,11 @@ import {
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
 import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
+// import { fromPromise } from "rxjs/observable/fromPromise";
+// import { timer } from "rxjs/observable/timer";
+// import { BehaviorSubject } from "rxjs/BehaviorSubject";
+// import { Observable } from "rxjs/Observable";
+// import { Observer } from "rxjs/Observer";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -46,17 +51,28 @@ export class HubConnection<THub> {
 		const connection$ = this.hubConnectionOptions$.pipe(
 			map(connectionOpts => [connectionOpts, this.internalConnStatus$.value] as [HubConnectionOptions, InternalConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
-				map(() => buildQueryString(connectionOpts.data)),
-				tap(queryString => {
-						let connectionBuilder = new SignalRHubConnectionBuilder()
-							.withUrl(`${connectionOpts.endpointUri}${queryString}`,	connectionOpts.options as any); // hack since signalr typings are incorrect.
-
-						if (connectionOpts.protocol) {
-							connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
-						}
-
-						this.hubConnection = connectionBuilder.build();
+				map(() => {
+					let data: Dictionary<string> = {};
+					if (connectionOpts.defaultData) {
+						data = connectionOpts.defaultData();
 					}
+					if (connectionOpts.data) {
+						const specificData = connectionOpts.data();
+						data = { ...data, ...specificData };
+					}
+					return data;
+				}),
+				map(buildQueryString),
+				tap(queryString => {
+					let connectionBuilder = new SignalRHubConnectionBuilder()
+						.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options as any); // hack since signalr typings are incorrect.
+
+					if (connectionOpts.protocol) {
+						connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
+					}
+
+					this.hubConnection = connectionBuilder.build();
+				}
 				),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
@@ -73,13 +89,13 @@ export class HubConnection<THub> {
 		connection$.subscribe();
 	}
 
-	connect(setData?: Dictionary<string>): Observable<void> {
+	connect(data?: () => Dictionary<string>): Observable<void> {
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
 			return emptyNext();
 		}
-		if (setData) {
-			this.setData(setData);
+		if (data) {
+			this.setData(data);
 		}
 
 		return emptyNext().pipe(
@@ -96,34 +112,17 @@ export class HubConnection<THub> {
 		);
 	}
 
-	setData(data: Dictionary<string> | undefined | null) {
-		if (!data) {
-			this.clearData();
-			return;
-		}
+	setData(data: () => Dictionary<string>) {
 		const connection = this.hubConnectionOptions$.value;
-		connection.data = { ...connection.data, ...data } as Dictionary<string>;
-		this.hubConnectionOptions$.next(connection);
-	}
-
-	clearData(...keys: string[]) {
-		const connection = this.hubConnectionOptions$.value;
-
-		if (keys && connection.data) {
-			for (const key of keys) {
-				delete connection.data[key];
-			}
-		} else {
-			connection.data = undefined;
-		}
+		connection.data = data;
 		this.hubConnectionOptions$.next(connection);
 	}
 
 	on<TResult>(methodName: keyof THub): Observable<TResult> {
 		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
 			const updateEvent = (latestValue: TResult) => observer.next(latestValue);
-			this.hubConnection.on(methodName, updateEvent);
-			return () => this.hubConnection.off(methodName, updateEvent);
+			this.hubConnection.on(methodName.toString(), updateEvent);
+			return () => this.hubConnection.off(methodName.toString(), updateEvent);
 		});
 
 		return this.activateStreamWithRetry(stream$);
@@ -131,7 +130,7 @@ export class HubConnection<THub> {
 
 	stream<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
 		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
-			this.hubConnection.stream<TResult>(methodName, ...args).subscribe({
+			this.hubConnection.stream<TResult>(methodName.toString(), ...args).subscribe({
 				closed: false,
 				next: item => observer.next(item),
 				error: err => {
@@ -154,11 +153,11 @@ export class HubConnection<THub> {
 	}
 
 	send(methodName: keyof THub | "StreamUnsubscribe", ...args: any[]): Observable<void> {
-		return fromPromise(this.hubConnection.send(methodName, ...args));
+		return fromPromise(this.hubConnection.send(methodName.toString(), ...args));
 	}
 
 	invoke<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
-		return fromPromise<TResult>(this.hubConnection.invoke(methodName, ...args));
+		return fromPromise<TResult>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
 	disconnect() {

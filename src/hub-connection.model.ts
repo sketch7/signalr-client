@@ -24,7 +24,9 @@ export interface HubConnectionOptions {
 	key: string;
 	endpointUri: string;
 	options?: ConnectionOptions;
-	data?: Dictionary<string>;
+	defaultData?: () => Dictionary<string>;
+	/** @internal */
+	data?: () => Dictionary<string>;
 	protocol?: IHubProtocol;
 }
 
