@@ -11,6 +11,13 @@ describe("QueryString Utils", () => {
 			});
 		});
 
+		describe("given an empty dictionary", () => {
+			it("should replace return an empty string", () => {
+				const result = SUT.buildQueryString({});
+				expect(result).toBe("");
+			});
+		});
+
 		describe("when having dictionary with one item", () => {
 			it("should replace all values", () => {
 				const result = SUT.buildQueryString({ token: "user-id" });

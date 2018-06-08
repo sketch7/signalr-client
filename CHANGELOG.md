@@ -1,3 +1,20 @@
+<a name="0.8.0"></a>
+# [0.8.0](https://github.com/sketch7/signalr-client/compare/0.7.1...0.8.0) (2018-06-08)
+
+
+### Code Refactoring
+
+* **hub connection:** rework `data` now requires to pass a function to refresh data upon every connect. ([f1566d9](https://github.com/sketch7/signalr-client/commit/f1566d9))
+
+
+### BREAKING CHANGES
+
+* **hub connection:** `connect` method now accepts `function` which returns `Dictionary<string>` instead `Dictionary<string>`
+* **hub connection:** `setData` method now accepts `function` which returns `Dictionary<string>` instead `Dictionary<string>`
+* **hub connection:** `clearData` method has been removed.
+
+
+
 <a name="0.7.1"></a>
 ## [0.7.1](https://github.com/sketch7/signalr-client/compare/0.7.0...0.7.1) (2018-06-05)
 

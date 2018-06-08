@@ -130,6 +130,10 @@ export interface Hero {
 }
 ```
 
+## RXJS - Previous Versions
+Currently we are still maintaining `@ssv/signalr-client` with `rxjs v5.5.10`.
+`npm i @ssv/signalr-client@0.5.2`
+This is equivalent to the latest version.
 
 ### Contributions
 
