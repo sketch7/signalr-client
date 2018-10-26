@@ -1,3 +1,16 @@
+<a name="0.8.1"></a>
+# [0.8.1](https://github.com/sketch7/signalr-client/compare/0.8.0...0.8.1) (2018-10-26)
+
+
+### Features
+
+* **deps:** update all dependencies
+
+### Chore
+- **build:** update CI and build tasks
+- **all:** cleanup and update changes breaking changes
+
+
 <a name="0.8.0"></a>
 # [0.8.0](https://github.com/sketch7/signalr-client/compare/0.7.1...0.8.0) (2018-06-08)
 

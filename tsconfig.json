@@ -1,5 +1,5 @@
 {
-	"extends": "./node_modules/@ssv/tools/tsconfig.base.json",
+	"extends": "./node_modules/@ssv/tools/config/tsconfig.json",
 	"compilerOptions": {
 		"types": [
 			"jest"
