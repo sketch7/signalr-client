@@ -5,11 +5,10 @@ const name = pkg.name.replace("@", "").replace(/(\/|\.)/g, "-");
 
 module.exports = {
 	input: pkg.module,
-	output: {
-		file: pkg.main,
-		format: "umd",
-		name
-	},
+	output: [
+		{ file: pkg.main, format: "umd", name, sourcemap: true },
+		{ file: pkg.module, format: "es", sourcemap: true }
+	],
 	external: id => id.indexOf("node_modules") > -1,
 	onwarn
 }

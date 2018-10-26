@@ -4,9 +4,6 @@ charset = utf-8
 indent_style = tab
 trim_trailing_whitespace = true
 
-[package.json]
-indent_style = spaces
+[*.{json,yml,md}]
 indent_size = 2
-
-[*.md]
-indent_style = spaces
+indent_style = space

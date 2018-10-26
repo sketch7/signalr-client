@@ -1,6 +1,5 @@
 const gulp = require("gulp");
 const util = require("gulp-util");
-const runSeq = require("run-sequence");
 
 const args = require("../args");
 const config = require("../config");
@@ -8,18 +7,11 @@ const config = require("../config");
 gulp.task("watch", () => {
 	args.continueOnError = true;
 	// ts
-	gulp.watch([config.src.ts, `!${config.src.testTs}`], () => {
-		if (args.isRelease) {
-			return runSeq(
-				"compile:ts:dev",
-				"copy-dist"
-			);
-		} else {
-			return runSeq(
-				"compile:ts:dev"
-			);
-		}
-	}).on("change", reportChange)
+	gulp.watch([config.src.ts, `!${config.src.testTs}`],
+		args.isRelease
+			? gulp.series("compile:ts:dev", "copy-dist")
+			: gulp.series("compile:ts:dev"))
+		.on("change", reportChange)
 		.on("error", swallowError);
 });
 
