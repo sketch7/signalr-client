@@ -58,7 +58,7 @@
     "yargs": "^12.0.2"
   },
   "dependencies": {
-    "@aspnet/signalr": "~1.0.4"
+    "@aspnet/signalr": "~1.0.0"
   },
   "peerDependencies": {
     "rxjs": "^6.2.0"
