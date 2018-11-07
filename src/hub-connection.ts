@@ -71,6 +71,10 @@ export class HubConnection<THub> {
 						connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
 					}
 
+					if (typeof connectionOption.logLevel === "number") {
+						connectionBuilder = connectionBuilder.configureLogging(connectionOption.logLevel);
+					}
+
 					this.hubConnection = connectionBuilder.build();
 				}
 				),
