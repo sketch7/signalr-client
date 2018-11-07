@@ -4,7 +4,8 @@ import {
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
-	HubConnectionBuilder as SignalRHubConnectionBuilder
+	HubConnectionBuilder as SignalRHubConnectionBuilder,
+	LogLevel
 } from "@aspnet/signalr";
 import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
 // import { fromPromise } from "rxjs/observable/fromPromise";
@@ -70,6 +71,8 @@ export class HubConnection<THub> {
 					if (connectionOpts.protocol) {
 						connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
 					}
+
+					connectionBuilder = connectionBuilder.configureLogging(typeof connectionOption.logLevel === 'number' ? connectionOption.logLevel : LogLevel.None);
 
 					this.hubConnection = connectionBuilder.build();
 				}
