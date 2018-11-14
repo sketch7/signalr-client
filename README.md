@@ -8,7 +8,6 @@
 
 # @ssv/signalr-client
 [![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
-[![bitHound Overall Score](https://www.bithound.io/github/sketch7/signalr-client/badges/score.svg)](https://www.bithound.io/github/sketch7/signalr-client)
 [![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
 SignalR client library built on top of ***@aspnet/signalr***. This gives you more features and easier to use.
@@ -102,12 +101,16 @@ export class HeroDetailComponent implements OnInit, OnDestroy {
 
 	private hubConnection: HubConnection<HeroHub>;
 	private hero$$: ISubscription;
+  private hubConnection$$: ISubscription;
 
 	constructor(hubFactory: HubConnectionFactory) {
 		this.hubConnection = hubFactory.get<HeroHub>("hero");
 	}
 
 	ngOnInit(): void {
+  	this.hubConnection$$ = this.hubConnection.connect()
+			.subscribe(() => console.log(`connected!!`));
+      
 		this.hero$$ = this.hubConnection.stream<Hero>("GetUpdates", "singed")
 		.subscribe(x => console.log(`hero stream :: singed :: update received`, x));
 	}
@@ -128,6 +131,36 @@ export interface Hero {
 	name: string;
 	health: number;
 }
+```
+
+### Raw Basic Example
+Create an instance of `HubConnectionFactory` ideally will be registered into your DI (if you're using any library) or you can create instance manually.
+
+Step 1:
+ - Register Hubs in the `HubConnectionFactory`
+```ts
+import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
+
+const hubFactory = new HubConnectionFactory();
+hubFactory.create(
+	{ key: "hero", endpointUri: "/hero" },  
+	{ key: "user", endpointUri: "http://localhost:62551/real-time/user" }
+);
+```
+
+Step2:
+- Get Hub by Key
+- Connect
+- subscribe for `on` 
+```ts
+const hubConnection = hubFactory.get<HeroHub>("hero");
+const hubConnection$$ = hubConnection.connect().subscribe(() => {
+	console.log(`connected!`);
+});
+
+const data$$ = hubConnection.on<string>("Send").subscribe(val => {
+	console.log(`send :: data received >>>`, val);
+});
 ```
 
 ## RXJS - Previous Versions
