@@ -1,11 +1,21 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/sketch7/signalr-client/compare/0.8.1...1.0.0) (2019-01-24)
+
+### Features
+
+* **build:** change build output - no features were added
+* **deps:** Update ASPNET SignalR version from `~1.0.0` to `~1.1.0`
+
+
+
 <a name="0.8.1"></a>
 # [0.8.1](https://github.com/sketch7/signalr-client/compare/0.8.0...0.8.1) (2018-10-26)
 
 
 ### Chore
 
-- **build:** update CI and build tasks
-- **all:** cleanup and update changes breaking changes
+* **build:** update CI and build tasks
+* **all:** cleanup and update changes breaking changes
 * **deps:** update all dependencies
 
 
@@ -92,12 +102,14 @@
 * **hub connection:** `clearData` has an optional parameter remove by keys or it will remove all ([99a6b8e](https://github.com/sketch7/signalr-client/commit/99a6b8e))
 
 
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/sketch7/signalr-client/compare/0.4.0...0.4.1) (2017-12-10)
 
 ### Code Refactoring
 
 * **hub connection:**: now `on` and `stream` share same process to activate stream with retries
+
 
 
 <a name="0.4.0"></a>
@@ -117,12 +129,16 @@
 
 * **hub connection:** fix `stream` dipose
 
+
+
 <a name="0.3.8"></a>
 ## [0.3.8](https://github.com/sketch7/signalr-client/compare/0.3.7...0.3.8) (2017-12-08)
 
 ### Maintenance
 
 * **packages:** cleaned up dependencies
+
+
 
 <a name="0.3.7"></a>
 ## [0.3.7](https://github.com/sketch7/signalr-client/compare/0.3.6...0.3.7) (2017-12-08)
@@ -198,6 +214,8 @@
 * **api:** add api documentation.
 * **contribution:** add development guidelines.
 
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/sketch7/signalr-client/compare/0.2.0...0.3.0) (2017-12-02)
 
@@ -209,6 +227,8 @@
 ### Bug Fixes
 
 * **hub connection:** fix `connect` & `disconnect` to validate connect state accordingly.
+
+
 
 <a name="0.2.0"></a>
 # [0.2.0](https://github.com/sketch7/signalr-client/compare/0.1.3...0.2.0) (2017-11-26)
@@ -233,6 +253,3 @@
 
 <a name="0.1.1"></a>
 ## 0.1.1 (2017-11-26)
-
-
-

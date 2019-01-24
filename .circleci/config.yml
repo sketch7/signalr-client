@@ -38,7 +38,7 @@ jobs:
             PACKAGE_VERSION=$(node -p "require('./package.json').version")
 
             print_title "publish..."
-            npm publish
+            npm run publish:rel
 
             print_title "git tag"
             git tag $PACKAGE_VERSION

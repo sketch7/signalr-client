@@ -7,12 +7,18 @@ const srcRoot = "src";
 
 module.exports = {
 	output: {
-		dist: outputRoot,
-		artifact: "./_artifact",
+		dist: outputRoot
 	},
 	src: {
 		root: srcRoot,
-		ts: `./${srcRoot}/**/*.ts`
+		ts: `./${srcRoot}/**/*.ts`,
+		testTs: `./${srcRoot}/**/*.spec.ts`,
+		karmaConfig: "karma.conf.js"
+	},
+	test: {
+		reporters: ["mocha"],
+		browsers: ["Chrome"],
+		setup: "test/test-setup.ts"
 	},
 	buildTargets: [
 		"es2015",
