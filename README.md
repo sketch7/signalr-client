@@ -10,27 +10,27 @@
 [![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
 [![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
-SignalR client library built on top of ***@aspnet/signalr***. This gives you more features and easier to use.
+SignalR client library built on top of **@aspnet/signalr**. This gives you more features and easier to use.
 
 **Quick links**
 
 [Change logs][changeLog] | [Project Repository][projectUri] | [API Documentation][apiWiki]
 
 ## Features
-* Fully ***TypeScript*** and ***ReactiveX***
+* Fully **TypeScript** and **ReactiveX**
 * Multiple hub connections state management
 * Connection state notifications 
 * Update connection details easily without losing current connection state
-* Subscriptions are handled through ***RxJS*** streams
+* Subscriptions are handled through **RxJS** streams
 * Reconnection strategies
     * Random strategy
     * BackOff strategy
     * Random BackOff strategy
     * Custom strategy
 * Auto re-subscriptions after getting disconnected and re-connected
-* Contains minimal dependencies (***SignalR*** and ***RxJS*** only)
-* ***No constraints*** with any framework
-* Designed to be straight forward integrated with ***any framework*** such as *[Angular](#angular-adapter)*, *Aurelia*, *React*, *Vue*, etc...
+* Contains minimal dependencies (**SignalR** and **RxJS** only)
+* **No constraints** with any framework
+* Designed to be straight forward integrated with **any framework** such as *[Angular](#angular-adapter)*, *Aurelia*, *React*, *Vue*, etc...
 
 ## Samples
 * Real world example (***coming soon***):
@@ -50,7 +50,7 @@ Check out the [API Documentation Page][apiWiki].
 
 
 ## Usage
-There are ***three simple steps***:
+There are **three simple steps**:
 
 1. Register `HubConnectionFactory` in your DI eco system
 2. In application bootstrap:
@@ -60,7 +60,7 @@ There are ***three simple steps***:
     * Use `HubConnection` to use enhanced signalr features
 
 ## Angular Adapter
-1. Register `HubConnectionFactory` as a ***Provider***
+1. Register `HubConnectionFactory` as a **Provider**
 
 You're all set! Now it's fully integrated with your Angular application.
 
@@ -162,11 +162,6 @@ const data$$ = hubConnection.on<string>("Send").subscribe(val => {
 	console.log(`send :: data received >>>`, val);
 });
 ```
-
-## RXJS - Previous Versions
-Currently we are still maintaining `@ssv/signalr-client` with `rxjs v5.5.10`.
-`npm i @ssv/signalr-client@0.5.2`
-This is equivalent to the latest version.
 
 ### Contributions
 

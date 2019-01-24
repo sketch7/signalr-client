@@ -1,12 +1,11 @@
 {
-	"extends": "./node_modules/@ssv/tools/config/tsconfig.json",
-	"compilerOptions": {
-		"types": [
-			"jest"
-		]
-	},
-	"include": [
-		"src/**/*",
-		"test/**/*"
-	]
+  "extends": "./node_modules/@ssv/tools/config/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "jest"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

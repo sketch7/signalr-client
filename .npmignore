@@ -1,18 +1,22 @@
 # general
 jspm_packages
 node_modules
-.idea
-.vscode
-.circleci
+/docs
+/typings
+/src
+/test
+/build
+/tools
+/.idea
+/.vscode
+/.circleci
+/.cache
 npm-debug.log
 *.tgz
 
 _artifact
-build
-test
 .eslintrc
 .stylelintrc
-.bithoundrc
 .editorconfig
 .gitignore
 .npmignore
@@ -23,10 +27,11 @@ karma.conf.js
 package-lock.json
 rollup.config.js
 system.config.js
-tsconfig.json
-tsconfig.build.json
-tsconfig.test.json
 tslint.json
 typings.json
 wallaby.js
 yarn.lock
+CODEOWNERS
+/tsconfig.json
+/tsconfig.build.json
+/tsconfig.test.json
