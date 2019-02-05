@@ -1,3 +1,12 @@
+<a name="1.0.1"></a>
+# [1.0.1](https://github.com/sketch7/signalr-client/compare/1.0.0...1.0.1) (2019-02-05)
+
+### Bug Fixes
+
+* **build:** revert build output - no features were added
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/sketch7/signalr-client/compare/0.8.1...1.0.0) (2019-01-24)
 
