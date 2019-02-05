@@ -7,11 +7,6 @@ import {
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
 import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
-// import { fromPromise } from "rxjs/observable/fromPromise";
-// import { timer } from "rxjs/observable/timer";
-// import { BehaviorSubject } from "rxjs/BehaviorSubject";
-// import { Observable } from "rxjs/Observable";
-// import { Observer } from "rxjs/Observer";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -157,7 +152,7 @@ export class HubConnection<THub> {
 	}
 
 	invoke<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
-		return fromPromise<TResult>(this.hubConnection.invoke(methodName.toString(), ...args));
+		return fromPromise<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
 	disconnect() {

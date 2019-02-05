@@ -7,7 +7,8 @@ const srcRoot = "src";
 
 module.exports = {
 	output: {
-		dist: outputRoot
+		dist: outputRoot,
+		artifact: "./_artifact",
 	},
 	src: {
 		root: srcRoot,
