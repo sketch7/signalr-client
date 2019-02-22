@@ -50,7 +50,7 @@ class MockSignalRHubConnection {
 
 	onclose(_cb: (err?: Error) => void): void {
 		console.log(">> [mockConn] onclose");
-		this._onclose = _cb;
+		this._onclose = _cb; // todo: handle multi
 	}
 
 	// todo: split into class
