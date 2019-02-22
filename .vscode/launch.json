@@ -1,0 +1,34 @@
+{
+	// Use IntelliSense to learn about possible Node.js debug attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Jest - Debug Current File",
+			"program": "${workspaceRoot}\\node_modules\\jest\\bin\\jest.js",
+			"args": [
+				"--runInBand",
+				"--testPathPattern",
+				"${fileBasenameNoExtension}"
+				// "--env",
+				// "jest-environment-node-debug"
+			],
+			"internalConsoleOptions": "openOnSessionStart",
+			"outFiles": [
+				"${workspaceRoot}/dist/**/*"
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Jest - Debug Tests",
+			"program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+			"args": [
+				"--runInBand"
+			]
+		}
+	]
+}

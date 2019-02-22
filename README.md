@@ -143,7 +143,7 @@ import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
 
 const hubFactory = new HubConnectionFactory();
 hubFactory.create(
-	{ key: "hero", endpointUri: "/hero" },  
+	{ key: "hero", endpointUri: "/hero" },
 	{ key: "user", endpointUri: "http://localhost:62551/real-time/user" }
 );
 ```

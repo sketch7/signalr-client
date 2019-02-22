@@ -25,6 +25,9 @@ export class HubConnection<THub> {
 
 	get connectionState$() { return this._connectionState$.asObservable(); }
 
+	get key(): string { return this._key; }
+
+	private _key: string;
 	private source: string;
 	private hubConnection!: SignalRHubConnection;
 	private retry: ReconnectionStrategyOptions;
@@ -38,6 +41,7 @@ export class HubConnection<THub> {
 	);
 
 	constructor(connectionOption: HubConnectionOptions) {
+		this._key = connectionOption.key;
 		this.source = `[${connectionOption.key}] HubConnection ::`;
 
 		this.retry = connectionOption.options && connectionOption.options.retry ? connectionOption.options.retry : {};
@@ -76,6 +80,7 @@ export class HubConnection<THub> {
 		);
 
 		const reconnect$ = this._connectionState$.pipe(
+			tap(x => console.warn(">>>> reconnect$ _connectionState state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
 			switchMap(() => this.connect())
 		);
@@ -103,7 +108,9 @@ export class HubConnection<THub> {
 				skipUntil(this.internalConnStatus$.pipe(filter(x => x === InternalConnectionStatus.ready))),
 				first()
 			)),
-			switchMap(() => this.openConnection())
+			switchMap(() => this.openConnection()),
+			tap(x => console.warn(">>>> connect - ready", x)),
+
 		);
 	}
 
@@ -166,6 +173,7 @@ export class HubConnection<THub> {
 	private openConnection() {
 		return emptyNext().pipe(
 			switchMap(() => fromPromise(this.hubConnection.start())),
+			tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen((errors: Observable<any>) => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
 				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
@@ -184,8 +192,10 @@ export class HubConnection<THub> {
 			)),
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
+			tap(x => console.warn(">>>> openConnection - state update", x)),
 			tap(() => {
 				this.hubConnection.onclose(err => {
+					console.warn(">>>> openConnection - onclose", err);
 					this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 					if (err) {
 						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
