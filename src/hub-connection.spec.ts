@@ -9,12 +9,12 @@ jest.mock("@aspnet/signalr");
 
 class MockSignalRHubConnectionBuilder {
 
-	private _hub: MockSignalRHubConnection | undefined;
+	private _lastHub: MockSignalRHubConnection | undefined;
 
 	build(): MockSignalRHubConnection {
 		console.warn(">> [mockConnBuilder] build");
 		const hub = new MockSignalRHubConnection();
-		this._hub = hub;
+		this._lastHub = hub;
 		return hub;
 	}
 
@@ -24,11 +24,11 @@ class MockSignalRHubConnectionBuilder {
 
 	// todo: perhaps find something nicer
 	hijackConnection(): MockSignalRHubConnection {
-		if (!this._hub) {
+		if (!this._lastHub) {
 			throw Error("No connection to hijack!");
 		}
-		const hub = this._hub;
-		this._hub = undefined;
+		const hub = this._lastHub;
+		this._lastHub = undefined;
 		return hub;
 	}
 
