@@ -5,11 +5,13 @@
 - given a disconnected connection
   - when connect is invoked
     - and connected successfully
-      - should have status as connected
+      x - should have status as connected
     - and fails to connect
       - should retry
       - when disconnect is invoked
         - should stop retying
+      - when retry attempts limit reached
+        - should emit error
 
 
 - given a connected connection

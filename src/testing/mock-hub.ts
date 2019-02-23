@@ -1,15 +1,31 @@
+export class MockSignalRHubBackend {
+
+	private _onclose: ((err?: Error) => void) | undefined;
+
+	constructor(
+		public connection: MockSignalRHubConnection
+	) {
+	}
+
+	disconnect(err?: Error | undefined) {
+		if (this._onclose) {
+			this._onclose(err);
+		}
+	}
+
+	registerOnclose(cb: (err?: Error) => void) {
+		this._onclose = cb; // todo: handle multi
+	}
+}
 
 export class MockSignalRHubConnectionBuilder {
-
-	constructor() {
-		console.warn(">>> MockSignalRHubConnectionBuilder ctor");
-	}
 
 	private _lastHub: MockSignalRHubConnection | undefined;
 
 	build(): MockSignalRHubConnection {
-		console.warn(">> [mockConnBuilder] build", this._lastHub);
-		const hub = new MockSignalRHubConnection();
+		console.warn(">> [mockConnBuilder] build");
+		// todo: find way to validate whether its the same hub key so it wont get misused
+		const hub = this._lastHub || new MockSignalRHubConnection();
 		this._lastHub = hub;
 		return hub;
 	}
@@ -23,32 +39,10 @@ export class MockSignalRHubConnectionBuilder {
 			throw Error("No connection!");
 		}
 		const hub = this._lastHub;
-		this._lastHub = undefined;
+		// this._lastHub = undefined;
 		return hub.backend;
 	}
 
-}
-
-export class MockSignalRHubBackend {
-
-	private _onclose: ((err?: Error) => void) | undefined;
-
-	constructor(
-		public connection: MockSignalRHubConnection
-	) {
-
-	}
-
-	// todo: split into class
-	triggerOnclose(err?: Error | undefined) {
-		if (this._onclose) {
-			this._onclose(err);
-		}
-	}
-
-	registerOnclose(cb: (err?: Error) => void) {
-		this._onclose = cb; // todo: handle multi
-	}
 }
 
 export class MockSignalRHubConnection {
@@ -56,17 +50,17 @@ export class MockSignalRHubConnection {
 	backend = new MockSignalRHubBackend(this);
 
 	start(): Promise<void> {
-		console.log(">> [mockConn] start");
+		// console.log(">> [mockConn] start");
 		return Promise.resolve();
 	}
 
 	stop(): Promise<void> {
-		console.log(">> [mockConn] stop");
+		// console.log(">> [mockConn] stop");
 		return Promise.resolve();
 	}
 
 	onclose(cb: (err?: Error) => void): void {
-		console.log(">> [mockConn] onclose");
+		// console.log(">> [mockConn] onclose");
 		this.backend.registerOnclose(cb);
 	}
 

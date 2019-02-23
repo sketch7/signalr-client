@@ -2,16 +2,20 @@ import { IHttpConnectionOptions, IHubProtocol } from "@aspnet/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 
+export const errorCodes = {
+	retryLimitsReached: "error.retry-limits-reached"
+};
+
 export enum ConnectionStatus {
-	disconnected,
-	connecting,
-	connected
+	disconnected = "disconnected",
+	connecting = "connecting",
+	connected = "connected"
 }
 
 export enum InternalConnectionStatus {
-	disconnected,
-	ready,
-	connected
+	disconnected = "disconnected",
+	ready = "ready",
+	connected = "connected"
 }
 
 export interface ConnectionState {

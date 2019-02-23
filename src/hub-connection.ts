@@ -1,16 +1,16 @@
 import {
-	tap, map, filter, switchMap, skipUntil, take, delay, first,
-	retryWhen, scan, delayWhen, defaultIfEmpty, distinctUntilChanged
+	tap, map, filter, switchMap, skipUntil, delay, first,
+	retryWhen, scan, delayWhen, distinctUntilChanged
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
-import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
+import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
-	ReconnectionStrategyOptions, InternalConnectionStatus
+	ReconnectionStrategyOptions, InternalConnectionStatus, errorCodes
 } from "./hub-connection.model";
 import { getReconnectionDelay } from "./reconnection-strategy";
 import { buildQueryString } from "./utils/query-string";
@@ -23,6 +23,11 @@ const connectedState: ConnectionState = { status: ConnectionStatus.connected };
 
 export class HubConnection<THub> {
 
+
+	/** todos:
+	 * - create desiredState$
+	 * - dispose and complete subscriptions
+	 */
 	get connectionState$() { return this._connectionState$.asObservable(); }
 
 	get key(): string { return this._key; }
@@ -34,6 +39,7 @@ export class HubConnection<THub> {
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
 	private internalConnStatus$ = new BehaviorSubject<InternalConnectionStatus>(InternalConnectionStatus.disconnected);
+	private connectionBuilder = new SignalRHubConnectionBuilder();
 
 	private waitUntilConnect$ = this.connectionState$.pipe(
 		distinctUntilChanged((x, y) => x.status === y.status),
@@ -63,25 +69,26 @@ export class HubConnection<THub> {
 				}),
 				map(buildQueryString),
 				tap(queryString => {
-					let connectionBuilder = new SignalRHubConnectionBuilder()
-						.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options as any); // hack since signalr typings are incorrect.
+					this.connectionBuilder.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options!);
 
 					if (connectionOpts.protocol) {
-						connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
+						this.connectionBuilder = this.connectionBuilder.withHubProtocol(connectionOpts.protocol);
 					}
-
-					this.hubConnection = connectionBuilder.build();
+					console.warn(">>> creating hub connection");
+					this.hubConnection = this.connectionBuilder.build();
 				}
 				),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
+				tap(() => console.warn(">>> before open connection #2", prevConnectionStatus)),
 				switchMap(() => this.openConnection())
 			))
 		);
 
 		const reconnect$ = this._connectionState$.pipe(
-			tap(x => console.warn(">>>> reconnect$ _connectionState state changed", x)),
+			tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+			tap(x => console.warn(">>>> reconnecting...", x)),
 			switchMap(() => this.connect())
 		);
 
@@ -172,15 +179,19 @@ export class HubConnection<THub> {
 
 	private openConnection() {
 		return emptyNext().pipe(
+			tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			switchMap(() => fromPromise(this.hubConnection.start())),
 			tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen((errors: Observable<any>) => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
-				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
+					if (this.retry.maximumAttempts && retryCount > this.retry.maximumAttempts) {
+						return throwError(new Error(errorCodes.retryLimitsReached));
+					}
+
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
 					// tslint:disable-next-line:no-console
-					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
+					console.warn(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
 					this._connectionState$.next({
 						status: ConnectionStatus.connecting,
 						reason: "reconnecting",
@@ -210,7 +221,6 @@ export class HubConnection<THub> {
 					}
 				});
 			}),
-			first()
 		);
 	}
 

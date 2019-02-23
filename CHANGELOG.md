@@ -1,3 +1,11 @@
+# vNext
+
+### Features
+
+**hub:**
+- connect now will throw error after being exhausted
+- 
+
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/sketch7/signalr-client/compare/1.0.0...1.0.1) (2019-02-05)
 

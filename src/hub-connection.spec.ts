@@ -1,6 +1,7 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription } from "rxjs";
-import { first, switchMap, tap } from "rxjs/operators";
+import { Subscription, merge } from "rxjs";
+import { first, switchMap, tap, skip } from "rxjs/operators";
+// import { TestScheduler } from "rxjs/testing";
 import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
@@ -10,9 +11,6 @@ jest.mock("@aspnet/signalr");
 
 let nextUniqueId = 0;
 
-const mockConnBuilder = new MockSignalRHubConnectionBuilder();
-(signalr.HubConnectionBuilder as unknown as jest.Mock).mockImplementation(() => mockConnBuilder);
-
 interface HeroHub {
 	UpdateHero: string;
 }
@@ -20,14 +18,30 @@ interface HeroHub {
 function createSUT() {
 	return new HubConnection<HeroHub>({
 		key: `hero-${nextUniqueId++}`,
-		endpointUri: "/hero"
+		endpointUri: "/hero",
+		options: {
+			retry: {
+				maximumAttempts: 3,
+				backOffStrategy: {
+					delayRetriesMs: 10,
+					maxDelayRetriesMs: 10
+				}
+			}
+		}
 	});
 }
 
 describe("HubConnectionSpecs", () => {
 
 	let SUT: HubConnection<HeroHub>;
+	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
+	let conn$$ = Subscription.EMPTY;
+
+	beforeEach(() => {
+		mockConnBuilder = new MockSignalRHubConnectionBuilder();
+		(signalr.HubConnectionBuilder as unknown as jest.Mock).mockImplementation(() => mockConnBuilder);
+	});
 
 	describe("given a disconnected connection", () => {
 
@@ -36,9 +50,12 @@ describe("HubConnectionSpecs", () => {
 			hubBackend = mockConnBuilder.getBackend();
 		});
 
+		afterEach(() => {
+			conn$$.unsubscribe();
+		});
+
 		describe("when connect is invoked", () => {
 
-			let conn$$ = Subscription.EMPTY;
 			describe("and connected successfully", () => {
 
 				it("should have status as connected", done => {
@@ -52,16 +69,55 @@ describe("HubConnectionSpecs", () => {
 
 			});
 
-			afterEach(() => {
-				conn$$.unsubscribe();
+
+
+			describe("and fails to connect", () => {
+
+				beforeEach(() => {
+					console.warn("beforeEach mock start to fail");
+					hubBackend.connection.start = jest.fn().mockRejectedValue(new Error("Error while connecting"));
+				});
+				afterEach(() => {
+					conn$$.unsubscribe();
+				});
+
+				it("should have status reconnecting", done => {
+					const connect$ = SUT.connect();
+					const state$ = SUT.connectionState$.pipe(
+						skip(1),
+						first(),
+						tap(state => {
+							expect(state.status).toBe(ConnectionStatus.connecting);
+							expect(state.reason).toBe("reconnecting");
+							done();
+						})
+					);
+					conn$$ = merge(connect$, state$).subscribe();
+				});
+
+				it("should retry according to retry strategy", done => {
+					// todo: try and use scheduler
+					SUT.connect().subscribe({
+						error: () => {
+							expect(hubBackend.connection.start).toBeCalledTimes(4); // todo: should this be one extra then specified?
+							done();
+						},
+					});
+
+				});
+
 			});
 
+
+
 		});
+
 	});
 
-	describe("given a connected connection", () => {
 
-		let conn$$ = Subscription.EMPTY;
+
+
+	describe("given a connected connection", () => {
 
 		beforeEach(done => {
 			SUT = createSUT();
@@ -69,13 +125,15 @@ describe("HubConnectionSpecs", () => {
 			conn$$ = SUT.connect().subscribe(done);
 		});
 
+		afterEach(() => {
+			conn$$.unsubscribe();
+		});
+
 		describe("when disconnect is invoked", () => {
 
 			it("should have status as disconnected", done => {
 				conn$$ = SUT.disconnect().pipe(
-					tap(x => console.warn(">>>> disconnected", x, SUT.key)),
-					tap(() => hubBackend.triggerOnclose()),
-					tap(x => console.warn(">>>> triggerOnclose triggered", x)),
+					tap(() => hubBackend.disconnect()),
 					switchMap(() => SUT.connectionState$.pipe(first()))
 				).subscribe({
 					next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
@@ -85,11 +143,7 @@ describe("HubConnectionSpecs", () => {
 
 		});
 
-		afterEach(() => {
-			conn$$.unsubscribe();
-		});
+
 
 	});
-
 });
-
