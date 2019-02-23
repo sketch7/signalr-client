@@ -2,65 +2,11 @@ import { HubConnection } from "./hub-connection";
 import { Subscription } from "rxjs";
 import { first, switchMap, tap } from "rxjs/operators";
 import { ConnectionStatus } from "./hub-connection.model";
+import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@aspnet/signalr";
 jest.genMockFromModule("@aspnet/signalr");
 jest.mock("@aspnet/signalr");
-
-class MockSignalRHubConnectionBuilder {
-
-	private _lastHub: MockSignalRHubConnection | undefined;
-
-	build(): MockSignalRHubConnection {
-		console.warn(">> [mockConnBuilder] build");
-		const hub = new MockSignalRHubConnection();
-		this._lastHub = hub;
-		return hub;
-	}
-
-	withUrl(): this {
-		return this;
-	}
-
-	// todo: perhaps find something nicer
-	hijackConnection(): MockSignalRHubConnection {
-		if (!this._lastHub) {
-			throw Error("No connection to hijack!");
-		}
-		const hub = this._lastHub;
-		this._lastHub = undefined;
-		return hub;
-	}
-
-}
-
-class MockSignalRHubConnection {
-
-	private _onclose: ((err?: Error) => void) | undefined;
-
-	start(): Promise<void> {
-		console.log(">> [mockConn] start");
-		return Promise.resolve();
-	}
-
-	stop(): Promise<void> {
-		console.log(">> [mockConn] stop");
-		return Promise.resolve();
-	}
-
-	onclose(_cb: (err?: Error) => void): void {
-		console.log(">> [mockConn] onclose");
-		this._onclose = _cb; // todo: handle multi
-	}
-
-	// todo: split into class
-	triggerOnclose(err?: Error | undefined) {
-		if (this._onclose) {
-			this._onclose(err);
-		}
-	}
-
-}
 
 let nextUniqueId = 0;
 
@@ -81,21 +27,21 @@ function createSUT() {
 describe("HubConnectionSpecs", () => {
 
 	let SUT: HubConnection<HeroHub>;
-	let hubBackend: MockSignalRHubConnection;
+	let hubBackend: MockSignalRHubBackend;
 
 	describe("given a disconnected connection", () => {
 
 		beforeEach(() => {
 			SUT = createSUT();
-			hubBackend = mockConnBuilder.hijackConnection();
+			hubBackend = mockConnBuilder.getBackend();
 		});
 
-		describe("and connect is invoked", () => {
+		describe("when connect is invoked", () => {
 
 			let conn$$ = Subscription.EMPTY;
-			describe("when connected successfully", () => {
+			describe("and connected successfully", () => {
 
-				it("should be marked as connected", done => {
+				it("should have status as connected", done => {
 					conn$$ = SUT.connect().pipe(
 						switchMap(() => SUT.connectionState$.pipe(first()))
 					).subscribe({
@@ -119,13 +65,13 @@ describe("HubConnectionSpecs", () => {
 
 		beforeEach(done => {
 			SUT = createSUT();
-			hubBackend = mockConnBuilder.hijackConnection();
+			hubBackend = mockConnBuilder.getBackend();
 			conn$$ = SUT.connect().subscribe(done);
 		});
 
-		describe("and disconnect is invoked", () => {
+		describe("when disconnect is invoked", () => {
 
-			it("should be marked as disconnected", done => {
+			it("should have status as disconnected", done => {
 				conn$$ = SUT.disconnect().pipe(
 					tap(x => console.warn(">>>> disconnected", x, SUT.key)),
 					tap(() => hubBackend.triggerOnclose()),
@@ -135,13 +81,12 @@ describe("HubConnectionSpecs", () => {
 					next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
 					complete: done
 				});
-
 			});
 
-			afterEach(() => {
-				conn$$.unsubscribe();
-			});
+		});
 
+		afterEach(() => {
+			conn$$.unsubscribe();
 		});
 
 	});
