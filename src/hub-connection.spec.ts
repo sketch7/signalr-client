@@ -95,7 +95,7 @@ describe("HubConnectionSpecs", () => {
 					conn$$ = merge(connect$, state$).subscribe();
 				});
 
-				it("should retry according to retry strategy", done => {
+				it("should emit error when retry attempts limit reached", done => {
 					// todo: try and use scheduler
 					SUT.connect().subscribe({
 						error: () => {
