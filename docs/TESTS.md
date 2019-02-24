@@ -27,7 +27,9 @@
 
 - given a connected connection
   - when data changes
-    - should reconnect
+    x - should reconnect
+  - when data doesnt change
+    - should not reconnect
 - given a disconnected connection
   - when data changes
     - should not connect
