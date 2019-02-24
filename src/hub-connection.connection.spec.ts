@@ -1,36 +1,12 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, merge } from "rxjs";
 import { first, switchMap, tap, skip, delay } from "rxjs/operators";
-// import { TestScheduler } from "rxjs/testing";
+
+import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@aspnet/signalr";
-jest.genMockFromModule("@aspnet/signalr");
-jest.mock("@aspnet/signalr");
-
-let nextUniqueId = 0;
-
-interface HeroHub {
-	UpdateHero: string;
-}
-
-function createSUT() {
-	return new HubConnection<HeroHub>({
-		key: `hero-${nextUniqueId++}`,
-		endpointUri: "/hero",
-		defaultData: () => ({ tenant: "kowalski", power: "2000" }),
-		options: {
-			retry: {
-				maximumAttempts: 3,
-				backOffStrategy: {
-					delayRetriesMs: 10,
-					maxDelayRetriesMs: 10
-				}
-			},
-		}
-	});
-}
 
 describe("HubConnection Specs", () => {
 
@@ -40,7 +16,6 @@ describe("HubConnection Specs", () => {
 	let conn$$ = Subscription.EMPTY;
 	let hubStartSpy: jest.SpyInstance<Promise<void>>;
 	let hubStopSpy: jest.SpyInstance<Promise<void>>;
-	let hubBuilderWithUrlSpy: jest.SpyInstance<MockSignalRHubConnectionBuilder>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
@@ -209,59 +184,7 @@ describe("HubConnection Specs", () => {
 
 	});
 
-	describe("setData Specs", () => {
 
-
-		describe("given a connected connection", () => {
-
-			beforeEach(done => {
-				SUT = createSUT();
-				hubBackend = mockConnBuilder.getBackend();
-				conn$$ = SUT.connect().subscribe(done);
-				hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-				hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
-				hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
-			});
-
-
-			describe("when data changes", () => {
-
-
-
-				it("should reconnect with new data", done => {
-					conn$$ = SUT.connectionState$.pipe(
-						first(),
-						tap(x => console.info("[spec] connectionState #1", x)),
-						tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-						tap(() => SUT.setData(() => ({
-							hero: "rexxar",
-							power: "1337"
-						}))),
-						// tap(x => console.info("[spec] disconnect #2", x)),
-						switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-						tap(state => {
-							console.info("[spec] test finished #3", state);
-							expect(hubStartSpy).toBeCalledTimes(1);
-							expect(hubStopSpy).toBeCalledTimes(1);
-							expect(hubBuilderWithUrlSpy).toHaveBeenLastCalledWith("/hero?tenant=kowalski&power=1337&hero=rexxar", expect.any(Object));
-							expect(state.status).toBe(ConnectionStatus.connected);
-							done();
-						}),
-						first()
-					).subscribe();
-				});
-
-
-
-			});
-
-
-
-		});
-
-
-
-	});
 
 
 });
