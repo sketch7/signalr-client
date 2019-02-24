@@ -1,6 +1,6 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, merge } from "rxjs";
-import { first, switchMap, tap, skip, delay } from "rxjs/operators";
+import { first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs/operators";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
@@ -42,7 +42,7 @@ describe("HubConnection Specs", () => {
 
 					it("should have status as connected", done => {
 						conn$$ = SUT.connect().pipe(
-							switchMap(() => SUT.connectionState$.pipe(first()))
+							withLatestFrom(SUT.connectionState$, (_x, y) => y),
 						).subscribe({
 							next: state => expect(state.status).toBe(ConnectionStatus.connected),
 							complete: done
@@ -138,7 +138,7 @@ describe("HubConnection Specs", () => {
 				it("should have status as disconnected", done => {
 					conn$$ = SUT.disconnect().pipe(
 						tap(() => hubBackend.disconnect()),
-						switchMap(() => SUT.connectionState$.pipe(first()))
+						withLatestFrom(SUT.connectionState$, (_x, y) => y),
 					).subscribe({
 						next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
 						complete: done

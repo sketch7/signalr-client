@@ -29,10 +29,10 @@
   - when data changes
     x - should reconnect with new data
   - when data doesnt change
-    - should not reconnect
+    - should not reconnect (xit **implement**)
 - given a disconnected connection
   - when data changes
-    - should not connect
+    x - should not connect
 
 
 ## `on` specs
