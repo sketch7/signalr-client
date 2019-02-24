@@ -103,6 +103,7 @@ describe("HubConnectionSpecs", () => {
 				});
 
 
+
 				describe("when disconnect is invoked", () => {
 
 					beforeEach(() => {
@@ -111,27 +112,23 @@ describe("HubConnectionSpecs", () => {
 
 					it("should stop retrying", done => {
 
-						const handleDisconnect = SUT.connectionState$.pipe(
+						const triggerDisconnect = SUT.connectionState$.pipe(
 							skip(1),
 							first(),
-							tap(x => console.info(">>>> connectionState #1 x3", x)),
 							switchMap(() => SUT.disconnect()),
-							tap(x => console.info(">>>> disconnect ", x)),
 							switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.disconnected))),
 							delay(50), // ensure there are no pending connects
 							tap(state => {
-								console.info(">>> test finished", state, ConnectionStatus.disconnected);
 								expect(state.status).toBe(ConnectionStatus.disconnected);
 								expect(hubBackend.connection.start).toBeCalledTimes(1);
 								expect(hubBackend.connection.stop).not.toBeCalled();
 								done();
 							}),
 						);
-						conn$$ = merge(SUT.connect(), handleDisconnect).subscribe();
+						conn$$ = merge(SUT.connect(), triggerDisconnect).subscribe();
 					});
 
 				});
-
 
 
 
@@ -158,6 +155,8 @@ describe("HubConnectionSpecs", () => {
 			conn$$.unsubscribe();
 		});
 
+
+
 		describe("when disconnect is invoked", () => {
 
 			it("should have status as disconnected", done => {
@@ -168,6 +167,40 @@ describe("HubConnectionSpecs", () => {
 					next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
 					complete: done
 				});
+			});
+
+		});
+
+
+
+		describe("when disconnects", () => {
+
+			let hubStartSpy: jest.SpyInstance<Promise<void>>;
+			let hubStopSpy: jest.SpyInstance<Promise<void>>;
+			beforeEach(() => {
+				hubStartSpy = jest.spyOn(hubBackend.connection, "start");
+				hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
+			});
+
+			fit("should reconnect", done => {
+
+				const reconnect$ = SUT.connectionState$.pipe(
+					first(),
+					tap(x => console.info("[spec] connectionState #1", x)),
+					tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
+					tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+					tap(x => console.info("[spec] disconnect #2", x)),
+					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+					tap(state => {
+						console.info("[spec] test finished #3", state);
+						expect(state.status).toBe(ConnectionStatus.connected);
+						expect(hubStartSpy).toBeCalledTimes(1);
+						expect(hubStopSpy).not.toBeCalled();
+						done();
+					}),
+					first()
+				);
+				conn$$ = reconnect$.subscribe();
 			});
 
 		});

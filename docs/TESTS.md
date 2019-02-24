@@ -11,16 +11,16 @@
     - and fails to connect
       x - should retry
       - when disconnect is invoked
-        - should stop retying
+        x - should stop retying
       - when retry attempts limit reached
         x - should emit error
 
 
 - given a connected connection
   - when disconnect is invoked
-    - should have status as disconnected
+    x - should have status as disconnected
   - when disconnects
-    - should reconnect
+    x - should reconnect
 
 ## `on` specs
 
