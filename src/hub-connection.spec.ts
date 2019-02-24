@@ -76,9 +76,6 @@ describe("HubConnectionSpecs", () => {
 				beforeEach(() => {
 					hubBackend.connection.start = jest.fn().mockRejectedValue(new Error("Error while connecting"));
 				});
-				afterEach(() => {
-					conn$$.unsubscribe();
-				});
 
 				it("should have status reconnecting", done => {
 					const connect$ = SUT.connect();
@@ -108,23 +105,29 @@ describe("HubConnectionSpecs", () => {
 
 				describe("when disconnect is invoked", () => {
 
-					fit("should stop retrying", done => {
+					beforeEach(() => {
+						hubBackend.connection.stop = jest.fn();
+					});
 
-						const waitOnce$ = SUT.connectionState$.pipe(
+					it("should stop retrying", done => {
+
+						const handleDisconnect = SUT.connectionState$.pipe(
 							skip(1),
 							first(),
 							tap(x => console.info(">>>> connectionState #1 x3", x)),
 							switchMap(() => SUT.disconnect()),
-							switchMap(() => SUT.connectionState$.pipe(first())),
+							tap(x => console.info(">>>> disconnect ", x)),
+							switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.disconnected))),
 							delay(50), // ensure there are no pending connects
 							tap(state => {
 								console.info(">>> test finished", state, ConnectionStatus.disconnected);
 								expect(state.status).toBe(ConnectionStatus.disconnected);
 								expect(hubBackend.connection.start).toBeCalledTimes(1);
+								expect(hubBackend.connection.stop).not.toBeCalled();
 								done();
-							})
+							}),
 						);
-						conn$$ = merge(SUT.connect(), waitOnce$).subscribe();
+						conn$$ = merge(SUT.connect(), handleDisconnect).subscribe();
 					});
 
 				});

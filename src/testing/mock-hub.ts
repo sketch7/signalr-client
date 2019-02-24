@@ -8,6 +8,7 @@ export class MockSignalRHubBackend {
 	}
 
 	disconnect(err?: Error | undefined) {
+		console.warn("[backend] trigger disconnect", err);
 		if (this._onclose) {
 			this._onclose(err);
 		}
@@ -55,7 +56,8 @@ export class MockSignalRHubConnection {
 	}
 
 	stop(): Promise<void> {
-		// console.log(">> [mockConn] stop");
+		console.log(">> [mockConn] stop");
+		this.backend.disconnect(); // todo: should we delay this so its more realistic?
 		return Promise.resolve();
 	}
 

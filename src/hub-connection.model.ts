@@ -6,6 +6,11 @@ export const errorCodes = {
 	retryLimitsReached: "error.retry-limits-reached"
 };
 
+export enum DesiredConnectionStatus {
+	disconnected = "disconnected",
+	connected = "connected"
+}
+
 export enum ConnectionStatus {
 	disconnected = "disconnected",
 	connecting = "connecting",
