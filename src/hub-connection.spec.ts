@@ -38,6 +38,9 @@ describe("HubConnection Specs", () => {
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
 	let conn$$ = Subscription.EMPTY;
+	let hubStartSpy: jest.SpyInstance<Promise<void>>;
+	let hubStopSpy: jest.SpyInstance<Promise<void>>;
+	let hubBuilderWithUrlSpy: jest.SpyInstance<MockSignalRHubConnectionBuilder>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
@@ -45,7 +48,6 @@ describe("HubConnection Specs", () => {
 	});
 
 	describe("Connection Specs", () => {
-
 
 
 		describe("given a disconnected connection", () => {
@@ -112,7 +114,8 @@ describe("HubConnection Specs", () => {
 					describe("when disconnect is invoked", () => {
 
 						beforeEach(() => {
-							hubBackend.connection.stop = jest.fn();
+							hubStartSpy = jest.spyOn(hubBackend.connection, "start");
+							hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
 						});
 
 						it("should stop retrying", done => {
@@ -125,8 +128,8 @@ describe("HubConnection Specs", () => {
 								delay(50), // ensure there are no pending connects
 								tap(state => {
 									expect(state.status).toBe(ConnectionStatus.disconnected);
-									expect(hubBackend.connection.start).toBeCalledTimes(1);
-									expect(hubBackend.connection.stop).not.toBeCalled();
+									expect(hubStartSpy).toBeCalledTimes(1);
+									expect(hubStopSpy).not.toBeCalled();
 									done();
 								}),
 							);
@@ -173,9 +176,6 @@ describe("HubConnection Specs", () => {
 
 			describe("when disconnects", () => {
 
-				let hubStartSpy: jest.SpyInstance<Promise<void>>;
-				let hubStopSpy: jest.SpyInstance<Promise<void>>;
-
 				beforeEach(() => {
 					hubStartSpy = jest.spyOn(hubBackend.connection, "start");
 					hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
@@ -214,17 +214,13 @@ describe("HubConnection Specs", () => {
 
 		describe("given a connected connection", () => {
 
-			let hubStartSpy: jest.SpyInstance<Promise<void>>;
-			let hubStopSpy: jest.SpyInstance<Promise<void>>;
-			let hubBuilderWithUrlSpy: jest.SpyInstance<MockSignalRHubConnectionBuilder>;
-
 			beforeEach(done => {
 				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
 				conn$$ = SUT.connect().subscribe(done);
 				hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-				hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
 				hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
+				hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
 			});
 
 
