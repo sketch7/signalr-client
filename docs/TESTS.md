@@ -4,14 +4,16 @@
 
 - given a disconnected connection
   - when connect is invoked
+    - and hub is disposed
+      - connect should complete*
     - and connected successfully
       x - should have status as connected
     - and fails to connect
-      - should retry
+      x - should retry
       - when disconnect is invoked
         - should stop retying
       - when retry attempts limit reached
-        - should emit error
+        x - should emit error
 
 
 - given a connected connection

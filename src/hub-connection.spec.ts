@@ -1,6 +1,6 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, merge } from "rxjs";
-import { first, switchMap, tap, skip } from "rxjs/operators";
+import { first, switchMap, tap, skip, delay } from "rxjs/operators";
 // import { TestScheduler } from "rxjs/testing";
 import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
@@ -74,7 +74,6 @@ describe("HubConnectionSpecs", () => {
 			describe("and fails to connect", () => {
 
 				beforeEach(() => {
-					console.warn("beforeEach mock start to fail");
 					hubBackend.connection.start = jest.fn().mockRejectedValue(new Error("Error while connecting"));
 				});
 				afterEach(() => {
@@ -105,6 +104,33 @@ describe("HubConnectionSpecs", () => {
 					});
 
 				});
+
+
+				describe("when disconnect is invoked", () => {
+
+					fit("should stop retrying", done => {
+
+						const waitOnce$ = SUT.connectionState$.pipe(
+							skip(1),
+							first(),
+							tap(x => console.info(">>>> connectionState #1 x3", x)),
+							switchMap(() => SUT.disconnect()),
+							switchMap(() => SUT.connectionState$.pipe(first())),
+							delay(50), // ensure there are no pending connects
+							tap(state => {
+								console.info(">>> test finished", state, ConnectionStatus.disconnected);
+								expect(state.status).toBe(ConnectionStatus.disconnected);
+								expect(hubBackend.connection.start).toBeCalledTimes(1);
+								done();
+							})
+						);
+						conn$$ = merge(SUT.connect(), waitOnce$).subscribe();
+					});
+
+				});
+
+
+
 
 			});
 
