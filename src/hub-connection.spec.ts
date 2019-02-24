@@ -19,6 +19,7 @@ function createSUT() {
 	return new HubConnection<HeroHub>({
 		key: `hero-${nextUniqueId++}`,
 		endpointUri: "/hero",
+		defaultData: () => ({ tenant: "kowalski", power: "2000" }),
 		options: {
 			retry: {
 				maximumAttempts: 3,
@@ -26,7 +27,7 @@ function createSUT() {
 					delayRetriesMs: 10,
 					maxDelayRetriesMs: 10
 				}
-			}
+			},
 		}
 	});
 }
@@ -154,12 +155,6 @@ describe("HubConnection Specs", () => {
 				conn$$ = SUT.connect().subscribe(done);
 			});
 
-			afterEach(() => {
-				conn$$.unsubscribe();
-			});
-
-
-
 			describe("when disconnect is invoked", () => {
 
 				it("should have status as disconnected", done => {
@@ -180,6 +175,7 @@ describe("HubConnection Specs", () => {
 
 				let hubStartSpy: jest.SpyInstance<Promise<void>>;
 				let hubStopSpy: jest.SpyInstance<Promise<void>>;
+
 				beforeEach(() => {
 					hubStartSpy = jest.spyOn(hubBackend.connection, "start");
 					hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
@@ -217,27 +213,26 @@ describe("HubConnection Specs", () => {
 
 
 		describe("given a connected connection", () => {
+
 			let hubStartSpy: jest.SpyInstance<Promise<void>>;
 			let hubStopSpy: jest.SpyInstance<Promise<void>>;
+			let hubBuilderWithUrlSpy: jest.SpyInstance<MockSignalRHubConnectionBuilder>;
+
 			beforeEach(done => {
 				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
 				conn$$ = SUT.connect().subscribe(done);
 				hubStartSpy = jest.spyOn(hubBackend.connection, "start");
+				hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
 				hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
 			});
-
-			afterEach(() => {
-				conn$$.unsubscribe();
-			});
-
 
 
 			describe("when data changes", () => {
 
 
 
-				fit("should reconnect", done => {
+				it("should reconnect with new data", done => {
 					conn$$ = SUT.connectionState$.pipe(
 						first(),
 						tap(x => console.info("[spec] connectionState #1", x)),
@@ -252,6 +247,7 @@ describe("HubConnection Specs", () => {
 							console.info("[spec] test finished #3", state);
 							expect(hubStartSpy).toBeCalledTimes(1);
 							expect(hubStopSpy).toBeCalledTimes(1);
+							expect(hubBuilderWithUrlSpy).toHaveBeenLastCalledWith("/hero?tenant=kowalski&power=1337&hero=rexxar", expect.any(Object));
 							expect(state.status).toBe(ConnectionStatus.connected);
 							done();
 						}),
@@ -266,6 +262,7 @@ describe("HubConnection Specs", () => {
 
 
 		});
+
 
 
 	});
