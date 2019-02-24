@@ -1,11 +1,16 @@
 {
   "extends": "./node_modules/@ssv/tools/config/tsconfig.json",
   "compilerOptions": {
+    // "noUnusedParameters": false,
+    // "noUnusedLocals": false,
     "types": [
       "jest"
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+  ],
+  "plugins": [
+    { "name": "typescript-tslint-plugin" }
   ]
 }
