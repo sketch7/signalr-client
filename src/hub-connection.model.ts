@@ -33,9 +33,9 @@ export interface HubConnectionOptions {
 	key: string;
 	endpointUri: string;
 	options?: ConnectionOptions;
-	defaultData?: () => Dictionary<string>;
+	defaultData?: () => Dictionary<string>; // todo: rename to getDefaultData
 	/** @internal */
-	data?: () => Dictionary<string>;
+	getData?: () => Dictionary<string>;
 	protocol?: IHubProtocol;
 }
 

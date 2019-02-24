@@ -56,17 +56,7 @@ export class HubConnection<THub> {
 		const connection$ = this.hubConnectionOptions$.pipe(
 			map(connectionOpts => [connectionOpts, this.internalConnStatus$.value] as [HubConnectionOptions, InternalConnectionStatus]),
 			switchMap(([connectionOpts, prevConnectionStatus]) => this._disconnect().pipe(
-				map(() => {
-					let data: Dictionary<string> = {};
-					if (connectionOpts.defaultData) {
-						data = connectionOpts.defaultData();
-					}
-					if (connectionOpts.data) {
-						const specificData = connectionOpts.data();
-						data = { ...data, ...specificData };
-					}
-					return data;
-				}),
+				map(() => this.mergeConnectionData(connectionOpts)),
 				map(buildQueryString),
 				tap(queryString => {
 					this.connectionBuilder.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options!);
@@ -94,7 +84,7 @@ export class HubConnection<THub> {
 			})
 		);
 
-		const reconnect$ = this._connectionState$.pipe(
+		const autoReconnectOnDisconnect = this._connectionState$.pipe(
 			tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
 			tap(x => console.warn(">>>> reconnecting...", x)),
@@ -102,9 +92,11 @@ export class HubConnection<THub> {
 		);
 
 		desiredDisconnected$.subscribe(); // todo: should we merge these?
-		reconnect$.subscribe();
+		autoReconnectOnDisconnect.subscribe();
 		connection$.subscribe();
 	}
+
+
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
 		console.info("triggered connect", data);
@@ -138,9 +130,9 @@ export class HubConnection<THub> {
 		return this.untilDisconnects$();
 	}
 
-	setData(data: () => Dictionary<string>) {
+	setData(getData: () => Dictionary<string>) {
 		const connection = this.hubConnectionOptions$.value;
-		connection.data = data;
+		connection.getData = getData;
 		this.hubConnectionOptions$.next(connection);
 	}
 
@@ -237,7 +229,7 @@ export class HubConnection<THub> {
 			tap(x => console.warn(">>>> openConnection - state update", x)),
 			tap(() => {
 				this.hubConnection.onclose(err => {
-					console.warn(">>>> openConnection - onclose", err);
+					console.warn(">>>> openConnection - onclose", err ? err.message : undefined);
 					this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 					if (err) {
 						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
@@ -264,6 +256,18 @@ export class HubConnection<THub> {
 				))
 			))
 		);
+	}
+
+	private mergeConnectionData(options: HubConnectionOptions): Dictionary<string> {
+		let data: Dictionary<string> = {};
+		if (options.defaultData) {
+			data = options.defaultData();
+		}
+		if (options.getData) {
+			const specificData = options.getData();
+			data = { ...data, ...specificData };
+		}
+		return data;
 	}
 
 }

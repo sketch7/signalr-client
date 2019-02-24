@@ -8,7 +8,7 @@ export class MockSignalRHubBackend {
 	}
 
 	disconnect(err?: Error | undefined) {
-		console.warn("[backend] trigger disconnect", err);
+		console.warn("[backend] trigger disconnect", err ? err.message : undefined);
 		if (this._onclose) {
 			this._onclose(err);
 		}

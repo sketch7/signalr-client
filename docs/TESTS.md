@@ -5,7 +5,7 @@
 - given a disconnected connection
   - when connect is invoked
     - and hub is disposed
-      - connect should complete*
+      - connect should complete* **implement**
     - and connected successfully
       x - should have status as connected
     - and fails to connect
@@ -21,6 +21,17 @@
     x - should have status as disconnected
   - when disconnects
     x - should reconnect
+
+
+## `setData` specs
+
+- given a connected connection
+  - when data changes
+    - should reconnect
+- given a disconnected connection
+  - when data changes
+    - should not connect
+
 
 ## `on` specs
 

@@ -4,6 +4,7 @@ node_modules
 *.tgz
 
 _artifact
+coverage
 dist
 .rpt2_*
-.rts2_* 
+.rts2_*

@@ -182,7 +182,7 @@ describe("HubConnectionSpecs", () => {
 				hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
 			});
 
-			fit("should reconnect", done => {
+			it("should reconnect", done => {
 
 				const reconnect$ = SUT.connectionState$.pipe(
 					first(),
