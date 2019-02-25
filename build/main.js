@@ -6,8 +6,7 @@ ssvTools.setGulpContext(gulp);
 
 require("require-dir")("./tasks");
 
-gulp.task("default", () => {
-
+gulp.task("default", cb => {
 	console.log(`======== ${config.packageName} ========`);
-
+	cb();
 });

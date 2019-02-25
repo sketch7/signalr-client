@@ -1,6 +1,6 @@
 {
   "name": "@ssv/signalr-client",
-  "version": "1.0.1",
+  "version": "1.1.0-dev.3",
   "description": "SignalR client library built on top of @aspnet/signalr. This gives you more features and easier to use.",
   "homepage": "https://github.com/sketch7/signalr-client",
   "keywords": [
@@ -18,14 +18,14 @@
   ],
   "scripts": {
     "start": "gulp watch",
+    "build": "gulp build",
+    "clean": "gulp clean",
+    "lint": "gulp lint",
     "test": "jest",
     "tdd": "jest --watch",
     "test-debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --env jest-environment-node-debug",
     "test-devt": "devtool ./node_modules/jest/bin/jest.js --runInBand --env jest-environment-node-debug",
-    "lint": "gulp lint",
-    "build": "gulp build",
-    "bundle": "gulp bundle:ts",
-    "prepare-release": "gulp prepare-release"
+    "publish:rel": "npm publish dist --access=public"
   },
   "author": "Stephen Lautier <stephen.lautier@outlook.com>, Clayton Lautier <clayton.lautier@outlook.com>",
   "license": "MIT",
@@ -50,7 +50,7 @@
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "jest-environment-node-debug": "^2.0.0",
-    "microbundle": "^0.9.0",
+    "microbundle": "^0.10.1",
     "require-dir": "^1.2.0",
     "rxjs": "^6.4.0",
     "ts-jest": "^24.0.0",
