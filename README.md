@@ -1,5 +1,4 @@
 [projectUri]: https://github.com/sketch7/signalr-client
-[projectGit]: https://github.com/sketch7/signalr-client.git
 [changeLog]: ./CHANGELOG.md
 [developmentWorkflowWiki]: ./docs/DEVELOPMENT-WORKFLOW.md
 [apiWiki]: ./docs/API.md
@@ -41,8 +40,9 @@ SignalR client library built on top of **@aspnet/signalr**. This gives you more 
 ## Installation
 
 Get library via [npm]
+
 ```bash
-npm install @ssv/signalr-client --save
+npm install @ssv/signalr-client
 ```
 
 ## API Documentation

@@ -10,3 +10,5 @@ export {
 	BackOffStrategyOptions,
 	errorCodes
 } from "./hub-connection.model";
+
+export { VERSION } from "./version";

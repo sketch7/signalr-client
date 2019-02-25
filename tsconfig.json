@@ -1,6 +1,7 @@
 {
   "extends": "./node_modules/@ssv/tools/config/tsconfig.json",
   "compilerOptions": {
+    "importHelpers": true,
     // "noUnusedParameters": false,
     // "noUnusedLocals": false,
     "types": [
