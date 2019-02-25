@@ -61,6 +61,21 @@ export class HubConnection<THub> {
 						this.connectionBuilder = this.connectionBuilder.withHubProtocol(connectionOpts.protocol);
 					}
 					this.hubConnection = this.connectionBuilder.build();
+					this.hubConnection.onclose(err => {
+						console.warn(">>>> connection - onclose", err ? err.message : undefined);
+						this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
+						if (err) {
+							console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
+							this._connectionState$.next({
+								status: ConnectionStatus.disconnected,
+								reason: errorReasonName,
+								data: { name: err.name, message: err.message }
+							});
+						} else {
+							console.warn(`${this.source} session disconnected`);
+							this._connectionState$.next(disconnectedState);
+						}
+					});
 				}),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
@@ -201,7 +216,6 @@ export class HubConnection<THub> {
 		console.info("triggered openConnection");
 		return emptyNext().pipe(
 			tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
-			takeUntil(this.untilDesiredDisconnects$()),
 			switchMap(() => fromPromise(this.hubConnection.start())), // todo: handle when desired disconnect
 			tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen(errors => errors.pipe(
@@ -226,23 +240,8 @@ export class HubConnection<THub> {
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
 			tap(x => console.warn(">>>> openConnection - state update", x)),
-			tap(() => {
-				this.hubConnection.onclose(err => {
-					console.warn(">>>> openConnection - onclose", err ? err.message : undefined);
-					this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
-					if (err) {
-						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
-						this._connectionState$.next({
-							status: ConnectionStatus.disconnected,
-							reason: errorReasonName,
-							data: { name: err.name, message: err.message }
-						});
-					} else {
-						console.warn(`${this.source} session disconnected`);
-						this._connectionState$.next(disconnectedState);
-					}
-				});
-			}),
+			takeUntil(this.untilDesiredDisconnects$()),
+
 		);
 	}
 

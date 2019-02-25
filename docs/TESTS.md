@@ -6,6 +6,8 @@
   - when connect is invoked
     - and while connecting disconnect was invoked
       - should disconnect
+    - and while retrying disconnect was invoked
+      - should disconnect
     - and hub is disposed
       - connect should complete* **implement**
     - and connected successfully

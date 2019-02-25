@@ -7,6 +7,7 @@ import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@aspnet/signalr";
+function delayPromise(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
 describe("HubConnection Specs", () => {
 
@@ -55,9 +56,39 @@ describe("HubConnection Specs", () => {
 
 
 
-				// todo:
-				// and while connecting disconnect was invoked
-				// should disconnect
+				describe("and while connecting disconnect was invoked", () => {
+
+					beforeEach(() => {
+						hubBackend.connection.start = jest.fn().mockReturnValue(delayPromise(5));
+					});
+
+					// and fails
+					// should
+
+					it("should have status disconnected", done => {
+						console.warn(">>>> START");
+
+						const connect$ = SUT.connect();
+						const state$ = SUT.connectionState$.pipe(
+							first(),
+							tap(x => console.warn(">>>> [spec] disconnect", x)),
+							switchMap(() => SUT.disconnect()),
+							tap(x => console.warn(">>>> [spec] disconnected", x)),
+							delay(2),
+							withLatestFrom(SUT.connectionState$, (_x, y) => y),
+							tap(x => console.warn(">>>> [spec] after delay", x)),
+							tap(state => {
+								expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+								expect(state.status).toBe(ConnectionStatus.disconnected);
+								done();
+							})
+						);
+						conn$$ = merge(connect$, state$).subscribe();
+					});
+
+
+
+				});
 
 
 				describe("and fails to connect", () => {
