@@ -52,6 +52,7 @@ export class MockSignalRHubConnection {
 
 	start(): Promise<void> {
 		// console.log(">> [mockConn] start");
+		// return new Promise(resolve => setTimeout(resolve, 100));
 		return Promise.resolve();
 	}
 

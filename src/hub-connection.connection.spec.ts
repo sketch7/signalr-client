@@ -49,8 +49,15 @@ describe("HubConnection Specs", () => {
 						});
 					});
 
+
+
 				});
 
+
+
+				// todo:
+				// and while connecting disconnect was invoked
+				// should disconnect
 
 
 				describe("and fails to connect", () => {

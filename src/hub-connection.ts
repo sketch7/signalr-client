@@ -21,14 +21,10 @@ const errorReasonName = "error";
 const disconnectedState = Object.freeze<ConnectionState>({ status: ConnectionStatus.disconnected });
 const connectedState = Object.freeze<ConnectionState>({ status: ConnectionStatus.connected });
 
+// todo: rename HubClient?
 export class HubConnection<THub> {
 
-
-	/** todos:
-	 * - dispose and complete subscriptions
-	 */
 	get connectionState$() { return this._connectionState$.asObservable(); }
-
 	get key(): string { return this._key; }
 
 	private _key: string;
@@ -95,8 +91,6 @@ export class HubConnection<THub> {
 		autoReconnectOnDisconnect.subscribe();
 		connection$.subscribe();
 	}
-
-
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
 		console.info("triggered connect", data);
@@ -178,6 +172,10 @@ export class HubConnection<THub> {
 		return fromPromise<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
+	dispose(): void {
+		// todo: unsubscribe + complete observables
+	}
+
 	private _disconnect(): Observable<void> {
 		console.info("triggered _disconnect", this.internalConnStatus$.value);
 		return this.internalConnStatus$.value === InternalConnectionStatus.connected
@@ -204,7 +202,7 @@ export class HubConnection<THub> {
 		return emptyNext().pipe(
 			tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			takeUntil(this.untilDesiredDisconnects$()),
-			switchMap(() => fromPromise(this.hubConnection.start())),
+			switchMap(() => fromPromise(this.hubConnection.start())), // todo: handle when desired disconnect
 			tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen(errors => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
@@ -221,6 +219,7 @@ export class HubConnection<THub> {
 						data: { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs }
 					});
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
+					// todo: refactor with reconnect$ subject
 					return timer(nextRetryMs);
 				})
 			)),
