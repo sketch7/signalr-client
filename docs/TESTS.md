@@ -6,8 +6,6 @@
   - when connect is invoked
     - and while connecting disconnect was invoked
       - should disconnect
-    - and while retrying disconnect was invoked
-      - should disconnect
     - and hub is disposed
       - connect should complete* **implement**
     - and connected successfully
@@ -18,7 +16,8 @@
         x - should stop retying
       - when retry attempts limit reached
         x - should emit error
-
+      - and while retrying disconnect was invoked
+        - should disconnect
 
 - given a connected connection
   - when disconnect is invoked

@@ -62,8 +62,6 @@ describe("HubConnection Specs", () => {
 						hubBackend.connection.start = jest.fn().mockReturnValue(delayPromise(5));
 					});
 
-					// and fails
-					// should
 
 					it("should have status disconnected", done => {
 						console.warn(">>>> START");
@@ -74,7 +72,7 @@ describe("HubConnection Specs", () => {
 							tap(x => console.warn(">>>> [spec] disconnect", x)),
 							switchMap(() => SUT.disconnect()),
 							tap(x => console.warn(">>>> [spec] disconnected", x)),
-							delay(2),
+							delay(2), // ensure start is in flight
 							withLatestFrom(SUT.connectionState$, (_x, y) => y),
 							tap(x => console.warn(">>>> [spec] after delay", x)),
 							tap(state => {
@@ -89,6 +87,7 @@ describe("HubConnection Specs", () => {
 
 
 				});
+
 
 
 				describe("and fails to connect", () => {
@@ -132,7 +131,6 @@ describe("HubConnection Specs", () => {
 						});
 
 						it("should stop retrying", done => {
-
 							const triggerDisconnect = SUT.connectionState$.pipe(
 								skip(1),
 								first(),
@@ -148,6 +146,9 @@ describe("HubConnection Specs", () => {
 							);
 							conn$$ = merge(SUT.connect(), triggerDisconnect).subscribe();
 						});
+
+
+
 
 					});
 
