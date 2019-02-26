@@ -24,7 +24,7 @@ export class MockSignalRHubConnectionBuilder {
 	private _lastHub: MockSignalRHubConnection | undefined;
 
 	build(): MockSignalRHubConnection {
-		console.warn(">> [mockConnBuilder] build");
+		// console.info(">> [connectionBuilder] build");
 		// todo: find way to validate whether its the same hub key so it wont get misused
 		const hub = this._lastHub || new MockSignalRHubConnection();
 		this._lastHub = hub;
@@ -40,7 +40,6 @@ export class MockSignalRHubConnectionBuilder {
 			throw Error("No connection!");
 		}
 		const hub = this._lastHub;
-		// this._lastHub = undefined;
 		return hub.backend;
 	}
 
@@ -51,19 +50,19 @@ export class MockSignalRHubConnection {
 	backend = new MockSignalRHubBackend(this);
 
 	start(): Promise<void> {
-		// console.log(">> [mockConn] start");
+		// console.log(">> [mock conn] start");
 		// return new Promise(resolve => setTimeout(resolve, 100));
 		return Promise.resolve();
 	}
 
 	stop(): Promise<void> {
-		console.log(">> [mockConn] stop");
+		// console.log(">> [mock conn] stop");
 		this.backend.disconnect(); // todo: should we delay this so its more realistic?
 		return Promise.resolve();
 	}
 
 	onclose(cb: (err?: Error) => void): void {
-		// console.log(">> [mockConn] onclose");
+		// console.log(">> [mock conn] onclose");
 		this.backend.registerOnclose(cb);
 	}
 

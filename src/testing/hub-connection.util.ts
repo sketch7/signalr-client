@@ -1,6 +1,5 @@
 import { HubConnection } from "../hub-connection";
 
-// import * as signalr from "@aspnet/signalr";
 jest.genMockFromModule("@aspnet/signalr");
 jest.mock("@aspnet/signalr");
 

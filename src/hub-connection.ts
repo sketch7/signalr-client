@@ -63,7 +63,6 @@ export class HubConnection<THub> {
 					}
 					this.hubConnection = this.connectionBuilder.build();
 					this.hubConnection.onclose(err => {
-						console.warn(">>>> connection - onclose", err ? err.message : undefined);
 						this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 						if (err) {
 							console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
@@ -80,13 +79,12 @@ export class HubConnection<THub> {
 				}),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
-				tap(() => console.warn(">>> before open connection #2", prevConnectionStatus)),
 				switchMap(() => this.openConnection())
 			))
 		);
 		const desiredDisconnected$ = this.desiredState$.pipe(
 			filter(status => status === DesiredConnectionStatus.disconnected),
-			tap(status => console.warn(">>>> disconnected$", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
+			// tap(status => console.warn(">>>> disconnected$", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			tap(() => {
 				switch (this.internalConnStatus$.value) {
 					case InternalConnectionStatus.connected:
@@ -103,9 +101,9 @@ export class HubConnection<THub> {
 		);
 
 		const reconnectOnDisconnect = this._connectionState$.pipe(
-			tap(x => console.warn(">>>> _connectionState$ state changed", x)),
+			// tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
-			tap(x => console.warn(">>>> reconnecting...", x)),
+			// tap(x => console.warn(">>>> reconnecting...", x)),
 			switchMap(() => this.connect())
 		);
 
@@ -117,7 +115,7 @@ export class HubConnection<THub> {
 	}
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
-		console.info("triggered connect", data);
+		// console.info("triggered connect", data);
 		this.desiredState$.next(DesiredConnectionStatus.connected);
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
@@ -126,7 +124,7 @@ export class HubConnection<THub> {
 		if (data) {
 			this.setData(data);
 		}
-
+		// todo: refactor this and use subject only instead
 		return emptyNext().pipe(
 			switchMap(() => this.internalConnStatus$.pipe(
 				tap(x => {
@@ -138,7 +136,7 @@ export class HubConnection<THub> {
 				first()
 			)),
 			switchMap(() => this.openConnection()),
-			tap(x => console.warn(">>>> connect - ready", x)),
+			// tap(x => console.warn(">>>> connect - ready", x)),
 		);
 	}
 
@@ -197,7 +195,6 @@ export class HubConnection<THub> {
 	}
 
 	dispose(): void {
-		console.warn(">> DISPOSE!", this.key);
 		this._disconnect();
 		this.desiredState$.complete();
 		this._connectionState$.complete();
@@ -206,7 +203,7 @@ export class HubConnection<THub> {
 	}
 
 	private _disconnect(): Observable<void> {
-		console.info("triggered _disconnect", this.internalConnStatus$.value);
+		// console.info("triggered _disconnect", this.internalConnStatus$.value);
 		return this.internalConnStatus$.value === InternalConnectionStatus.connected
 			? fromPromise(this.hubConnection.stop())
 			: emptyNext();
@@ -227,11 +224,11 @@ export class HubConnection<THub> {
 	}
 
 	private openConnection() {
-		console.info("triggered openConnection");
+		// console.info("triggered openConnection");
 		return emptyNext().pipe(
-			tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
+			// tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			switchMap(() => fromPromise(this.hubConnection.start())),
-			tap(x => console.warn(">>>> openConnection - connection established", x)),
+			// tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen(errors => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
 				delayWhen((retryCount: number) => {
@@ -239,20 +236,21 @@ export class HubConnection<THub> {
 						return throwError(new Error(errorCodes.retryLimitsReached));
 					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
-					console.warn(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
+					// tslint:disable-next-line:no-console
+					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
 					this._connectionState$.next({
 						status: ConnectionStatus.connecting,
 						reason: "reconnecting",
 						data: { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs }
 					});
+					// todo: refactor with subject instead e.g.
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
-					// todo: refactor with reconnect$ subject
+
 					return timer(nextRetryMs);
 				})
 			)),
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
-			tap(x => console.warn(">>>> openConnection - state update", x)),
 			takeUntil(this.untilDesiredDisconnects$()),
 
 		);
