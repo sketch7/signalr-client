@@ -6,6 +6,7 @@ import { HubConnection } from "./hub-connection";
 
 import * as signalr from "@aspnet/signalr";
 
+// tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - dispose Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;

@@ -12,6 +12,7 @@ function promiseDelayReject(ms: number, reason?: any) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
 }
 
+// tslint:disable: no-consecutive-blank-lines
 describe("HubConnection Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;

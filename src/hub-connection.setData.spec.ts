@@ -8,6 +8,7 @@ import { ConnectionStatus } from "./hub-connection.model";
 
 import * as signalr from "@aspnet/signalr";
 
+// tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - setData Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;
@@ -42,6 +43,7 @@ describe("HubConnection - setData Specs", () => {
 
 
 		describe("when data changes", () => {
+
 
 
 
@@ -82,9 +84,7 @@ describe("HubConnection - setData Specs", () => {
 				SUT.setData(() => ({ ...data }));
 				SUT.connectionState$.pipe(
 					first(),
-					tap(x => console.info("[spec] PRE connectionState #1", x)),
 					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-					tap(x => console.info("[spec] PRE connectionState #2", x)),
 				).subscribe({
 					complete: () => {
 						hubStartSpy.mockClear();
