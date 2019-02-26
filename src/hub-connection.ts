@@ -141,7 +141,7 @@ export class HubConnection<THub> {
 	}
 
 	disconnect(): Observable<void> {
-		console.info("triggered disconnect");
+		// console.info("triggered disconnect");
 		this.desiredState$.next(DesiredConnectionStatus.disconnected);
 		return this.untilDisconnects$();
 	}
@@ -195,7 +195,7 @@ export class HubConnection<THub> {
 	}
 
 	dispose(): void {
-		this._disconnect();
+		this.disconnect();
 		this.desiredState$.complete();
 		this._connectionState$.complete();
 		this.internalConnStatus$.complete();
