@@ -24,6 +24,7 @@ describe("HubConnection - setData Specs", () => {
 	});
 
 	afterEach(() => {
+		SUT.dispose();
 		conn$$.unsubscribe();
 	});
 

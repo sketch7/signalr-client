@@ -88,15 +88,21 @@ export class HubConnection<THub> {
 			filter(status => status === DesiredConnectionStatus.disconnected),
 			tap(status => console.warn(">>>> disconnected$", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			tap(() => {
-				if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
-					this._disconnect();
-				} else if (this.internalConnStatus$.value === InternalConnectionStatus.ready) {
-					this._connectionState$.next(disconnectedState);
+				switch (this.internalConnStatus$.value) {
+					case InternalConnectionStatus.connected:
+						this._disconnect();
+						break;
+					case InternalConnectionStatus.ready:
+						this._connectionState$.next(disconnectedState);
+						break;
+					// default:
+					// 	console.error("desiredDisconnected$ - State unhandled", this.internalConnStatus$.value);
+					// 	break;
 				}
 			})
 		);
 
-		const autoReconnectOnDisconnect = this._connectionState$.pipe(
+		const reconnectOnDisconnect = this._connectionState$.pipe(
 			tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
 			tap(x => console.warn(">>>> reconnecting...", x)),
@@ -105,7 +111,7 @@ export class HubConnection<THub> {
 
 		this.effects$$ = merge(
 			desiredDisconnected$,
-			autoReconnectOnDisconnect,
+			reconnectOnDisconnect,
 			connection$
 		).subscribe();
 	}
@@ -191,6 +197,7 @@ export class HubConnection<THub> {
 	}
 
 	dispose(): void {
+		console.warn(">> DISPOSE!", this.key);
 		this._disconnect();
 		this.desiredState$.complete();
 		this._connectionState$.complete();
@@ -223,7 +230,7 @@ export class HubConnection<THub> {
 		console.info("triggered openConnection");
 		return emptyNext().pipe(
 			tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
-			switchMap(() => fromPromise(this.hubConnection.start())), // todo: handle when desired disconnect
+			switchMap(() => fromPromise(this.hubConnection.start())),
 			tap(x => console.warn(">>>> openConnection - connection established", x)),
 			retryWhen(errors => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
@@ -232,7 +239,6 @@ export class HubConnection<THub> {
 						return throwError(new Error(errorCodes.retryLimitsReached));
 					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
-					// tslint:disable-next-line:no-console
 					console.warn(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
 					this._connectionState$.next({
 						status: ConnectionStatus.connecting,

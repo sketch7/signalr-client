@@ -4,6 +4,7 @@
 
 - **hub connection:** connect now will throw error after being exhausted
 - **hub connection:** add `dispose` which will complete all subscriptions
+- **hub connection:** when retry limit reached now throws error
 
 ### Bug Fixes
 

@@ -37,6 +37,7 @@ describe("HubConnection Specs", () => {
 			});
 
 			afterEach(() => {
+				// SUT.dispose(); // todo: find why this is failing tests
 				conn$$.unsubscribe();
 			});
 
