@@ -7,7 +7,10 @@ import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@aspnet/signalr";
-function delayPromise(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+function promiseDelayResolve(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+function promiseDelayReject(ms: number, reason?: any) {
+	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
+}
 
 describe("HubConnection Specs", () => {
 
@@ -59,34 +62,71 @@ describe("HubConnection Specs", () => {
 				describe("and while connecting disconnect was invoked", () => {
 
 					beforeEach(() => {
-						hubBackend.connection.start = jest.fn().mockReturnValue(delayPromise(5));
+						hubBackend.connection.start = jest.fn().mockReturnValue(promiseDelayResolve(5));
 					});
 
 
-					it("should have status disconnected", done => {
-						console.warn(">>>> START");
+					describe("and connects successfully", () => {
 
-						const connect$ = SUT.connect();
-						const state$ = SUT.connectionState$.pipe(
-							first(),
-							tap(x => console.warn(">>>> [spec] disconnect", x)),
-							switchMap(() => SUT.disconnect()),
-							tap(x => console.warn(">>>> [spec] disconnected", x)),
-							delay(2), // ensure start is in flight
-							withLatestFrom(SUT.connectionState$, (_x, y) => y),
-							tap(x => console.warn(">>>> [spec] after delay", x)),
-							tap(state => {
-								expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
-								expect(state.status).toBe(ConnectionStatus.disconnected);
-								done();
-							})
-						);
-						conn$$ = merge(connect$, state$).subscribe();
+
+
+						it("should have status disconnected", done => {
+							const connect$ = SUT.connect();
+							const state$ = SUT.connectionState$.pipe(
+								first(),
+								switchMap(() => SUT.disconnect()),
+								delay(2), // ensure start is in flight
+								withLatestFrom(SUT.connectionState$, (_x, y) => y),
+								tap(state => {
+									expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+									expect(state.status).toBe(ConnectionStatus.disconnected);
+									done();
+								})
+							);
+							conn$$ = merge(connect$, state$).subscribe();
+						});
+
+
+
+					});
+
+
+
+					describe("and connect fails", () => {
+
+						beforeEach(() => {
+							hubBackend.connection.start = jest.fn().mockReturnValue(promiseDelayReject(5));
+						});
+
+
+						it("should have status disconnected", done => {
+							const connect$ = SUT.connect();
+							const state$ = SUT.connectionState$.pipe(
+								first(),
+								tap(x => console.warn(">>>> [spec] disconnect", x)),
+								delay(2), // wait first try
+								switchMap(() => SUT.disconnect()),
+								tap(x => console.warn(">>>> [spec] disconnected", x)),
+								delay(50), // ensure there are no pending connects
+								withLatestFrom(SUT.connectionState$, (_x, y) => y),
+								tap(x => console.warn(">>>> [spec] after delay", x)),
+								tap(state => {
+									expect(state.status).toBe(ConnectionStatus.disconnected);
+									expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+									done();
+								})
+							);
+							conn$$ = merge(connect$, state$).subscribe();
+						});
+
+
+
 					});
 
 
 
 				});
+
 
 
 
@@ -109,6 +149,8 @@ describe("HubConnection Specs", () => {
 						);
 						conn$$ = merge(connect$, state$).subscribe();
 					});
+
+
 
 					it("should emit error when retry attempts limit reached", done => {
 						// todo: try and use scheduler
