@@ -3,6 +3,7 @@
 ### Features
 
 - **hub connection:** connect now will throw error after being exhausted
+- **hub connection:** add `dispose` which will complete all subscriptions
 
 ### Bug Fixes
 

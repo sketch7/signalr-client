@@ -6,7 +6,7 @@ import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
-import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError } from "rxjs";
+import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError, Subscription, merge } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -33,9 +33,10 @@ export class HubConnection<THub> {
 	private retry: ReconnectionStrategyOptions;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
-	private _desiredState$ = new BehaviorSubject<DesiredConnectionStatus>(DesiredConnectionStatus.disconnected);
+	private desiredState$ = new BehaviorSubject<DesiredConnectionStatus>(DesiredConnectionStatus.disconnected);
 	private internalConnStatus$ = new BehaviorSubject<InternalConnectionStatus>(InternalConnectionStatus.disconnected);
 	private connectionBuilder = new SignalRHubConnectionBuilder();
+	private effects$$ = Subscription.EMPTY;
 
 	private waitUntilConnect$ = this.connectionState$.pipe(
 		distinctUntilChanged((x, y) => x.status === y.status),
@@ -83,7 +84,7 @@ export class HubConnection<THub> {
 				switchMap(() => this.openConnection())
 			))
 		);
-		const desiredDisconnected$ = this._desiredState$.pipe(
+		const desiredDisconnected$ = this.desiredState$.pipe(
 			filter(status => status === DesiredConnectionStatus.disconnected),
 			tap(status => console.warn(">>>> disconnected$", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			tap(() => {
@@ -102,14 +103,16 @@ export class HubConnection<THub> {
 			switchMap(() => this.connect())
 		);
 
-		desiredDisconnected$.subscribe(); // todo: should we merge these?
-		autoReconnectOnDisconnect.subscribe();
-		connection$.subscribe();
+		this.effects$$ = merge(
+			desiredDisconnected$,
+			autoReconnectOnDisconnect,
+			connection$
+		).subscribe();
 	}
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
 		console.info("triggered connect", data);
-		this._desiredState$.next(DesiredConnectionStatus.connected);
+		this.desiredState$.next(DesiredConnectionStatus.connected);
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
 			return emptyNext();
@@ -135,7 +138,7 @@ export class HubConnection<THub> {
 
 	disconnect(): Observable<void> {
 		console.info("triggered disconnect");
-		this._desiredState$.next(DesiredConnectionStatus.disconnected);
+		this.desiredState$.next(DesiredConnectionStatus.disconnected);
 		return this.untilDisconnects$();
 	}
 
@@ -188,7 +191,11 @@ export class HubConnection<THub> {
 	}
 
 	dispose(): void {
-		// todo: unsubscribe + complete observables
+		this._disconnect();
+		this.desiredState$.complete();
+		this._connectionState$.complete();
+		this.internalConnStatus$.complete();
+		this.effects$$.unsubscribe();
 	}
 
 	private _disconnect(): Observable<void> {
@@ -206,7 +213,7 @@ export class HubConnection<THub> {
 	}
 
 	private untilDesiredDisconnects$() {
-		return this._desiredState$.pipe(
+		return this.desiredState$.pipe(
 			first(state => state === DesiredConnectionStatus.disconnected),
 			mapTo(undefined),
 		);
