@@ -1,16 +1,16 @@
 import {
-	tap, map, filter, switchMap, skipUntil, take, delay, first,
-	retryWhen, scan, delayWhen, defaultIfEmpty, distinctUntilChanged
+	tap, map, filter, switchMap, skipUntil, delay, first,
+	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
 } from "@aspnet/signalr";
-import { from as fromPromise, timer, BehaviorSubject, Observable, Observer } from "rxjs";
+import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError, Subscription, merge } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
-	ReconnectionStrategyOptions, InternalConnectionStatus
+	ReconnectionStrategyOptions, InternalConnectionStatus, errorCodes, DesiredConnectionStatus
 } from "./hub-connection.model";
 import { getReconnectionDelay } from "./reconnection-strategy";
 import { buildQueryString } from "./utils/query-string";
@@ -18,19 +18,25 @@ import { Dictionary } from "./utils/dictionary";
 import { emptyNext } from "./utils/rxjs";
 
 const errorReasonName = "error";
-const disconnectedState: ConnectionState = { status: ConnectionStatus.disconnected };
-const connectedState: ConnectionState = { status: ConnectionStatus.connected };
+const disconnectedState = Object.freeze<ConnectionState>({ status: ConnectionStatus.disconnected });
+const connectedState = Object.freeze<ConnectionState>({ status: ConnectionStatus.connected });
 
+// todo: rename HubClient?
 export class HubConnection<THub> {
 
 	get connectionState$() { return this._connectionState$.asObservable(); }
+	get key(): string { return this._key; }
 
+	private _key: string;
 	private source: string;
 	private hubConnection!: SignalRHubConnection;
 	private retry: ReconnectionStrategyOptions;
 	private hubConnectionOptions$: BehaviorSubject<HubConnectionOptions>;
 	private _connectionState$ = new BehaviorSubject<ConnectionState>(disconnectedState);
+	private desiredState$ = new BehaviorSubject<DesiredConnectionStatus>(DesiredConnectionStatus.disconnected);
 	private internalConnStatus$ = new BehaviorSubject<InternalConnectionStatus>(InternalConnectionStatus.disconnected);
+	private connectionBuilder = new SignalRHubConnectionBuilder();
+	private effects$$ = Subscription.EMPTY;
 
 	private waitUntilConnect$ = this.connectionState$.pipe(
 		distinctUntilChanged((x, y) => x.status === y.status),
@@ -38,6 +44,7 @@ export class HubConnection<THub> {
 	);
 
 	constructor(connectionOption: HubConnectionOptions) {
+		this._key = connectionOption.key;
 		this.source = `[${connectionOption.key}] HubConnection ::`;
 
 		this.retry = connectionOption.options && connectionOption.options.retry ? connectionOption.options.retry : {};
@@ -45,46 +52,71 @@ export class HubConnection<THub> {
 
 		const connection$ = this.hubConnectionOptions$.pipe(
 			map(connectionOpts => [connectionOpts, this.internalConnStatus$.value] as [HubConnectionOptions, InternalConnectionStatus]),
-			switchMap(([connectionOpts, prevConnectionStatus]) => this.disconnect().pipe(
-				map(() => {
-					let data: Dictionary<string> = {};
-					if (connectionOpts.defaultData) {
-						data = connectionOpts.defaultData();
-					}
-					if (connectionOpts.data) {
-						const specificData = connectionOpts.data();
-						data = { ...data, ...specificData };
-					}
-					return data;
-				}),
+			switchMap(([connectionOpts, prevConnectionStatus]) => this._disconnect().pipe(
+				map(() => this.mergeConnectionData(connectionOpts)),
 				map(buildQueryString),
 				tap(queryString => {
-					let connectionBuilder = new SignalRHubConnectionBuilder()
-						.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options as any); // hack since signalr typings are incorrect.
+					this.connectionBuilder.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options!);
 
 					if (connectionOpts.protocol) {
-						connectionBuilder = connectionBuilder.withHubProtocol(connectionOpts.protocol);
+						this.connectionBuilder = this.connectionBuilder.withHubProtocol(connectionOpts.protocol);
 					}
-
-					this.hubConnection = connectionBuilder.build();
-				}
-				),
+					this.hubConnection = this.connectionBuilder.build();
+					this.hubConnection.onclose(err => {
+						this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
+						if (err) {
+							console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
+							this._connectionState$.next({
+								status: ConnectionStatus.disconnected,
+								reason: errorReasonName,
+								data: { name: err.name, message: err.message }
+							});
+						} else {
+							console.warn(`${this.source} session disconnected`);
+							this._connectionState$.next(disconnectedState);
+						}
+					});
+				}),
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
 				switchMap(() => this.openConnection())
 			))
 		);
+		const desiredDisconnected$ = this.desiredState$.pipe(
+			filter(status => status === DesiredConnectionStatus.disconnected),
+			// tap(status => console.warn(">>>> disconnected$", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
+			tap(() => {
+				switch (this.internalConnStatus$.value) {
+					case InternalConnectionStatus.connected:
+						this._disconnect();
+						break;
+					case InternalConnectionStatus.ready:
+						this._connectionState$.next(disconnectedState);
+						break;
+					// default:
+					// 	console.error("desiredDisconnected$ - State unhandled", this.internalConnStatus$.value);
+					// 	break;
+				}
+			})
+		);
 
-		const reconnect$ = this._connectionState$.pipe(
+		const reconnectOnDisconnect = this._connectionState$.pipe(
+			// tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+			// tap(x => console.warn(">>>> reconnecting...", x)),
 			switchMap(() => this.connect())
 		);
 
-		reconnect$.subscribe();
-		connection$.subscribe();
+		this.effects$$ = merge(
+			desiredDisconnected$,
+			reconnectOnDisconnect,
+			connection$
+		).subscribe();
 	}
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
+		// console.info("triggered connect", data);
+		this.desiredState$.next(DesiredConnectionStatus.connected);
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
 			return emptyNext();
@@ -92,7 +124,7 @@ export class HubConnection<THub> {
 		if (data) {
 			this.setData(data);
 		}
-
+		// todo: refactor this and use subject only instead
 		return emptyNext().pipe(
 			switchMap(() => this.internalConnStatus$.pipe(
 				tap(x => {
@@ -103,13 +135,20 @@ export class HubConnection<THub> {
 				skipUntil(this.internalConnStatus$.pipe(filter(x => x === InternalConnectionStatus.ready))),
 				first()
 			)),
-			switchMap(() => this.openConnection())
+			switchMap(() => this.openConnection()),
+			// tap(x => console.warn(">>>> connect - ready", x)),
 		);
 	}
 
-	setData(data: () => Dictionary<string>) {
+	disconnect(): Observable<void> {
+		// console.info("triggered disconnect");
+		this.desiredState$.next(DesiredConnectionStatus.disconnected);
+		return this.untilDisconnects$();
+	}
+
+	setData(getData: () => Dictionary<string>) {
 		const connection = this.hubConnectionOptions$.value;
-		connection.data = data;
+		connection.getData = getData;
 		this.hubConnectionOptions$.next(connection);
 	}
 
@@ -155,21 +194,47 @@ export class HubConnection<THub> {
 		return fromPromise<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
-	disconnect() {
-		if (this.internalConnStatus$.value !== InternalConnectionStatus.connected) {
-			return emptyNext();
-		}
+	dispose(): void {
+		this.disconnect();
+		this.desiredState$.complete();
+		this._connectionState$.complete();
+		this.internalConnStatus$.complete();
+		this.effects$$.unsubscribe();
+	}
 
-		return fromPromise(this.hubConnection.stop());
+	private _disconnect(): Observable<void> {
+		// console.info("triggered _disconnect", this.internalConnStatus$.value);
+		return this.internalConnStatus$.value === InternalConnectionStatus.connected
+			? fromPromise(this.hubConnection.stop())
+			: emptyNext();
+	}
+
+	private untilDisconnects$(): Observable<void> {
+		return this.connectionState$.pipe(
+			first(state => state.status !== ConnectionStatus.connected),
+			mapTo(undefined),
+		);
+	}
+
+	private untilDesiredDisconnects$() {
+		return this.desiredState$.pipe(
+			first(state => state === DesiredConnectionStatus.disconnected),
+			mapTo(undefined),
+		);
 	}
 
 	private openConnection() {
+		// console.info("triggered openConnection");
 		return emptyNext().pipe(
+			// tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			switchMap(() => fromPromise(this.hubConnection.start())),
-			retryWhen((errors: Observable<any>) => errors.pipe(
+			// tap(x => console.warn(">>>> openConnection - connection established", x)),
+			retryWhen(errors => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
-				this.retry.maximumAttempts ? take(this.retry.maximumAttempts) : defaultIfEmpty(),
 				delayWhen((retryCount: number) => {
+					if (this.retry.maximumAttempts && retryCount > this.retry.maximumAttempts) {
+						return throwError(new Error(errorCodes.retryLimitsReached));
+					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
 					// tslint:disable-next-line:no-console
 					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
@@ -178,29 +243,16 @@ export class HubConnection<THub> {
 						reason: "reconnecting",
 						data: { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs }
 					});
+					// todo: refactor with subject instead e.g.
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
+
 					return timer(nextRetryMs);
 				})
 			)),
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
-			tap(() => {
-				this.hubConnection.onclose(err => {
-					this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
-					if (err) {
-						console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
-						this._connectionState$.next({
-							status: ConnectionStatus.disconnected,
-							reason: errorReasonName,
-							data: { name: err.name, message: err.message }
-						});
-					} else {
-						console.warn(`${this.source} session disconnected`);
-						this._connectionState$.next(disconnectedState);
-					}
-				});
-			}),
-			first()
+			takeUntil(this.untilDesiredDisconnects$()),
+
 		);
 	}
 
@@ -213,6 +265,18 @@ export class HubConnection<THub> {
 				))
 			))
 		);
+	}
+
+	private mergeConnectionData(options: HubConnectionOptions): Dictionary<string> {
+		let data: Dictionary<string> = {};
+		if (options.defaultData) {
+			data = options.defaultData();
+		}
+		if (options.getData) {
+			const specificData = options.getData();
+			data = { ...data, ...specificData };
+		}
+		return data;
 	}
 
 }

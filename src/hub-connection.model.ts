@@ -2,16 +2,25 @@ import { IHttpConnectionOptions, IHubProtocol } from "@aspnet/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 
+export const errorCodes = {
+	retryLimitsReached: "error.retry-limits-reached"
+};
+
+export enum DesiredConnectionStatus {
+	disconnected = "disconnected",
+	connected = "connected"
+}
+
 export enum ConnectionStatus {
-	disconnected,
-	connecting,
-	connected
+	disconnected = "disconnected",
+	connecting = "connecting",
+	connected = "connected"
 }
 
 export enum InternalConnectionStatus {
-	disconnected,
-	ready,
-	connected
+	disconnected = "disconnected",
+	ready = "ready",
+	connected = "connected"
 }
 
 export interface ConnectionState {
@@ -24,9 +33,10 @@ export interface HubConnectionOptions {
 	key: string;
 	endpointUri: string;
 	options?: ConnectionOptions;
+	// todo: rename to getDefaultData or defaultDataFactory () => Dictionary<string> | Promise<Dictionary<string>>
 	defaultData?: () => Dictionary<string>;
 	/** @internal */
-	data?: () => Dictionary<string>;
+	getData?: () => Dictionary<string>;
 	protocol?: IHubProtocol;
 }
 

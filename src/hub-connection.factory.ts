@@ -41,7 +41,7 @@ export class HubConnectionFactory {
 	remove(key: string) {
 		const hub = this.hubConnections[key];
 		if (hub) {
-			hub.disconnect();
+			hub.dispose();
 			delete this.hubConnections[key];
 		}
 	}

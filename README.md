@@ -1,5 +1,4 @@
 [projectUri]: https://github.com/sketch7/signalr-client
-[projectGit]: https://github.com/sketch7/signalr-client.git
 [changeLog]: ./CHANGELOG.md
 [developmentWorkflowWiki]: ./docs/DEVELOPMENT-WORKFLOW.md
 [apiWiki]: ./docs/API.md
@@ -41,8 +40,9 @@ SignalR client library built on top of **@aspnet/signalr**. This gives you more 
 ## Installation
 
 Get library via [npm]
+
 ```bash
-npm install @ssv/signalr-client --save
+npm install @ssv/signalr-client
 ```
 
 ## API Documentation
@@ -143,7 +143,7 @@ import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
 
 const hubFactory = new HubConnectionFactory();
 hubFactory.create(
-	{ key: "hero", endpointUri: "/hero" },  
+	{ key: "hero", endpointUri: "/hero" },
 	{ key: "user", endpointUri: "http://localhost:62551/real-time/user" }
 );
 ```

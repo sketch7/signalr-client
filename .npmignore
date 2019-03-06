@@ -31,6 +31,8 @@ tslint.json
 typings.json
 wallaby.js
 yarn.lock
+ng-package.json
+ng-package.js
 CODEOWNERS
 /tsconfig.json
 /tsconfig.build.json

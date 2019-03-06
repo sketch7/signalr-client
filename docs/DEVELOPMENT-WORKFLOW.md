@@ -1,11 +1,13 @@
+[releaseWorkflowWiki]: ./RELEASE-WORKFLOW.md
+
 ## Getting Started
 
 ### Setup Machine for Development
 Install/setup the following:
 
-- NodeJS v9+
+- NodeJS v10+
 - Visual Studio Code or similar code editor
-- TypeScript 2.6+
+- TypeScript 3.1+
 - Git + SourceTree, SmartGit or similar (optional)
 - Ensure to install **global NPM modules** using the following:
 
@@ -13,11 +15,6 @@ Install/setup the following:
 ```bash
 npm install -g git gulp
 ```
-
-
-#### Cloning Repo
-
-- Run `git clone https://github.com/sketch7/signalr-client.git`
 
 
 ### Project Setup
@@ -33,7 +30,6 @@ npm install
 ```bash
 npm run build
 ```
-In order to view all other tasks invoke `gulp` or check the gulp tasks directly.
 
 ### Running the tests
 
@@ -41,10 +37,7 @@ In order to view all other tasks invoke `gulp` or check the gulp tasks directly.
 npm test
 ```
 
-
-### Development utils
-
-#### Trigger gulp watch
+#### Watch
 Handles compiling of changes.
 
 ```bash
@@ -62,9 +55,8 @@ npm run tdd
 
 ### Preparation for Release
 
-In order to release follow the following procedure.
+- Update changelogs
+- bump version
 
- - Create branch e.g. `feature/xyz`.. *onces changes are ready...*
- - Run `npm run prepare-release -- --bump major|minor|patch|prerelease (default: patch)`
- - Create a PR from `feature/xyz` to `master`
- - Once merged it will auto `npm publish` and `git tag`
+
+Check out the [release workflow guide][releaseWorkflowWiki] in order to guide you creating a release and publishing it.
