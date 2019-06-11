@@ -29,17 +29,20 @@ jobs:
       - run:
           name: Test
           command: npm test -- --ci --runInBand --passWithNoTests
-      - deploy:
-          name: Publish NPM
+      - run:
+          name: Check if branch is publishable
           command: |
             if [ "$CIRCLE_BRANCH" != "master" ]; then
               echo -e "\e[33m Branch does not publish -- exit!"
-              exit
+              circleci step halt
             fi
+      - deploy:
+          name: Publish NPM
+          command: |
             . ./.circleci/utils.sh
-           
+
             PACKAGE_VERSION=$(node -p "require('./package.json').version")
-            
+
             print_title "publish..."
             npm run publish:rel
 
