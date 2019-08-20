@@ -1,3 +1,13 @@
+## [1.1.1](https://github.com/sketch7/signalr-client/compare/1.1.0...1.1.1) (2019-06-11)
+
+### Chore
+
+*No new fixes/features in this release*
+
+- **deps:** update dev dependencies
+- **ci:** update node version
+
+
 ## [1.1.0](https://github.com/sketch7/signalr-client/compare/1.0.0...1.1.0) (2019-03-06)
 
 ### Features
