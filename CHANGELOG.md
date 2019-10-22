@@ -1,3 +1,9 @@
+## [1.1.2](https://github.com/sketch7/signalr-client/compare/1.1.1...1.1.2) (2019-10-22)
+
+### Bug Fixes
+
+- **build:** fix rel build to be correctly as `rel`
+
 ## [1.1.1](https://github.com/sketch7/signalr-client/compare/1.1.0...1.1.1) (2019-06-11)
 
 ### Chore
