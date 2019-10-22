@@ -6,7 +6,7 @@ import { createSUT, HeroHub } from "./testing/hub-connection.util";
 import { HubConnection } from "./hub-connection";
 import { ConnectionStatus } from "./hub-connection.model";
 
-import * as signalr from "@aspnet/signalr";
+import * as signalr from "@microsoft/signalr";
 
 // tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - setData Specs", () => {

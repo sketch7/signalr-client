@@ -6,7 +6,7 @@ import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
-import * as signalr from "@aspnet/signalr";
+import * as signalr from "@microsoft/signalr";
 function promiseDelayResolve(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 function promiseDelayReject(ms: number, reason?: any) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));

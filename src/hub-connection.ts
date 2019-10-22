@@ -5,7 +5,7 @@ import {
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder
-} from "@aspnet/signalr";
+} from "@microsoft/signalr";
 import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError, Subscription, merge } from "rxjs";
 
 import {
