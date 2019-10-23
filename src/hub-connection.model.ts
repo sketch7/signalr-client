@@ -1,4 +1,4 @@
-import { IHttpConnectionOptions, IHubProtocol } from "@aspnet/signalr";
+import { IHttpConnectionOptions, IHubProtocol } from "@microsoft/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 

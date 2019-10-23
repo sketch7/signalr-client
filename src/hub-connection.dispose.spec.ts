@@ -4,7 +4,7 @@ import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testin
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
 import { HubConnection } from "./hub-connection";
 
-import * as signalr from "@aspnet/signalr";
+import * as signalr from "@microsoft/signalr";
 
 // tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - dispose Specs", () => {

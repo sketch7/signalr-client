@@ -1,4 +1,4 @@
-import { HttpTransportType } from "@aspnet/signalr";
+import { HttpTransportType } from "@microsoft/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 import { HubConnectionOptions } from "./hub-connection.model";

@@ -1,7 +1,7 @@
 import { HubConnection } from "../hub-connection";
 
-jest.genMockFromModule("@aspnet/signalr");
-jest.mock("@aspnet/signalr");
+jest.genMockFromModule("@microsoft/signalr");
+jest.mock("@microsoft/signalr");
 
 let nextUniqueId = 0;
 
