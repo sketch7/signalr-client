@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/sketch7/signalr-client/compare/2.0.0...2.1.0) (2020-07-15)
+
+### Features
+
+- **deps:** update `@microsoft/signalr` from `v3.0.0` to `v3.1.6`
+- **deps:** update dev dependencies
+
 ## [2.0.0](https://github.com/sketch7/signalr-client/compare/1.1.2...2.0.0) (2019-10-22)
 
 ### Features
@@ -30,7 +37,7 @@
 
 ### Bug Fixes
 
-- **hub connection:** when connecting and fails, during retring if `disconnect` is triggered was being ignored and will keep connecting
+- **hub connection:** when connecting and fails, during retrying if `disconnect` is triggered was being ignored and will keep connecting
 
 
 ## [1.0.1](https://github.com/sketch7/signalr-client/compare/1.0.0...1.0.1) (2019-02-05)
