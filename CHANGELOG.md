@@ -1,3 +1,14 @@
+## [3.0.0-rc1](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-29)
+
+### Features
+
+- **signalr:** update from `@microsoft/signalr v3.0.0` to `@microsoft/signalr v5.0.5`
+
+### Chore
+
+- **deps:** update dev dependencies
+- **ci:** update node version
+
 ## [2.0.0](https://github.com/sketch7/signalr-client/compare/1.1.2...2.0.0) (2019-10-22)
 
 ### Features
