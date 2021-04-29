@@ -2,6 +2,10 @@
 In order to release follow the following procedure.
 
  - Create branch e.g. `feature/xyz`.. *onces changes are ready...*
- - Run `npm run prepare-release -- --bump major|minor|patch|prerelease (default: patch)`
  - Create a PR from `feature/xyz` to `master`
- - Once merged it will auto `npm publish` and `git tag`
+
+## Stable Versions
+ - Create PR to version branch e.g. `3.x`
+ - Update version within `package.json`
+ - Update `CHANGELOG.md`
+ - Once merged it will auto `publish` and `git tag`
