@@ -5,7 +5,6 @@ const args = require("../args");
 const config = require("../config");
 
 require("./clean");
-require("./lint");
 
 ssvTools.registerGulpMultiTargetBuilds({
 	taskName: "ts",
