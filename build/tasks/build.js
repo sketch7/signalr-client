@@ -34,6 +34,11 @@ gulp.task("rebuild", gulp.series("clean", "build"))
 
 gulp.task("ci", gulp.series("rebuild", "compile:test"));
 
+gulp.task("compile:test", () => ssvTools.compileTsc({
+	module: "es2015",
+	configPath: "./tsconfig.test.json",
+	continueOnError: args.continueOnError
+}));
 
 // scripts - compile:ts | compile:ts:dev | compile:ts:TARGET
 function compileTs(target) {
