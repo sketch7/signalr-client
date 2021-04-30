@@ -9,7 +9,7 @@ export interface HeroHub {
 	UpdateHero: string;
 }
 
-export function createSUT() {
+export function createSUT(): HubConnection<HeroHub> {
 	return new HubConnection<HeroHub>({
 		key: `hero-${nextUniqueId++}`,
 		endpointUri: "/hero",

@@ -1,6 +1,6 @@
 import { Dictionary } from "./dictionary";
 
-export function buildQueryString(data: Dictionary<string> | undefined) {
+export function buildQueryString(data: Dictionary<string> | undefined): string {
 	let queryString = "";
 	if (!data) {
 		return queryString;

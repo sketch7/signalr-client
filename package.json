@@ -23,7 +23,7 @@
     "start": "gulp watch",
     "build": "gulp build",
     "clean": "gulp clean",
-    "lint": "gulp lint",
+    "lint": "eslint -c .eslintrc.js --ext .ts \"src/**/*.ts\"",
     "test": "jest",
     "tdd": "jest --watch",
     "test-debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --env jest-environment-node-debug",

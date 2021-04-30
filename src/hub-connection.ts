@@ -24,7 +24,7 @@ const connectedState = Object.freeze<ConnectionState>({ status: ConnectionStatus
 // todo: rename HubClient?
 export class HubConnection<THub> {
 
-	get connectionState$() { return this._connectionState$.asObservable(); }
+	get connectionState$(): Observable<ConnectionState> { return this._connectionState$.asObservable(); }
 	get key(): string { return this._key; }
 
 	private _key: string;
@@ -56,6 +56,7 @@ export class HubConnection<THub> {
 				map(() => this.mergeConnectionData(connectionOpts)),
 				map(buildQueryString),
 				tap(queryString => {
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					this.connectionBuilder.withUrl(`${connectionOpts.endpointUri}${queryString}`, connectionOpts.options!);
 
 					if (connectionOpts.protocol) {
@@ -146,14 +147,14 @@ export class HubConnection<THub> {
 		return this.untilDisconnects$();
 	}
 
-	setData(getData: () => Dictionary<string>) {
+	setData(getData: () => Dictionary<string>): void {
 		const connection = this.hubConnectionOptions$.value;
 		connection.getData = getData;
 		this.hubConnectionOptions$.next(connection);
 	}
 
 	on<TResult>(methodName: keyof THub): Observable<TResult> {
-		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
+		const stream$: Observable<TResult> = new Observable((observer: Observer<TResult>): (() => void) | void => {
 			const updateEvent = (latestValue: TResult) => observer.next(latestValue);
 			this.hubConnection.on(methodName.toString(), updateEvent);
 			return () => this.hubConnection.off(methodName.toString(), updateEvent);
@@ -162,8 +163,8 @@ export class HubConnection<THub> {
 		return this.activateStreamWithRetry(stream$);
 	}
 
-	stream<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
-		const stream$: Observable<TResult> = Observable.create((observer: Observer<TResult>): (() => void) | void => {
+	stream<TResult>(methodName: keyof THub, ...args: unknown[]): Observable<TResult> {
+		const stream$: Observable<TResult> = new Observable((observer: Observer<TResult>): (() => void) | void => {
 			this.hubConnection.stream<TResult>(methodName.toString(), ...args).subscribe({
 				closed: false,
 				next: item => observer.next(item),
@@ -186,11 +187,11 @@ export class HubConnection<THub> {
 		return this.activateStreamWithRetry(stream$);
 	}
 
-	send(methodName: keyof THub | "StreamUnsubscribe", ...args: any[]): Observable<void> {
+	send(methodName: keyof THub | "StreamUnsubscribe", ...args: unknown[]): Observable<void> {
 		return fromPromise(this.hubConnection.send(methodName.toString(), ...args));
 	}
 
-	invoke<TResult>(methodName: keyof THub, ...args: any[]): Observable<TResult> {
+	invoke<TResult>(methodName: keyof THub, ...args: unknown[]): Observable<TResult> {
 		return fromPromise<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
@@ -259,7 +260,7 @@ export class HubConnection<THub> {
 	private activateStreamWithRetry<TResult>(stream$: Observable<TResult>): Observable<TResult> {
 		return this.waitUntilConnect$.pipe(
 			switchMap(() => stream$.pipe(
-				retryWhen((errors: Observable<any>) => errors.pipe(
+				retryWhen((errors: Observable<unknown>) => errors.pipe(
 					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
 					delayWhen(() => this.waitUntilConnect$)
 				))
