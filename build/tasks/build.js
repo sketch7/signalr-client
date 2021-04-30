@@ -5,13 +5,18 @@ const args = require("../args");
 const config = require("../config");
 
 require("./clean");
-require("./lint");
 
 ssvTools.registerGulpMultiTargetBuilds({
 	taskName: "ts",
 	action: compileTs,
 	config: config
 });
+
+gulp.task("compile:test", () => ssvTools.compileTsc({
+	module: "es2015",
+	configPath: "./tsconfig.test.json",
+	continueOnError: args.continueOnError
+}));
 
 gulp.task("bundle:ts", () => ssvTools.rollup({ continueOnError: args.continueOnError, useTypeScriptConfig: true }));
 gulp.task("build:resources", () => ssvTools.buildResources(config.output.dist));
@@ -34,7 +39,6 @@ gulp.task("build", args.isRelease
 gulp.task("rebuild", gulp.series("clean", "build"))
 
 gulp.task("ci", gulp.series("rebuild", "compile:test"));
-
 
 // scripts - compile:ts | compile:ts:dev | compile:ts:TARGET
 function compileTs(target) {

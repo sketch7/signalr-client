@@ -8,7 +8,7 @@ import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testin
 
 import * as signalr from "@microsoft/signalr";
 function promiseDelayResolve(ms: number) { return new Promise(r => setTimeout(r, ms)); }
-function promiseDelayReject(ms: number, reason?: any) {
+function promiseDelayReject(ms: number, reason?: unknown) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
 }
 

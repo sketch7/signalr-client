@@ -1,3 +1,21 @@
+## [3.0.0](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-30)
+
+### Features
+
+- **signalr:** update from `@microsoft/signalr v3.0.0` to `@microsoft/signalr v5.0.5`
+- **deps:** add dependency on `tslib: ^2.0.0`
+
+### Refactor
+
+- **lint:** fix all lint errors
+- **all:** remove rxjs deprecations
+
+### Chore
+
+- **deps:** update all dev dependencies
+- **ci:** update node version
+- **lint:** migrate from tslint to eslint
+
 ## [2.0.0](https://github.com/sketch7/signalr-client/compare/1.1.2...2.0.0) (2019-10-22)
 
 ### Features

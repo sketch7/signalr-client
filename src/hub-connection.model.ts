@@ -26,7 +26,7 @@ export enum InternalConnectionStatus {
 export interface ConnectionState {
 	status: ConnectionStatus;
 	reason?: string;
-	data?: any;
+	data?: unknown;
 }
 
 export interface HubConnectionOptions {

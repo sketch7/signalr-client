@@ -7,7 +7,7 @@ import { HubConnection } from "./hub-connection";
 export class HubConnectionFactory {
 
 	private source = "HubConnectionFactory ::";
-	private hubConnections: Dictionary<HubConnection<any>> = {};
+	private hubConnections: Dictionary<HubConnection<unknown>> = {};
 
 	create(...connectionOptions: HubConnectionOptions[]): this {
 		for (const connectionOption of connectionOptions) {
@@ -25,7 +25,7 @@ export class HubConnectionFactory {
 				connectionOption.options.transport = HttpTransportType.WebSockets;
 			}
 
-			this.hubConnections[connectionOption.key] = new HubConnection<any>(connectionOption);
+			this.hubConnections[connectionOption.key] = new HubConnection<unknown>(connectionOption);
 		}
 		return this;
 	}
@@ -38,7 +38,7 @@ export class HubConnectionFactory {
 		throw new Error(`${this.source} get :: connection key not found '${key}'`);
 	}
 
-	remove(key: string) {
+	remove(key: string): void {
 		const hub = this.hubConnections[key];
 		if (hub) {
 			hub.dispose();
@@ -46,7 +46,7 @@ export class HubConnectionFactory {
 		}
 	}
 
-	connectAll() {
+	connectAll(): void {
 		// tslint:disable-next-line:forin
 		for (const hubKey in this.hubConnections) {
 			const hub = this.hubConnections[hubKey];
@@ -54,7 +54,7 @@ export class HubConnectionFactory {
 		}
 	}
 
-	disconnectAll() {
+	disconnectAll(): void {
 		// tslint:disable-next-line:forin
 		for (const hubKey in this.hubConnections) {
 			const hub = this.hubConnections[hubKey];

@@ -7,14 +7,14 @@ export class MockSignalRHubBackend {
 	) {
 	}
 
-	disconnect(err?: Error | undefined) {
+	disconnect(err?: Error | undefined): void {
 		console.warn("[backend] trigger disconnect", err ? err.message : undefined);
 		if (this._onclose) {
 			this._onclose(err);
 		}
 	}
 
-	registerOnclose(cb: (err?: Error) => void) {
+	registerOnclose(cb: (err?: Error) => void): void {
 		this._onclose = cb; // todo: handle multi
 	}
 }
