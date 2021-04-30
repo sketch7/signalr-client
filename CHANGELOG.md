@@ -1,4 +1,4 @@
-## [3.0.0-rc1](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-29)
+## [3.0.0](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-30)
 
 ### Features
 
