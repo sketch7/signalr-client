@@ -32,9 +32,9 @@ SignalR client library built on top of **@aspnet/signalr**. This gives you more 
 * Designed to be straight forward integrated with **any framework** such as *[Angular](#angular-adapter)*, *Aurelia*, *React*, *Vue*, etc...
 
 ## Samples
-* Real world example (***coming soon***):
+* Real world example [(***Orleans Heroes***)](https://github.com/sketch7/orleans-heroes):
     * Client: Angular
-    * Server: Microsoft Orleans integrated with SignalR
+    * Server: Microsoft Orleans integrated with [Sketch7 SignalR](https://github.com/sketch7/SignalR.Orleans)
 * [Angular basic example](#angular-basic-example)
 
 ## Installation
