@@ -3,7 +3,7 @@
 ### Features
 
 - **signalr:** update from `@microsoft/signalr v3.0.0` to `@microsoft/signalr v5.0.5`
-- **deps:** add dependency on `tslib: ^2.0.0`
+- **deps:** add dependency on `tslib: ^2.1.0`
 
 ### Refactor
 

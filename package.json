@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@microsoft/signalr": "~5.0.5",
-    "tslib": "^2.0.0"
+    "tslib": "^2.1.0"
   },
   "peerDependencies": {
     "rxjs": "^6.6.0"
