@@ -1,3 +1,10 @@
+## [4.0.0](https://github.com/sketch7/signalr-client/compare/3.0.0...4.0.0) (2022-03-11)
+
+### Features
+
+- **signalr:** update from `@microsoft/signalr v5.0.5` to `@microsoft/signalr v6.0.3`
+- **deps:** add dependency on `tslib: ^2.1.0`
+
 ## [3.0.0](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-30)
 
 ### Features
