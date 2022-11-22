@@ -7,6 +7,7 @@
 ### Bug Fixes
 
 - **hub connection:** correctly close the websocket connection when `disconnect` is called right after `connect`
+- **hub connection:** `connectionState$` `connecting` will also be set when connecting not only when reconnecting
 
 ## [3.0.0](https://github.com/sketch7/signalr-client/compare/2.0.0...3.0.0) (2021-04-30)
 
