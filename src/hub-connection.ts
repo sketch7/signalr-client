@@ -1,12 +1,12 @@
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil, finalize
+	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil, finalize, catchError
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder,
 } from "@microsoft/signalr";
-import { from as fromPromise, BehaviorSubject, Observable, Observer, timer, throwError, Subscription, merge, EMPTY } from "rxjs";
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, NEVER, Subject } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -38,7 +38,7 @@ export class HubConnection<THub> {
 	private desiredState$ = new BehaviorSubject<DesiredConnectionStatus>(DesiredConnectionStatus.disconnected);
 	private internalConnStatus$ = new BehaviorSubject<InternalConnectionStatus>(InternalConnectionStatus.disconnected);
 	private connectionBuilder = new SignalRHubConnectionBuilder();
-	private effects$$ = Subscription.EMPTY;
+	private readonly _destroy$ = new Subject<void>();
 
 	private waitUntilConnect$ = this.connectionState$.pipe(
 		distinctUntilChanged((x, y) => x.status === y.status),
@@ -85,51 +85,48 @@ export class HubConnection<THub> {
 				tap(() => this.internalConnStatus$.next(InternalConnectionStatus.ready)),
 				filter(() => prevConnectionStatus === InternalConnectionStatus.connected),
 				switchMap(() => this.openConnection())
-			))
+			)),
+			takeUntil(this._destroy$),
 		);
 		const desiredDisconnected$ = this.desiredState$.pipe(
 			tap(status => console.warn(">>>> [desiredDisconnected$] PRE FILTER", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			filter(status => status === DesiredConnectionStatus.disconnected),
 			tap(status => console.warn(">>>> [desiredDisconnected$] desired disconnected", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
-			switchMap(() => {
-			// delayWhen(() => {
+			tap(() => {
 				if (this._connectionState$.value.status !== ConnectionStatus.disconnected) {
 					console.warn(">>>> [desiredDisconnected$] _disconnect");
-					return this._disconnect().pipe(
+					// note: ideally delayWhen disconnect first, though for some reason obs not bubbling
+					this._disconnect().pipe(
 						tap(x => console.warn(">>>> [desiredDisconnected$] _disconnect$ complete", x)),
 						finalize(() => console.warn(">>>> [desiredDisconnected$] finalize _disconnect$ complete")),
 					);
 				}
-				return EMPTY;
-				// switch (this._connectionState$.value) {
-				// 	case ConnectionStatus.connected:
-				// 	case ConnectionStatus.connecting:
-				// 		this._disconnect();
-				// 		break;
-				// 	case InternalConnectionStatus.ready:
-				// 		this._connectionState$.next(disconnectedState);
-				// 		break;
-				// 	// default:
-				// 	// 	console.error("desiredDisconnected$ - State unhandled", this.internalConnStatus$.value);
-				// 	// 	break;
-				// }
 			}),
 			tap(x => console.warn(">>>> [desiredDisconnected$] DISCONNECTED", x)),
+			finalize(() => console.warn(">>>> [desiredDisconnected$] finalize OUTTER")),
 			tap(() => this._connectionState$.next(disconnectedState)),
+			takeUntil(this._destroy$),
 		);
 
-		const reconnectOnDisconnect = this._connectionState$.pipe(
+		const reconnectOnDisconnect$ = this._connectionState$.pipe(
 			// tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
 			// tap(x => console.warn(">>>> reconnecting...", x)),
-			switchMap(() => this.connect())
+			switchMap(() => this.connect()),
+			takeUntil(this._destroy$),
 		);
 
-		this.effects$$ = merge(
+		// todo: submany
+		[
 			desiredDisconnected$,
-			reconnectOnDisconnect,
+			reconnectOnDisconnect$,
 			connection$
-		).subscribe();
+		].forEach((x: Observable<unknown>) => x.subscribe());
+		// this.effects$$ = merge(
+		// 	desiredDisconnected$,
+		// 	reconnectOnDisconnect,
+		// 	connection$
+		// ).subscribe();
 	}
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
@@ -205,11 +202,11 @@ export class HubConnection<THub> {
 	}
 
 	send(methodName: keyof THub | "StreamUnsubscribe", ...args: unknown[]): Observable<void> {
-		return fromPromise(this.hubConnection.send(methodName.toString(), ...args));
+		return from(this.hubConnection.send(methodName.toString(), ...args));
 	}
 
 	invoke<TResult>(methodName: keyof THub, ...args: unknown[]): Observable<TResult> {
-		return fromPromise<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
+		return from<Promise<TResult>>(this.hubConnection.invoke(methodName.toString(), ...args));
 	}
 
 	dispose(): void {
@@ -217,7 +214,8 @@ export class HubConnection<THub> {
 		this.desiredState$.complete();
 		this._connectionState$.complete();
 		this.internalConnStatus$.complete();
-		this.effects$$.unsubscribe();
+		this._destroy$.next();
+		this._destroy$.complete();
 	}
 
 	private _disconnect(): Observable<void> {
@@ -225,10 +223,18 @@ export class HubConnection<THub> {
 		// return this.internalConnStatus$.value === InternalConnectionStatus.connected
 		return this._connectionState$.value.status !== ConnectionStatus.disconnected
 			// || this.hubConnection.state !== HubConnectionState.Disconnecting
-			? fromPromise(this.hubConnection.stop()).pipe(
+			? from(this.hubConnection.stop()).pipe(
 				tap(x => console.warn(">>>> [_disconnect] STOP complete", x)),
+				catchError(err => {
+					console.warn(">>> ERR", err);
+					return NEVER;
+				}),
 				finalize(() => console.warn(">>>> [_disconnect] finalize")),
 			)
+			// ? from(this.hubConnection.stop()).pipe(
+			// 	tap(x => console.warn(">>>> [_disconnect] STOP complete", x)),
+			// 	finalize(() => console.warn(">>>> [_disconnect] finalize")),
+			// )
 			: emptyNext();
 	}
 
@@ -252,7 +258,7 @@ export class HubConnection<THub> {
 		return emptyNext().pipe(
 			// tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			tap(() => this._connectionState$.next(connectingState)),
-			switchMap(() => fromPromise(this.hubConnection.start())),
+			switchMap(() => from(this.hubConnection.start())),
 			tap(x => console.warn(">>>> [openConnection] - connection established", x)),
 			retryWhen(errors => errors.pipe(
 				scan((errorCount: number) => ++errorCount, 0),
@@ -279,10 +285,6 @@ export class HubConnection<THub> {
 			takeUntil(this.untilDesiredDisconnects$()
 				.pipe(
 					tap(x => console.warn(">>>> [openConnection] takeUntil Triggered", x)),
-					tap(() => console.warn(">>>> [openConnection] takeUntil Triggered x2", this.hubConnection.state)),
-					// tap(x => this.hubConnection.stop()),
-					delay(1000),
-					tap(() => console.warn(">>>> [openConnection] takeUntil Triggered x3", this.hubConnection.state)),
 				)
 			),
 
