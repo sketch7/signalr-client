@@ -66,7 +66,6 @@ export class HubConnection<THub> {
 
 					this.hubConnection = this.connectionBuilder.build();
 					this.hubConnection.onclose(err => {
-						console.warn(">>> onClose")
 						this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 						if (err) {
 							console.error(`${this.source} session disconnected with errors`, { name: err.name, message: err.message });
@@ -118,7 +117,7 @@ export class HubConnection<THub> {
 	}
 
 	connect(data?: () => Dictionary<string>): Observable<void> {
-		console.warn("[connect] init", data);
+		// console.warn("[connect] init", data);
 		this.desiredState$.next(DesiredConnectionStatus.connected);
 		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
 			console.warn(`${this.source} session already connected`);
@@ -144,7 +143,7 @@ export class HubConnection<THub> {
 	}
 
 	disconnect(): Observable<void> {
-		console.warn("[disconnect] init");
+		// console.warn("[disconnect] init");
 		this.desiredState$.next(DesiredConnectionStatus.disconnected);
 		return this.untilDisconnects$();
 	}
@@ -207,7 +206,7 @@ export class HubConnection<THub> {
 	}
 
 	private _disconnect(): Observable<void> {
-		console.warn("[_disconnect] init", this.internalConnStatus$.value, this._connectionState$.value);
+		// console.warn("[_disconnect] init", this.internalConnStatus$.value, this._connectionState$.value);
 		return this._connectionState$.value.status !== ConnectionStatus.disconnected
 			? from(this.hubConnection.stop())
 			: emptyNext();
@@ -228,7 +227,7 @@ export class HubConnection<THub> {
 	}
 
 	private openConnection() {
-		console.warn("[openConnection]");
+		// console.warn("[openConnection]");
 		return emptyNext().pipe(
 			// tap(x => console.warn(">>>> openConnection - attempting to connect", x)),
 			tap(() => this._connectionState$.next(connectingState)),
