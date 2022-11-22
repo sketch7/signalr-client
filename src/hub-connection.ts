@@ -1,12 +1,12 @@
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil, finalize, catchError
+	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder,
 } from "@microsoft/signalr";
-import { from, BehaviorSubject, Observable, Observer, timer, throwError, NEVER, Subject } from "rxjs";
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
