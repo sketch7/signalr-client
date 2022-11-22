@@ -65,6 +65,7 @@ export class HubConnection<THub> {
 					}
 
 					this.hubConnection = this.connectionBuilder.build();
+					connectionOpts.configureSignalRHubConnection?.(this.hubConnection);
 					this.hubConnection.onclose(err => {
 						this.internalConnStatus$.next(InternalConnectionStatus.disconnected);
 						if (err) {
