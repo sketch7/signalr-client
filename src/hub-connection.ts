@@ -87,7 +87,6 @@ export class HubConnection<THub> {
 			takeUntil(this._destroy$),
 		);
 		const desiredDisconnected$ = this.desiredState$.pipe(
-			// tap(status => console.warn(">>>> [desiredDisconnected$] PRE FILTER", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			filter(status => status === DesiredConnectionStatus.disconnected),
 			// tap(status => console.warn(">>>> [desiredDisconnected$] desired disconnected", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			tap(() => {
