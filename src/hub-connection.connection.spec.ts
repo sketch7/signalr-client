@@ -72,18 +72,13 @@ describe("HubConnection Specs", () => {
 					describe("and connects successfully", () => {
 
 
-						// connect -> WHILE CONNECTING -> disconnect -> connect with different data
+						// connect -> WHILE CONNECTING -> disconnect
 						it("should have status disconnected", done => {
-							console.info("START>>>>>")
 							const connect$ = SUT.connect();
-							connect$.subscribe();
-							console.info("subscribe connect$")
-							SUT.connectionState$.pipe(
+							const state$ = SUT.connectionState$.pipe(
 								first(),
-								tap(x => console.info(">>>> SUT DISCONNECT", x)),
 								switchMap(() => SUT.disconnect()),
-								tap(x => console.info(">>>> SUT DISCONNECT COMPLETE", x)),
-								delay(1000), // ensure start is in flight
+								delay(2), // ensure start is in flight
 								withLatestFrom(SUT.connectionState$, (_x, y) => y),
 								tap(state => {
 									expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
@@ -91,8 +86,8 @@ describe("HubConnection Specs", () => {
 									expect(state.status).toBe(ConnectionStatus.disconnected);
 									done();
 								})
-							).subscribe();
-							// conn$$ = merge(connect$, state$).subscribe();
+							);
+							conn$$ = merge(connect$, state$).subscribe();
 						});
 
 						describe("and connects with different data", () => {
