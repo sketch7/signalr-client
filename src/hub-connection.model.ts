@@ -1,4 +1,4 @@
-import { IHttpConnectionOptions, IHubProtocol } from "@microsoft/signalr";
+import { HubConnection, IHttpConnectionOptions, IHubProtocol } from "@microsoft/signalr";
 
 import { Dictionary } from "./utils/dictionary";
 
@@ -38,6 +38,10 @@ export interface HubConnectionOptions {
 	/** @internal */
 	getData?: () => Dictionary<string>;
 	protocol?: IHubProtocol;
+	/**
+	 * Configures the SignalR Hub connection after it has been built (raw) in order to access/configure `serverTimeoutInMilliseconds`, `keepAliveIntervalInMilliseconds` etc...
+	 */
+	configureSignalRHubConnection?: (hubConnection: HubConnection) => void;
 }
 
 export interface ConnectionOptions extends IHttpConnectionOptions {
