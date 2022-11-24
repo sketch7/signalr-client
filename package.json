@@ -1,6 +1,6 @@
 {
   "name": "@ssv/signalr-client",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "versionSuffix": "",
   "description": "SignalR client library built on top of @microsoft/signalr. This gives you more features and easier to use.",
   "homepage": "https://github.com/sketch7/signalr-client",
@@ -63,7 +63,7 @@
     "yargs": "^16.2.0"
   },
   "dependencies": {
-    "@microsoft/signalr": "^6.0.11",
+    "@microsoft/signalr": "^7.0.0",
     "tslib": "^2.1.0"
   },
   "peerDependencies": {
