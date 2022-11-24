@@ -1,8 +1,19 @@
-## [3.2.0](https://github.com/sketch7/signalr-client/compare/3.1.0...3.2.0) (2022-11-24)
+## [4.0.0](https://github.com/sketch7/signalr-client/compare/3.1.0...4.0.0) (2022-11-24)
 
 ### Features
 
 - **deps** update `@microsoft/signalr: ^6.0.11`
+
+### BREAKING CHANGES
+
+- **angular:** **KNOWN ISSUE**: usage directly with angular when listening to changes seems to require zone now (usage with state works fine, and its suggested)
+```ts
+this.connection.on<Hero>("HeroChanged").pipe(
+  // ... change ui
+  // tap(() => this.cdr.markForCheck()), // used to work
+  tap(() => this.ngZone.run(() => this.cdr.markForCheck())), // with @microsoft/signalr 6.x is not working without zone
+).subscribe();
+```
 
 ## [3.1.0](https://github.com/sketch7/signalr-client/compare/3.0.0...3.1.0) (2022-11-22)
 
