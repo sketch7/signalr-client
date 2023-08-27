@@ -6,6 +6,7 @@
 [npm]: https://www.npmjs.com/package/@ssv/signalr-client
 
 # @ssv/signalr-client
+<!-- TODO: update badge -->
 [![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
 [![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
@@ -166,3 +167,5 @@ const data$$ = hubConnection.on<string>("Send").subscribe(val => {
 ### Contributions
 
 Check out the [development guide][developmentWorkflowWiki].
+
+Build using: https://gist.github.com/aleclarson/9900ed2a9a3119d865286b218e14d226
