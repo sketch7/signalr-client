@@ -89,12 +89,13 @@ export class HubConnection<THub> {
 		);
 		const desiredDisconnected$ = this.desiredState$.pipe(
 			filter(status => status === DesiredConnectionStatus.disconnected),
+			// eslint-disable-next-line max-len
 			// tap(status => console.warn(">>>> [desiredDisconnected$] desired disconnected", { internalConnStatus$: this.internalConnStatus$.value, desiredStatus: status })),
 			tap(() => {
 				if (this._connectionState$.value.status !== ConnectionStatus.disconnected) {
 					// console.warn(">>>> [desiredDisconnected$] _disconnect");
 					// note: ideally delayWhen disconnect first, though for some reason obs not bubbling
-					this._disconnect()
+					this._disconnect();
 				}
 			}),
 			tap(() => this._connectionState$.next(disconnectedState)),
@@ -240,7 +241,7 @@ export class HubConnection<THub> {
 						return throwError(new Error(errorCodes.retryLimitsReached));
 					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
-					// tslint:disable-next-line:no-console
+					// eslint-disable-next-line max-len
 					console.debug(`${this.source} connect :: retrying`, { retryCount, maximumAttempts: this.retry.maximumAttempts, nextRetryMs });
 					this._connectionState$.next({
 						status: ConnectionStatus.connecting,
@@ -256,7 +257,6 @@ export class HubConnection<THub> {
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
 			takeUntil(this.untilDesiredDisconnects$()),
-
 		);
 	}
 

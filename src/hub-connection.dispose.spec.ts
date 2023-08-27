@@ -35,16 +35,13 @@ describe("HubConnection - dispose Specs", () => {
 		});
 
 
-
 		it("should close connection", () => {
 			SUT.dispose();
 			expect(hubStopSpy).toBeCalledTimes(1);
 		});
 
 
-
 	});
-
 
 
 	describe("given a disconnected connection", () => {
@@ -54,7 +51,6 @@ describe("HubConnection - dispose Specs", () => {
 			hubBackend = mockConnBuilder.getBackend();
 			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
 		});
-
 
 
 		it("should dispose correctly", () => {
@@ -68,9 +64,7 @@ describe("HubConnection - dispose Specs", () => {
 		});
 
 
-
 	});
-
 
 
 });

@@ -5,7 +5,7 @@ export function buildQueryString(data: Dictionary<string> | undefined): string {
 	if (!data) {
 		return queryString;
 	}
-	// tslint:disable-next-line:forin
+	// eslint-disable-next-line guard-for-in
 	for (const key in data) {
 		queryString += queryString === "" ? "?" : "&";
 		queryString += `${key}=${data[key]}`;

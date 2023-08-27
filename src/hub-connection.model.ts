@@ -39,7 +39,8 @@ export interface HubConnectionOptions {
 	getData?: () => Dictionary<string>;
 	protocol?: IHubProtocol;
 	/**
-	 * Configures the SignalR Hub connection after it has been built (raw) in order to access/configure `serverTimeoutInMilliseconds`, `keepAliveIntervalInMilliseconds` etc...
+	 * Configures the SignalR Hub connection after it has been built (raw) in order to access/configure
+	 * `serverTimeoutInMilliseconds`, `keepAliveIntervalInMilliseconds` etc...
 	 */
 	configureSignalRHubConnection?: (hubConnection: HubConnection) => void;
 }

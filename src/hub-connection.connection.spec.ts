@@ -7,7 +7,9 @@ import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@microsoft/signalr";
-function promiseDelayResolve(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+function promiseDelayResolve(ms: number) {
+	return new Promise(r => setTimeout(r, ms));
+}
 function promiseDelayReject(ms: number, reason?: unknown) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
 }
@@ -56,9 +58,7 @@ describe("HubConnection Specs", () => {
 					});
 
 
-
 				});
-
 
 
 				describe("and while connecting disconnect was invoked", () => {
@@ -113,12 +113,10 @@ describe("HubConnection Specs", () => {
 							});
 
 
-
 						});
 
 
 					});
-
 
 
 					describe("and connect fails", () => {
@@ -149,14 +147,10 @@ describe("HubConnection Specs", () => {
 						});
 
 
-
 					});
 
 
-
 				});
-
-
 
 
 				describe("and fails to connect", () => {
@@ -180,7 +174,6 @@ describe("HubConnection Specs", () => {
 					});
 
 
-
 					it("should emit error when retry attempts limit reached", done => {
 						// todo: try and use scheduler
 						SUT.connect().subscribe({
@@ -191,7 +184,6 @@ describe("HubConnection Specs", () => {
 						});
 
 					});
-
 
 
 					describe("when disconnect is invoked", () => {
@@ -219,20 +211,15 @@ describe("HubConnection Specs", () => {
 						});
 
 
-
-
 					});
-
 
 
 				});
 
 
-
 			});
 
 		});
-
 
 
 		describe("given a connected connection", () => {
@@ -256,7 +243,6 @@ describe("HubConnection Specs", () => {
 				});
 
 			});
-
 
 
 			describe("when disconnects", () => {
@@ -287,14 +273,10 @@ describe("HubConnection Specs", () => {
 			});
 
 
-
 		});
 
 
-
 	});
-
-
 
 
 });

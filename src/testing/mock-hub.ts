@@ -17,6 +17,7 @@ export class MockSignalRHubBackend {
 	registerOnclose(cb: (err?: Error) => void): void {
 		this._onclose = cb; // todo: handle multi
 	}
+
 }
 
 export class MockSignalRHubConnectionBuilder {
@@ -83,4 +84,5 @@ export class MockSignalRHubConnection {
 	// off(methodName: any, method?: any) {
 	// 	throw new Error("Method not implemented.");
 	// }
+
 }

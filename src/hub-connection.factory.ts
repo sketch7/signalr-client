@@ -47,7 +47,7 @@ export class HubConnectionFactory {
 	}
 
 	connectAll(): void {
-		// tslint:disable-next-line:forin
+		// eslint-disable-next-line guard-for-in
 		for (const hubKey in this.hubConnections) {
 			const hub = this.hubConnections[hubKey];
 			hub.connect();
@@ -55,7 +55,7 @@ export class HubConnectionFactory {
 	}
 
 	disconnectAll(): void {
-		// tslint:disable-next-line:forin
+		// eslint-disable-next-line guard-for-in
 		for (const hubKey in this.hubConnections) {
 			const hub = this.hubConnections[hubKey];
 			hub.disconnect();

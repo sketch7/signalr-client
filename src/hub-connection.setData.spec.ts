@@ -45,8 +45,6 @@ describe("HubConnection - setData Specs", () => {
 		describe("when data changes", () => {
 
 
-
-
 			it("should reconnect with new data", done => {
 				conn$$ = SUT.connectionState$.pipe(
 					first(),
@@ -68,9 +66,7 @@ describe("HubConnection - setData Specs", () => {
 			});
 
 
-
 		});
-
 
 
 		xdescribe("when data has not changed", () => {
@@ -96,7 +92,6 @@ describe("HubConnection - setData Specs", () => {
 			});
 
 
-
 			it("should not reconnect", done => {
 				conn$$ = SUT.connectionState$.pipe(
 					first(),
@@ -114,13 +109,10 @@ describe("HubConnection - setData Specs", () => {
 			});
 
 
-
 		});
 
 
-
 	});
-
 
 
 	describe("given a disconnected connection", () => {
@@ -154,14 +146,10 @@ describe("HubConnection - setData Specs", () => {
 			});
 
 
-
 		});
 
 
-
 	});
-
-
 
 
 });
