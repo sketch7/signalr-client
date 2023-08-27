@@ -1,1 +1,1 @@
-export * from './lib/ssv';
+export * from './lib/index';
