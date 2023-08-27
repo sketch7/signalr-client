@@ -1,8 +1,17 @@
+# Editor configuration, see https://editorconfig.org
+root = true
 
-[*.{js,ts}]
+[*]
 charset = utf-8
 indent_style = tab
+
+[*.{js,ts}]
 trim_trailing_whitespace = true
+spaces_around_operators = inside
+insert_final_newline = false
+
+[package.json]
+insert_final_newline = true
 
 [*.{json,yml,md}]
 indent_size = 2

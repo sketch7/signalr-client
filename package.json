@@ -24,15 +24,20 @@
     "start": "gulp watch",
     "build": "gulp build",
     "clean": "gulp clean",
+    "_clean": "rimraf dist",
     "lint": "eslint -c .eslintrc.js --ext .ts \"src/**/*.ts\"",
     "test": "jest",
     "tdd": "jest --watch",
     "test-debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --env jest-environment-node-debug",
     "test-devt": "devtool ./node_modules/jest/bin/jest.js --runInBand --env jest-environment-node-debug",
-    "publish:rel": "npm publish dist --access=public"
+    "__CI__": "",
+    "pre-release-build": "echo TODO: version placeholder as gitaction or script",
+    "_pre-release-build": "gulp prebuild:rel",
+    "release": "npm publish ./dist --access=public"
   },
   "author": "Stephen Lautier <stephen.lautier@outlook.com>, Clayton Lautier <clayton.lautier@outlook.com>",
   "license": "MIT",
+  "private": false,
   "main": "dist/bundles/ssv-signalr-client.umd.js",
   "module": "dist/es2015/index.js",
   "typings": "dist/es2015/index.d.ts",
@@ -40,34 +45,30 @@
     "type": "git",
     "url": "https://github.com/sketch7/signalr-client"
   },
-  "bugs": {
-    "url": "https://github.com/sketch7/signalr-client/issues"
-  },
-  "devDependencies": {
-    "@ssv/tools": "^0.9.1",
-    "@types/jest": "^26.0.23",
-    "del": "^6.0.0",
-    "gulp": "^4.0.2",
-    "gulp-bump": "^3.2.0",
-    "gulp-conventional-changelog": "^2.0.35",
-    "gulp-util": "^3.0.8",
-    "jest": "^26.6.3",
-    "jest-cli": "^26.6.3",
-    "jest-environment-node-debug": "^2.0.0",
-    "microbundle": "^0.13.0",
-    "require-dir": "^1.2.0",
-    "rxjs": "^6.6.7",
-    "ts-jest": "^26.5.5",
-    "typescript": "^4.2.4",
-    "typescript-tslint-plugin": "^1.0.1",
-    "yargs": "^16.2.0"
-  },
   "dependencies": {
-    "@microsoft/signalr": "^7.0.0",
-    "tslib": "^2.1.0"
+    "tslib": "^2.0.0",
+    "@microsoft/signalr": "^7.0.0"
   },
   "peerDependencies": {
-    "rxjs": "^6.6.0"
+    "rxjs": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@ssv/tools": "~0.10.2",
+    "@types/jest": "^29.5.0",
+    "gulp": "^4.0.2",
+    "gulp-bump": "^3.2.0",
+    "gulp-conventional-changelog": "^2.0.32",
+    "jest": "^29.5.0",
+    "jest-environment-node-debug": "^2.0.0",
+    "require-dir": "^1.2.0",
+    "rimraf": "^3.0.2",
+    "rxjs": "^6.6.3",
+    "ts-jest": "^29.1.0",
+    "typescript": "~4.8.2",
+    "yargs": "^16.1.0"
+  },
+  "resolutions": {
+    "natives": "1.1.3"
   },
   "jest": {
     "transform": {
