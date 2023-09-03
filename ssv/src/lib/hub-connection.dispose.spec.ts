@@ -1,4 +1,5 @@
 import { Subscription } from "rxjs";
+import { Mock, SpyInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
@@ -12,12 +13,12 @@ describe("HubConnection - dispose Specs", () => {
 	let SUT: HubConnection<HeroHub>;
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	let conn$$ = Subscription.EMPTY;
-	let hubStopSpy: jest.SpyInstance<Promise<void>>;
+	const conn$$ = Subscription.EMPTY;
+	let hubStopSpy: SpyInstance<[], Promise<void>>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
-		(signalr.HubConnectionBuilder as unknown as jest.Mock).mockImplementation(() => mockConnBuilder);
+		(signalr.HubConnectionBuilder as unknown as Mock).mockImplementation(() => mockConnBuilder);
 	});
 
 	afterEach(() => {
@@ -27,11 +28,11 @@ describe("HubConnection - dispose Specs", () => {
 
 	describe("given a connected connection", () => {
 
-		beforeEach(done => {
+		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
-			conn$$ = SUT.connect().subscribe(done);
-			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
+			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
+			return SUT.connect().toPromise();
 		});
 
 
@@ -49,12 +50,12 @@ describe("HubConnection - dispose Specs", () => {
 		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
-			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
+			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 		});
 
 
 		it("should dispose correctly", () => {
-			const connStateComplete = jest.fn();
+			const connStateComplete = vi.fn();
 			SUT.connectionState$.subscribe({
 				complete: connStateComplete
 			});
