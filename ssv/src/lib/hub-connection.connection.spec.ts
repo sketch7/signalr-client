@@ -227,58 +227,59 @@ describe("HubConnection Specs", () => {
 		});
 
 
-		// describe("given a connected connection", () => {
+		describe("given a connected connection", () => {
 
-		// 	beforeEach(done => {
-		// 		SUT = createSUT();
-		// 		hubBackend = mockConnBuilder.getBackend();
-		// 		conn$$ = SUT.connect().subscribe(done);
-		// 	});
+			beforeEach(() => new Promise<void>(done => {
+				SUT = createSUT();
+				hubBackend = mockConnBuilder.getBackend();
+				conn$$ = SUT.connect().subscribe(done);
+			}));
 
-		// 	describe("when disconnect is invoked", () => {
+			describe("when disconnect is invoked", () => {
 
-		// 		it("should have status as disconnected", done => {
-		// 			conn$$ = SUT.disconnect().pipe(
-		// 				tap(() => hubBackend.disconnect()),
-		// 				withLatestFrom(SUT.connectionState$, (_x, y) => y),
-		// 			).subscribe({
-		// 				next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
-		// 				complete: done
-		// 			});
-		// 		});
+				it("should have status as disconnected", () => new Promise<void>(done => {
+					conn$$ = SUT.disconnect().pipe(
+						tap(() => hubBackend.disconnect()),
+						withLatestFrom(SUT.connectionState$, (_x, y) => y),
+					).subscribe({
+						next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
+						complete: done
+					});
+				}));
 
-		// 	});
-
-
-		// 	describe("when disconnects", () => {
-
-		// 		beforeEach(() => {
-		// 			hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-		// 			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
-		// 		});
-
-		// 		it("should reconnect", done => {
-
-		// 			const reconnect$ = SUT.connectionState$.pipe(
-		// 				first(),
-		// 				tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-		// 				tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
-		// 				switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-		// 				tap(state => {
-		// 					expect(state.status).toBe(ConnectionStatus.connected);
-		// 					expect(hubStartSpy).toBeCalledTimes(1);
-		// 					expect(hubStopSpy).not.toBeCalled();
-		// 					done();
-		// 				}),
-		// 				first()
-		// 			);
-		// 			conn$$ = reconnect$.subscribe();
-		// 		});
-
-		// 	});
+			});
 
 
-		// });
+			describe("when disconnects", () => {
+
+				beforeEach(() => {
+					// todo: check if redundant
+					hubStartSpy = vi.spyOn(hubBackend.connection, "start");
+					hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
+				});
+
+				it("should reconnect", () => new Promise<void>(done => {
+
+					const reconnect$ = SUT.connectionState$.pipe(
+						first(),
+						tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
+						tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+						switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+						tap(state => {
+							expect(state.status).toBe(ConnectionStatus.connected);
+							expect(hubStartSpy).toBeCalledTimes(1);
+							expect(hubStopSpy).not.toBeCalled();
+							done();
+						}),
+						first()
+					);
+					conn$$ = reconnect$.subscribe();
+				}));
+
+			});
+
+
+		});
 
 
 	});
