@@ -1,7 +1,7 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, merge } from "rxjs";
 import { first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs/operators";
-import type { Mock } from 'vitest'
+import type { Mock, SpyInstance } from 'vitest'
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
@@ -22,9 +22,9 @@ describe("HubConnection Specs", () => {
 	let hubBackend: MockSignalRHubBackend;
 	let conn$$ = Subscription.EMPTY;
 	// let hubStartSpy: jest.SpyInstance<Promise<void>>;
-	let hubStartSpy: Mock<undefined, Promise<void>>;
+	let hubStartSpy: SpyInstance<[], Promise<void>>;
 	// let hubStopSpy: jest.SpyInstance<Promise<void>>;
-	let hubStopSpy: Mock<undefined, Promise<void>>;
+	let hubStopSpy: SpyInstance<[], Promise<void>>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
@@ -39,6 +39,8 @@ describe("HubConnection Specs", () => {
 			beforeEach(() => {
 				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
+				hubStartSpy = vi.spyOn(hubBackend.connection, "start");
+				hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 			});
 
 			afterEach(() => {
@@ -156,68 +158,68 @@ describe("HubConnection Specs", () => {
 				});
 
 
-				// describe("and fails to connect", () => {
+				describe("and fails to connect", () => {
 
-				// 	beforeEach(() => {
-				// 		hubBackend.connection.start = jest.fn().mockRejectedValue(new Error("Error while connecting"));
-				// 	});
+					beforeEach(() => {
+						hubBackend.connection.start = vi.fn().mockRejectedValue(new Error("Error while connecting"));
+					});
 
-				// 	it("should have status reconnecting", done => {
-				// 		const connect$ = SUT.connect();
-				// 		const state$ = SUT.connectionState$.pipe(
-				// 			skip(1),
-				// 			first(),
-				// 			tap(state => {
-				// 				expect(state.status).toBe(ConnectionStatus.connecting);
-				// 				expect(state.reason).toBe("reconnecting");
-				// 				done();
-				// 			})
-				// 		);
-				// 		conn$$ = merge(connect$, state$).subscribe();
-				// 	});
-
-
-				// 	it("should emit error when retry attempts limit reached", done => {
-				// 		// todo: try and use scheduler
-				// 		SUT.connect().subscribe({
-				// 			error: () => {
-				// 				expect(hubBackend.connection.start).toBeCalledTimes(4); // todo: should this be one extra then specified?
-				// 				done();
-				// 			},
-				// 		});
-
-				// 	});
+					it("should have status reconnecting", () => new Promise<void>(done => {
+						const connect$ = SUT.connect();
+						const state$ = SUT.connectionState$.pipe(
+							skip(1),
+							first(),
+							tap(state => {
+								expect(state.status).toBe(ConnectionStatus.connecting);
+								expect(state.reason).toBe("reconnecting");
+								done();
+							})
+						);
+						conn$$ = merge(connect$, state$).subscribe();
+					}));
 
 
-				// 	describe("when disconnect is invoked", () => {
+					it("should emit error when retry attempts limit reached", () => new Promise<void>(done => {
+						// todo: try and use scheduler
+						SUT.connect().subscribe({
+							error: () => {
+								expect(hubBackend.connection.start).toBeCalledTimes(4); // todo: should this be one extra then specified?
+								done();
+							},
+						});
 
-				// 		beforeEach(() => {
-				// 			hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-				// 			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
-				// 		});
-
-				// 		it("should stop retrying", done => {
-				// 			const triggerDisconnect = SUT.connectionState$.pipe(
-				// 				skip(1),
-				// 				first(),
-				// 				switchMap(() => SUT.disconnect()),
-				// 				switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.disconnected))),
-				// 				delay(50), // ensure there are no pending connects
-				// 				tap(state => {
-				// 					expect(state.status).toBe(ConnectionStatus.disconnected);
-				// 					expect(hubStartSpy).toBeCalledTimes(1);
-				// 					// expect(hubStopSpy).not.toBeCalled();
-				// 					done();
-				// 				}),
-				// 			);
-				// 			conn$$ = merge(SUT.connect(), triggerDisconnect).subscribe();
-				// 		});
+					}));
 
 
-				// 	});
+					describe("when disconnect is invoked", () => {
+
+						beforeEach(() => {
+							hubStartSpy = vi.spyOn(hubBackend.connection, "start");
+							hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
+						});
+
+						it("should stop retrying", () => new Promise<void>(done => {
+							const triggerDisconnect = SUT.connectionState$.pipe(
+								skip(1),
+								first(),
+								switchMap(() => SUT.disconnect()),
+								switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.disconnected))),
+								delay(50), // ensure there are no pending connects
+								tap(state => {
+									expect(state.status).toBe(ConnectionStatus.disconnected);
+									expect(hubStartSpy).toBeCalledTimes(1);
+									// expect(hubStopSpy).not.toBeCalled();
+									done();
+								}),
+							);
+							conn$$ = merge(SUT.connect(), triggerDisconnect).subscribe();
+						}));
 
 
-				// });
+					});
+
+
+				});
 
 
 			});
