@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "test-ui": "vitest --ui"
   },
   "dependencies": {
     "@microsoft/signalr": "^7.0.0",

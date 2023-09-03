@@ -1,7 +1,7 @@
 import { HubConnection } from "../hub-connection";
-
-jest.genMockFromModule("@microsoft/signalr");
-jest.mock("@microsoft/signalr");
+import { vi } from "vitest";
+// jest.genMockFromModule("@microsoft/signalr");
+vi.mock("@microsoft/signalr");
 
 let nextUniqueId = 0;
 
