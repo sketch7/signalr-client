@@ -1,5 +1,5 @@
-import { Subscription } from "rxjs";
 import { first, switchMap, tap, withLatestFrom } from "rxjs/operators";
+import { Mock, SpyInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
@@ -8,45 +8,42 @@ import { ConnectionStatus } from "./hub-connection.model";
 
 import * as signalr from "@microsoft/signalr";
 
-// tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - setData Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	let conn$$ = Subscription.EMPTY;
-	let hubStartSpy: jest.SpyInstance<Promise<void>>;
-	let hubStopSpy: jest.SpyInstance<Promise<void>>;
-	let hubBuilderWithUrlSpy: jest.SpyInstance<MockSignalRHubConnectionBuilder>;
+	let hubStartSpy: SpyInstance<[], Promise<void>>;
+	let hubStopSpy: SpyInstance<[], Promise<void>>;
+	let hubBuilderWithUrlSpy: SpyInstance<[], MockSignalRHubConnectionBuilder>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
-		(signalr.HubConnectionBuilder as unknown as jest.Mock).mockImplementation(() => mockConnBuilder);
+		(signalr.HubConnectionBuilder as unknown as Mock).mockImplementation(() => mockConnBuilder);
 	});
 
 	afterEach(() => {
 		SUT.dispose();
-		conn$$.unsubscribe();
 	});
 
 
 	describe("given a connected connection", () => {
 
-		beforeEach(done => {
+		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
-			conn$$ = SUT.connect().subscribe(done);
-			hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
-			hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
+			hubStartSpy = vi.spyOn(hubBackend.connection, "start");
+			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
+			hubBuilderWithUrlSpy = vi.spyOn(mockConnBuilder, "withUrl");
+			return SUT.connect().toPromise();
 		});
 
 
 		describe("when data changes", () => {
 
 
-			it("should reconnect with new data", done => {
-				conn$$ = SUT.connectionState$.pipe(
+			it("should reconnect with new data", () => {
+				return SUT.connectionState$.pipe(
 					first(),
 					tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
 					tap(() => SUT.setData(() => ({
@@ -59,24 +56,23 @@ describe("HubConnection - setData Specs", () => {
 						expect(hubStopSpy).toBeCalledTimes(1);
 						expect(hubBuilderWithUrlSpy).toHaveBeenLastCalledWith("/hero?tenant=kowalski&power=1337&hero=rexxar", expect.any(Object));
 						expect(state.status).toBe(ConnectionStatus.connected);
-						done();
 					}),
 					first()
-				).subscribe();
+				).toPromise();
 			});
 
 
 		});
 
 
-		xdescribe("when data has not changed", () => {
+		describe.skip("when data has not changed", () => {
 
 			const data = {
 				hero: "rexxar",
 				power: "1337"
 			};
 
-			beforeEach(done => {
+			beforeEach(() => new Promise<void>(done => {
 				SUT.setData(() => ({ ...data }));
 				SUT.connectionState$.pipe(
 					first(),
@@ -89,11 +85,11 @@ describe("HubConnection - setData Specs", () => {
 					}
 				});
 
-			});
+			}));
 
 
-			it("should not reconnect", done => {
-				conn$$ = SUT.connectionState$.pipe(
+			it("should not reconnect", () => {
+				return SUT.connectionState$.pipe(
 					first(),
 					tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
 					tap(() => SUT.setData(() => ({ ...data }))),
@@ -102,10 +98,9 @@ describe("HubConnection - setData Specs", () => {
 						expect(hubStartSpy).not.toBeCalled();
 						expect(hubStopSpy).not.toBeCalled();
 						expect(state.status).toBe(ConnectionStatus.disconnected);
-						done();
 					}),
 					first()
-				).subscribe();
+				).toPromise();
 			});
 
 
@@ -120,17 +115,17 @@ describe("HubConnection - setData Specs", () => {
 		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
-			hubStartSpy = jest.spyOn(hubBackend.connection, "start");
-			hubStopSpy = jest.spyOn(hubBackend.connection, "stop");
-			hubBuilderWithUrlSpy = jest.spyOn(mockConnBuilder, "withUrl");
+			hubStartSpy = vi.spyOn(hubBackend.connection, "start");
+			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
+			hubBuilderWithUrlSpy = vi.spyOn(mockConnBuilder, "withUrl");
 		});
 
 
 		describe("when data changes", () => {
 
 
-			it("should not connect", done => {
-				conn$$ = SUT.connectionState$.pipe(
+			it("should not connect", () => {
+				return SUT.connectionState$.pipe(
 					first(),
 					tap(() => SUT.setData(() => ({
 						hero: "rexxar",
@@ -142,7 +137,7 @@ describe("HubConnection - setData Specs", () => {
 						expect(hubStopSpy).not.toBeCalled();
 						expect(state.status).toBe(ConnectionStatus.disconnected);
 					}),
-				).subscribe({ complete: done });
+				).toPromise();
 			});
 
 

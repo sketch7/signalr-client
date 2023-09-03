@@ -1,4 +1,3 @@
-import { Subscription } from "rxjs";
 import { Mock, SpyInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
