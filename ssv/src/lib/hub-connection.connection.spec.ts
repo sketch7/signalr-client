@@ -15,7 +15,6 @@ function promiseDelayReject(ms: number, reason?: unknown) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
 }
 
-// tslint:disable: no-consecutive-blank-lines
 describe("HubConnection Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;
@@ -65,96 +64,96 @@ describe("HubConnection Specs", () => {
 				});
 
 
-				// describe("and while connecting disconnect was invoked", () => {
+				describe("and while connecting disconnect was invoked", () => {
 
-				// 	beforeEach(() => {
-				// 		hubBackend.connection.start = jest.fn().mockReturnValue(promiseDelayResolve(5));
-				// 		hubBackend.connection.stop = jest.fn().mockReturnValue(promiseDelayResolve(5));
-				// 	});
-
-
-				// 	describe("and connects successfully", () => {
+					beforeEach(() => {
+						hubBackend.connection.start = vi.fn().mockReturnValue(promiseDelayResolve(5));
+						hubBackend.connection.stop = vi.fn().mockReturnValue(promiseDelayResolve(5));
+					});
 
 
-				// 		// connect -> WHILE CONNECTING -> disconnect
-				// 		it("should have status disconnected", done => {
-				// 			const connect$ = SUT.connect();
-				// 			const state$ = SUT.connectionState$.pipe(
-				// 				first(),
-				// 				switchMap(() => SUT.disconnect()),
-				// 				delay(2), // ensure start is in flight
-				// 				withLatestFrom(SUT.connectionState$, (_x, y) => y),
-				// 				tap(state => {
-				// 					expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
-				// 					expect(hubBackend.connection.stop).toHaveBeenCalledTimes(1);
-				// 					expect(state.status).toBe(ConnectionStatus.disconnected);
-				// 					done();
-				// 				})
-				// 			);
-				// 			conn$$ = merge(connect$, state$).subscribe();
-				// 		});
-
-				// 		describe("and connects with different data", () => {
+					describe("and connects successfully", () => {
 
 
-				// 			// connect -> WHILE CONNECTING -> disconnect -> connect with different data
-				// 			it("should have status connected", done => {
-				// 				const connect$ = SUT.connect();
-				// 				const state$ = SUT.connectionState$.pipe(
-				// 					first(),
-				// 					switchMap(() => SUT.disconnect()),
-				// 					delay(2), // ensure start is in flight
-				// 					switchMap(() => SUT.connect(() => ({ second: "true" }))),
-				// 					withLatestFrom(SUT.connectionState$, (_x, y) => y),
-				// 					tap(state => {
-				// 						expect(hubBackend.connection.start).toHaveBeenCalledTimes(2);
-				// 						expect(hubBackend.connection.stop).toHaveBeenCalledTimes(1);
-				// 						expect(state.status).toBe(ConnectionStatus.connected);
-				// 						done();
-				// 					})
-				// 				);
-				// 				conn$$ = merge(connect$, state$).subscribe();
-				// 			});
+						// connect -> WHILE CONNECTING -> disconnect
+						it("should have status disconnected", () => new Promise<void>(done => {
+							const connect$ = SUT.connect();
+							const state$ = SUT.connectionState$.pipe(
+								first(),
+								switchMap(() => SUT.disconnect()),
+								delay(2), // ensure start is in flight
+								withLatestFrom(SUT.connectionState$, (_x, y) => y),
+								tap(state => {
+									expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+									expect(hubBackend.connection.stop).toHaveBeenCalledTimes(1);
+									expect(state.status).toBe(ConnectionStatus.disconnected);
+									done();
+								})
+							);
+							conn$$ = merge(connect$, state$).subscribe();
+						}));
+
+						describe("and connects with different data", () => {
 
 
-				// 		});
+							// connect -> WHILE CONNECTING -> disconnect -> connect with different data
+							it("should have status connected", () => new Promise<void>(done => {
+								const connect$ = SUT.connect();
+								const state$ = SUT.connectionState$.pipe(
+									first(),
+									switchMap(() => SUT.disconnect()),
+									delay(2), // ensure start is in flight
+									switchMap(() => SUT.connect(() => ({ second: "true" }))),
+									withLatestFrom(SUT.connectionState$, (_x, y) => y),
+									tap(state => {
+										expect(hubBackend.connection.start).toHaveBeenCalledTimes(2);
+										expect(hubBackend.connection.stop).toHaveBeenCalledTimes(1);
+										expect(state.status).toBe(ConnectionStatus.connected);
+										done();
+									})
+								);
+								conn$$ = merge(connect$, state$).subscribe();
+							}));
 
 
-				// 	});
+						});
 
 
-				// 	describe("and connect fails", () => {
-
-				// 		beforeEach(() => {
-				// 			hubBackend.connection.start = jest.fn().mockReturnValue(promiseDelayReject(5));
-				// 		});
+					});
 
 
-				// 		it("should have status disconnected", done => {
-				// 			const connect$ = SUT.connect();
-				// 			const state$ = SUT.connectionState$.pipe(
-				// 				first(),
-				// 				tap(x => console.warn(">>>> [spec] disconnect", x)),
-				// 				delay(2), // wait first try
-				// 				switchMap(() => SUT.disconnect()),
-				// 				tap(x => console.warn(">>>> [spec] disconnected", x)),
-				// 				delay(50), // ensure there are no pending connects
-				// 				withLatestFrom(SUT.connectionState$, (_x, y) => y),
-				// 				tap(x => console.warn(">>>> [spec] after delay", x)),
-				// 				tap(state => {
-				// 					expect(state.status).toBe(ConnectionStatus.disconnected);
-				// 					expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
-				// 					done();
-				// 				})
-				// 			);
-				// 			conn$$ = merge(connect$, state$).subscribe();
-				// 		});
+					describe("and connect fails", () => {
+
+						beforeEach(() => {
+							hubBackend.connection.start = vi.fn().mockReturnValue(promiseDelayReject(5));
+						});
 
 
-				// 	});
+						it("should have status disconnected", () => new Promise<void>(done => {
+							const connect$ = SUT.connect();
+							const state$ = SUT.connectionState$.pipe(
+								first(),
+								tap(x => console.warn(">>>> [spec] disconnect", x)),
+								delay(2), // wait first try
+								switchMap(() => SUT.disconnect()),
+								tap(x => console.warn(">>>> [spec] disconnected", x)),
+								delay(50), // ensure there are no pending connects
+								withLatestFrom(SUT.connectionState$, (_x, y) => y),
+								tap(x => console.warn(">>>> [spec] after delay", x)),
+								tap(state => {
+									expect(state.status).toBe(ConnectionStatus.disconnected);
+									expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+									done();
+								})
+							);
+							conn$$ = merge(connect$, state$).subscribe();
+						}));
 
 
-				// });
+					});
+
+
+				});
 
 
 				// describe("and fails to connect", () => {
