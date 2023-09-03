@@ -13,18 +13,12 @@ describe("HubConnection - dispose Specs", () => {
 	let SUT: HubConnection<HeroHub>;
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	const conn$$ = Subscription.EMPTY;
 	let hubStopSpy: SpyInstance<[], Promise<void>>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
 		(signalr.HubConnectionBuilder as unknown as Mock).mockImplementation(() => mockConnBuilder);
 	});
-
-	afterEach(() => {
-		conn$$.unsubscribe();
-	});
-
 
 	describe("given a connected connection", () => {
 
