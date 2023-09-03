@@ -32,10 +32,16 @@ describe("HubConnection - setData Specs", () => {
 		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
+			const connect$ = SUT.connect().toPromise();
 			hubStartSpy = vi.spyOn(hubBackend.connection, "start");
 			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 			hubBuilderWithUrlSpy = vi.spyOn(mockConnBuilder, "withUrl");
-			return SUT.connect().toPromise();
+			return connect$;
+		});
+
+		afterEach(() => {
+			hubStartSpy.mockClear();
+			hubStopSpy.mockClear();
 		});
 
 
@@ -66,26 +72,23 @@ describe("HubConnection - setData Specs", () => {
 
 
 		describe.skip("when data has not changed", () => {
+		// describe("when data has not changed", () => {
 
 			const data = {
 				hero: "rexxar",
 				power: "1337"
 			};
 
-			beforeEach(() => new Promise<void>(done => {
+			beforeEach(() => {
 				SUT.setData(() => ({ ...data }));
-				SUT.connectionState$.pipe(
+				return SUT.connectionState$.pipe(
 					first(),
 					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-				).subscribe({
-					complete: () => {
-						hubStartSpy.mockClear();
-						hubStopSpy.mockClear();
-						done();
-					}
+				).toPromise().then(() => {
+					hubStartSpy.mockClear();
+					hubStopSpy.mockClear();
 				});
-
-			}));
+			});
 
 
 			it("should not reconnect", () => {
