@@ -229,23 +229,21 @@ describe("HubConnection Specs", () => {
 
 		describe("given a connected connection", () => {
 
-			beforeEach(() => new Promise<void>(done => {
+			beforeEach(() => {
 				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
-				conn$$ = SUT.connect().subscribe(done);
-			}));
+				return SUT.connect().toPromise();
+			});
 
 			describe("when disconnect is invoked", () => {
 
-				it("should have status as disconnected", () => new Promise<void>(done => {
-					conn$$ = SUT.disconnect().pipe(
+				it("should have status as disconnected", ()  => {
+					return SUT.disconnect().pipe(
 						tap(() => hubBackend.disconnect()),
 						withLatestFrom(SUT.connectionState$, (_x, y) => y),
-					).subscribe({
-						next: state => expect(state.status).toBe(ConnectionStatus.disconnected),
-						complete: done
-					});
-				}));
+						tap(state => expect(state.status).toBe(ConnectionStatus.disconnected),
+					)).toPromise();
+				});
 
 			});
 
@@ -258,8 +256,7 @@ describe("HubConnection Specs", () => {
 					hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 				});
 
-				it("should reconnect", () => new Promise<void>(done => {
-
+				it("should reconnect", () => {
 					const reconnect$ = SUT.connectionState$.pipe(
 						first(),
 						tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
@@ -269,12 +266,11 @@ describe("HubConnection Specs", () => {
 							expect(state.status).toBe(ConnectionStatus.connected);
 							expect(hubStartSpy).toBeCalledTimes(1);
 							expect(hubStopSpy).not.toBeCalled();
-							done();
 						}),
 						first()
 					);
-					conn$$ = reconnect$.subscribe();
-				}));
+					return reconnect$.toPromise();
+				});
 
 			});
 
