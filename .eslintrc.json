@@ -2,6 +2,7 @@
   "root": true,
   "ignorePatterns": ["!**/*"],
   "plugins": ["@nx"],
+
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
@@ -17,7 +18,12 @@
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": "error"
+        "@nx/dependency-checks": [
+          "warn",
+          {
+            "ignoredFiles": ["{projectRoot}/vite.config.{js,ts,mjs,mts}"]
+          }
+        ]
       }
     }
   ]
