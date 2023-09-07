@@ -50,6 +50,7 @@
     "@nx/eslint-plugin": "16.8.0",
     "@nx/js": "16.8.0",
     "@nx/linter": "16.8.0",
+    "@nx/rollup": "16.8.0",
     "@nx/vite": "16.8.0",
     "@nx/workspace": "16.8.0",
     "@ssv/tools": "~0.10.3",
@@ -68,7 +69,6 @@
     "vite": "~4.3.9",
     "vitest": "~0.32.0"
   },
-  "type": "commonjs",
-  "main": "./src/index.js",
+  "type": "module",
   "typings": "./src/index.d.ts"
 }

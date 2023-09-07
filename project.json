@@ -5,14 +5,16 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/esbuild:esbuild",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "main": "./src/index.ts",
-        "outputPath": "dist/signalr-client",
-        "outputFileName": "main.js",
+        "outputPath": "dist",
         "tsConfig": "./tsconfig.lib.json",
+        "compiler": "tsc",
+        "project": "./package.json",
+        "format": ["cjs", "esm"],
         "assets": [{
           "glob": "./README.md",
           "input": ".",
@@ -20,11 +22,12 @@
         }]
       },
       "configurations": {
-        "development": {
-          "minify": false
-        },
         "production": {
-          "minify": true
+          "optimization": true,
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
         }
       }
     },
