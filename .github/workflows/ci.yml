@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - '*.x'
-      # - feature/* # todo: comment
     paths-ignore:
       - '**.md'
 

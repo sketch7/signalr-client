@@ -27,8 +27,7 @@
     "test": "nx test",
     "test-ui": "vitest --ui",
     "__CI__": "",
-    "pre-release-build": "echo TODO: version placeholder as gitaction or script",
-    "_pre-release-build": "gulp prebuild:rel",
+    "_pre-release-build": "echo hook for pre-release-build",
     "release": "npm publish ./dist --access=public"
   },
   "author": "Stephen Lautier <stephen.lautier@outlook.com>, Clayton Lautier <clayton.lautier@outlook.com>",
