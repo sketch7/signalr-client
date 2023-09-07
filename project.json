@@ -5,13 +5,27 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/ssv",
         "main": "./src/index.ts",
+        "outputPath": "dist/signalr-client",
+        "outputFileName": "main.js",
         "tsConfig": "./tsconfig.lib.json",
-        "assets": ["*.md"]
+        "assets": [{
+          "glob": "./README.md",
+          "input": ".",
+          "output": "."
+        }]
+      },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
       }
     },
     "lint": {
@@ -26,7 +40,7 @@
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "passWithNoTests": true,
-        "reportsDirectory": "coverage/ssv"
+        "reportsDirectory": "coverage/signalr-client"
       }
     }
   },
