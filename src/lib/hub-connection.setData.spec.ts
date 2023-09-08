@@ -1,4 +1,4 @@
-import { first, switchMap, tap, withLatestFrom } from "rxjs/operators";
+import { lastValueFrom, first, switchMap, tap, withLatestFrom  } from "rxjs";
 import { Mock, SpyInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
@@ -31,7 +31,7 @@ describe("HubConnection - setData Specs", () => {
 		beforeEach(() => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
-			const connect$ = SUT.connect().toPromise();
+			const connect$ = lastValueFrom(SUT.connect());
 			hubStartSpy = vi.spyOn(hubBackend.connection, "start");
 			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 			hubBuilderWithUrlSpy = vi.spyOn(mockConnBuilder, "withUrl");
@@ -45,7 +45,7 @@ describe("HubConnection - setData Specs", () => {
 
 		describe("when data changes", () => {
 
-			it("should reconnect with new data", () => SUT.connectionState$.pipe(
+			it("should reconnect with new data", () => lastValueFrom(SUT.connectionState$.pipe(
 				first(),
 				tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
 				tap(() => SUT.setData(() => ({
@@ -60,7 +60,7 @@ describe("HubConnection - setData Specs", () => {
 					expect(state.status).toBe(ConnectionStatus.connected);
 				}),
 				first()
-			).toPromise());
+			)));
 
 		});
 
@@ -74,16 +74,16 @@ describe("HubConnection - setData Specs", () => {
 
 			beforeEach(() => {
 				SUT.setData(() => ({ ...data }));
-				return SUT.connectionState$.pipe(
+				return lastValueFrom(SUT.connectionState$.pipe(
 					first(),
 					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-				).toPromise().then(() => {
+				)).then(() => {
 					hubStartSpy.mockClear();
 					hubStopSpy.mockClear();
 				});
 			});
 
-			it("should not reconnect", () => SUT.connectionState$.pipe(
+			it("should not reconnect", () => lastValueFrom(SUT.connectionState$.pipe(
 				first(),
 				tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
 				tap(() => SUT.setData(() => ({ ...data }))),
@@ -94,7 +94,7 @@ describe("HubConnection - setData Specs", () => {
 					expect(state.status).toBe(ConnectionStatus.disconnected);
 				}),
 				first()
-			).toPromise());
+			)));
 
 		});
 
@@ -112,7 +112,7 @@ describe("HubConnection - setData Specs", () => {
 
 		describe("when data changes", () => {
 
-			it("should not connect", () => SUT.connectionState$.pipe(
+			it("should not connect", () => lastValueFrom(SUT.connectionState$.pipe(
 				first(),
 				tap(() => SUT.setData(() => ({
 					hero: "rexxar",
@@ -124,7 +124,7 @@ describe("HubConnection - setData Specs", () => {
 					expect(hubStopSpy).not.toBeCalled();
 					expect(state.status).toBe(ConnectionStatus.disconnected);
 				}),
-			).toPromise());
+			)));
 
 		});
 

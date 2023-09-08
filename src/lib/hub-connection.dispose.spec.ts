@@ -1,3 +1,4 @@
+import { lastValueFrom } from "rxjs";
 import { Mock, SpyInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
@@ -25,7 +26,7 @@ describe("HubConnection - dispose Specs", () => {
 			SUT = createSUT();
 			hubBackend = mockConnBuilder.getBackend();
 			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
-			return SUT.connect().toPromise();
+			return lastValueFrom(SUT.connect());
 		});
 
 		it("should close connection", () => {

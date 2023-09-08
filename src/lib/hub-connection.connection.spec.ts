@@ -1,6 +1,5 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription, merge } from "rxjs";
-import { first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs/operators";
+import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs";
 import type { Mock, SpyInstance } from "vitest";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
@@ -213,16 +212,19 @@ describe("HubConnection Specs", () => {
 			beforeEach(() => {
 				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
-				return SUT.connect().toPromise();
+				return lastValueFrom(SUT.connect());
 			});
 
 			describe("when disconnect is invoked", () => {
 
-				it("should have status as disconnected", ()  => SUT.disconnect().pipe(
-					tap(() => hubBackend.disconnect()),
-					withLatestFrom(SUT.connectionState$, (_x, y) => y),
-					tap(state => expect(state.status).toBe(ConnectionStatus.disconnected),
-					)).toPromise());
+				it("should have status as disconnected", ()  => {
+					const test$ = SUT.disconnect().pipe(
+						tap(() => hubBackend.disconnect()),
+						withLatestFrom(SUT.connectionState$, (_x, y) => y),
+						tap(state => expect(state.status).toBe(ConnectionStatus.disconnected)
+						));
+					return lastValueFrom(test$);
+				});
 
 			});
 
@@ -247,7 +249,7 @@ describe("HubConnection Specs", () => {
 						}),
 						first()
 					);
-					return reconnect$.toPromise();
+					return lastValueFrom(reconnect$);
 				});
 
 			});

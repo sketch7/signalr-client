@@ -1,12 +1,12 @@
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, scan, delayWhen, distinctUntilChanged, mapTo, takeUntil
+	retryWhen, scan, delayWhen, distinctUntilChanged, takeUntil
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
 	HubConnectionBuilder as SignalRHubConnectionBuilder,
 } from "@microsoft/signalr";
-import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject } from "rxjs";
 
 import {
 	ConnectionState, ConnectionStatus, HubConnectionOptions,
@@ -216,14 +216,14 @@ export class HubConnection<THub> {
 	private untilDisconnects$(): Observable<void> {
 		return this.connectionState$.pipe(
 			first(state => state.status !== ConnectionStatus.connected),
-			mapTo(undefined),
+			map(() => undefined),
 		);
 	}
 
 	private untilDesiredDisconnects$() {
 		return this.desiredState$.pipe(
 			first(state => state === DesiredConnectionStatus.disconnected),
-			mapTo(undefined),
+			map(() => undefined),
 		);
 	}
 

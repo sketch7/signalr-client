@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 
 export default defineConfig({
-	cacheDir: './node_modules/.vite/signalr-client',
+	cacheDir: "./node_modules/.vite/signalr-client",
 
 	plugins: [nxViteTsPaths()],
 
@@ -16,9 +16,9 @@ export default defineConfig({
 	test: {
 		globals: true,
 		cache: {
-			dir: './node_modules/.vitest',
+			dir: "./node_modules/.vitest",
 		},
-		environment: 'node',
-		include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+		environment: "node",
+		include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
 	},
 });
