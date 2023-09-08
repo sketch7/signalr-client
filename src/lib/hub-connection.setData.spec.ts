@@ -26,7 +26,6 @@ describe("HubConnection - setData Specs", () => {
 		SUT.dispose();
 	});
 
-
 	describe("given a connected connection", () => {
 
 		beforeEach(() => {
@@ -44,32 +43,26 @@ describe("HubConnection - setData Specs", () => {
 			hubStopSpy.mockClear();
 		});
 
-
 		describe("when data changes", () => {
 
-
-			it("should reconnect with new data", () => {
-				return SUT.connectionState$.pipe(
-					first(),
-					tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-					tap(() => SUT.setData(() => ({
-						hero: "rexxar",
-						power: "1337"
-					}))),
-					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-					tap(state => {
-						expect(hubStartSpy).toBeCalledTimes(1);
-						expect(hubStopSpy).toBeCalledTimes(1);
-						expect(hubBuilderWithUrlSpy).toHaveBeenLastCalledWith("/hero?tenant=kowalski&power=1337&hero=rexxar", expect.any(Object));
-						expect(state.status).toBe(ConnectionStatus.connected);
-					}),
-					first()
-				).toPromise();
-			});
-
+			it("should reconnect with new data", () => SUT.connectionState$.pipe(
+				first(),
+				tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
+				tap(() => SUT.setData(() => ({
+					hero: "rexxar",
+					power: "1337"
+				}))),
+				switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+				tap(state => {
+					expect(hubStartSpy).toBeCalledTimes(1);
+					expect(hubStopSpy).toBeCalledTimes(1);
+					expect(hubBuilderWithUrlSpy).toHaveBeenLastCalledWith("/hero?tenant=kowalski&power=1337&hero=rexxar", expect.any(Object));
+					expect(state.status).toBe(ConnectionStatus.connected);
+				}),
+				first()
+			).toPromise());
 
 		});
-
 
 		describe.skip("when data has not changed", () => {
 		// describe("when data has not changed", () => {
@@ -90,28 +83,22 @@ describe("HubConnection - setData Specs", () => {
 				});
 			});
 
-
-			it("should not reconnect", () => {
-				return SUT.connectionState$.pipe(
-					first(),
-					tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-					tap(() => SUT.setData(() => ({ ...data }))),
-					switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
-					tap(state => {
-						expect(hubStartSpy).not.toBeCalled();
-						expect(hubStopSpy).not.toBeCalled();
-						expect(state.status).toBe(ConnectionStatus.disconnected);
-					}),
-					first()
-				).toPromise();
-			});
-
+			it("should not reconnect", () => SUT.connectionState$.pipe(
+				first(),
+				tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
+				tap(() => SUT.setData(() => ({ ...data }))),
+				switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+				tap(state => {
+					expect(hubStartSpy).not.toBeCalled();
+					expect(hubStopSpy).not.toBeCalled();
+					expect(state.status).toBe(ConnectionStatus.disconnected);
+				}),
+				first()
+			).toPromise());
 
 		});
 
-
 	});
-
 
 	describe("given a disconnected connection", () => {
 
@@ -123,31 +110,24 @@ describe("HubConnection - setData Specs", () => {
 			hubBuilderWithUrlSpy = vi.spyOn(mockConnBuilder, "withUrl");
 		});
 
-
 		describe("when data changes", () => {
 
-
-			it("should not connect", () => {
-				return SUT.connectionState$.pipe(
-					first(),
-					tap(() => SUT.setData(() => ({
-						hero: "rexxar",
-						power: "1337"
-					}))),
-					withLatestFrom(SUT.connectionState$, (_x, y) => y),
-					tap(state => {
-						expect(hubStartSpy).not.toBeCalled();
-						expect(hubStopSpy).not.toBeCalled();
-						expect(state.status).toBe(ConnectionStatus.disconnected);
-					}),
-				).toPromise();
-			});
-
+			it("should not connect", () => SUT.connectionState$.pipe(
+				first(),
+				tap(() => SUT.setData(() => ({
+					hero: "rexxar",
+					power: "1337"
+				}))),
+				withLatestFrom(SUT.connectionState$, (_x, y) => y),
+				tap(state => {
+					expect(hubStartSpy).not.toBeCalled();
+					expect(hubStopSpy).not.toBeCalled();
+					expect(state.status).toBe(ConnectionStatus.disconnected);
+				}),
+			).toPromise());
 
 		});
 
-
 	});
-
 
 });

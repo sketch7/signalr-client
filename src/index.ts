@@ -1,1 +1,1 @@
-﻿export * from './lib/signalr-client';
+﻿export * from "./lib/signalr-client";

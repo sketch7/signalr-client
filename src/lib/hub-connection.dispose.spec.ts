@@ -28,15 +28,12 @@ describe("HubConnection - dispose Specs", () => {
 			return SUT.connect().toPromise();
 		});
 
-
 		it("should close connection", () => {
 			SUT.dispose();
 			expect(hubStopSpy).toBeCalledTimes(1);
 		});
 
-
 	});
-
 
 	describe("given a disconnected connection", () => {
 
@@ -45,7 +42,6 @@ describe("HubConnection - dispose Specs", () => {
 			hubBackend = mockConnBuilder.getBackend();
 			hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
 		});
-
 
 		it("should dispose correctly", () => {
 			const connStateComplete = vi.fn();
@@ -57,8 +53,6 @@ describe("HubConnection - dispose Specs", () => {
 			expect(connStateComplete).toBeCalledTimes(1);
 		});
 
-
 	});
-
 
 });

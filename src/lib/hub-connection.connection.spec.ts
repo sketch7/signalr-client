@@ -1,7 +1,7 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, merge } from "rxjs";
 import { first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs/operators";
-import type { Mock, SpyInstance } from 'vitest'
+import type { Mock, SpyInstance } from "vitest";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
@@ -33,7 +33,6 @@ describe("HubConnection Specs", () => {
 
 	describe("Connection Specs", () => {
 
-
 		describe("given a disconnected connection", () => {
 
 			beforeEach(() => {
@@ -62,9 +61,7 @@ describe("HubConnection Specs", () => {
 						// todo: convert to promise
 					}));
 
-
 				});
-
 
 				describe("and while connecting disconnect was invoked", () => {
 
@@ -73,9 +70,7 @@ describe("HubConnection Specs", () => {
 						hubBackend.connection.stop = vi.fn().mockReturnValue(promiseDelayResolve(5));
 					});
 
-
 					describe("and connects successfully", () => {
-
 
 						// connect -> WHILE CONNECTING -> disconnect
 						it("should have status disconnected", () => new Promise<void>(done => {
@@ -97,7 +92,6 @@ describe("HubConnection Specs", () => {
 
 						describe("and connects with different data", () => {
 
-
 							// connect -> WHILE CONNECTING -> disconnect -> connect with different data
 							it("should have status connected", () => new Promise<void>(done => {
 								const connect$ = SUT.connect();
@@ -117,19 +111,15 @@ describe("HubConnection Specs", () => {
 								conn$$ = merge(connect$, state$).subscribe();
 							}));
 
-
 						});
 
-
 					});
-
 
 					describe("and connect fails", () => {
 
 						beforeEach(() => {
 							hubBackend.connection.start = vi.fn().mockReturnValue(promiseDelayReject(5));
 						});
-
 
 						it("should have status disconnected", () => new Promise<void>(done => {
 							const connect$ = SUT.connect();
@@ -151,12 +141,9 @@ describe("HubConnection Specs", () => {
 							conn$$ = merge(connect$, state$).subscribe();
 						}));
 
-
 					});
 
-
 				});
-
 
 				describe("and fails to connect", () => {
 
@@ -178,7 +165,6 @@ describe("HubConnection Specs", () => {
 						conn$$ = merge(connect$, state$).subscribe();
 					}));
 
-
 					it("should emit error when retry attempts limit reached", () => new Promise<void>(done => {
 						// todo: try and use scheduler
 						SUT.connect().subscribe({
@@ -189,7 +175,6 @@ describe("HubConnection Specs", () => {
 						});
 
 					}));
-
 
 					describe("when disconnect is invoked", () => {
 
@@ -215,17 +200,13 @@ describe("HubConnection Specs", () => {
 							conn$$ = merge(SUT.connect(), triggerDisconnect).subscribe();
 						}));
 
-
 					});
 
-
 				});
-
 
 			});
 
 		});
-
 
 		describe("given a connected connection", () => {
 
@@ -237,16 +218,13 @@ describe("HubConnection Specs", () => {
 
 			describe("when disconnect is invoked", () => {
 
-				it("should have status as disconnected", ()  => {
-					return SUT.disconnect().pipe(
-						tap(() => hubBackend.disconnect()),
-						withLatestFrom(SUT.connectionState$, (_x, y) => y),
-						tap(state => expect(state.status).toBe(ConnectionStatus.disconnected),
-					)).toPromise();
-				});
+				it("should have status as disconnected", ()  => SUT.disconnect().pipe(
+					tap(() => hubBackend.disconnect()),
+					withLatestFrom(SUT.connectionState$, (_x, y) => y),
+					tap(state => expect(state.status).toBe(ConnectionStatus.disconnected),
+					)).toPromise());
 
 			});
-
 
 			describe("when disconnects", () => {
 
@@ -274,11 +252,8 @@ describe("HubConnection Specs", () => {
 
 			});
 
-
 		});
 
-
 	});
-
 
 });
