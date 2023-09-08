@@ -1,3 +1,14 @@
+## [5.0.0](https://github.com/sketch7/signalr-client/compare/4.1.0...5.0.0) (2023-09-08)
+
+### Features
+
+- **deps** export `DesiredConnectionStatus`
+
+### BREAKING CHANGES
+
+- **deps** changed `@microsoft/signalr: ^7.0.0` as `peerDependency`
+- **build** output as `esm` and `cjs`
+
 ## [4.1.0](https://github.com/sketch7/signalr-client/compare/4.0.0...4.1.0) (2022-11-24)
 
 ### Features
