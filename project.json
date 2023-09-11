@@ -1,0 +1,51 @@
+{
+  "name": "signalr-client",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "./src/index.ts",
+        "outputPath": "dist",
+        "tsConfig": "./tsconfig.lib.json",
+        "compiler": "tsc",
+        "project": "./package.json",
+        "format": ["cjs", "esm"],
+        "assets": [{
+          "glob": "./README.md",
+          "input": ".",
+          "output": "."
+        }]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["./**/*.ts", "./package.json"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "coverage/signalr-client"
+      }
+    }
+  },
+  "tags": []
+}

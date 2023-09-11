@@ -1,19 +1,41 @@
 {
-  "extends": "./node_modules/@ssv/tools/config/tsconfig.json",
+  // "extends": "./node_modules/@ssv/tools/config/tsconfig.json",
   "compilerOptions": {
-    "importHelpers": true,
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     // "noUnusedParameters": false,
     // "noUnusedLocals": false,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ssv/signalr-client": [
+        "src/index.ts"
+      ]
+    },
     "types": [
-      "jest"
+      "vitest"
     ]
   },
-  "include": [
-    "src/**/*",
-  ],
-  "plugins": [
+  "files": [],
+  "include": [],
+  "references": [
     {
-      "name": "typescript-tslint-plugin"
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ]
 }

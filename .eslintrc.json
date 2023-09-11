@@ -1,0 +1,57 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "!**/*"
+  ],
+  "plugins": [
+    "@nx",
+    "@typescript-eslint"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "vite.config.ts"
+      ],
+      "extends": [
+        "plugin:@nx/typescript",
+        "plugin:@typescript-eslint/recommended",
+        "./node_modules/@ssv/tools/config/typescript-recommended.json"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.lint.json"
+      },
+      "rules": {}
+    },
+    {
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
+      "extends": [
+        "plugin:@nx/javascript"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "*.json"
+      ],
+      "parser": "jsonc-eslint-parser",
+      "rules": {
+        "@nx/dependency-checks": [
+          "warn",
+          {
+            "ignoredFiles": [
+              "{projectRoot}/vite.config.{js,ts,mjs,mts}"
+            ],
+            "ignoredDependencies": [
+              "vitest"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

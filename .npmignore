@@ -5,17 +5,20 @@ node_modules
 /typings
 /src
 /test
+/examples
 /build
 /tools
 /.idea
 /.vscode
 /.circleci
 /.cache
+/.github
 npm-debug.log
 *.tgz
 
 _artifact
 .eslintrc
+.eslintrc.js
 .stylelintrc
 .editorconfig
 .gitignore

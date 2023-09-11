@@ -6,7 +6,7 @@
 [npm]: https://www.npmjs.com/package/@ssv/signalr-client
 
 # @ssv/signalr-client
-[![CircleCI](https://circleci.com/gh/sketch7/signalr-client.svg?style=shield)](https://circleci.com/gh/sketch7/signalr-client)
+[![CI](https://github.com/sketch7/signalr-client/actions/workflows/ci.yml/badge.svg)](https://github.com/sketch7/signalr-client/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/%40ssv%2Fsignalr-client.svg)](https://badge.fury.io/js/%40ssv%2Fsignalr-client)
 
 SignalR client library built on top of **@aspnet/signalr**. This gives you more features and easier to use.
