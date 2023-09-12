@@ -50,15 +50,40 @@ describe("HubConnection Specs", () => {
 
 				describe("and connected successfully", () => {
 
-					it("should have status as connected", () => new Promise<void>(done => {
-						conn$$ = SUT.connect().pipe(
-							withLatestFrom(SUT.connectionState$, (_x, y) => y),
-						).subscribe({
-							next: state => expect(state.status).toBe(ConnectionStatus.connected),
-							complete: done
-						});
-						// todo: convert to promise
-					}));
+					it("should have status as connected", async () => {
+						await lastValueFrom(SUT.connect());
+
+						const state = await lastValueFrom(SUT.connectionState$.pipe(
+							delay(20),
+							first(),
+						));
+
+						expect(state.status).toBe(ConnectionStatus.connected);
+					});
+
+				});
+
+				describe("and invoked again concurrently", () => {
+
+					beforeEach(() => {
+						hubBackend.connection.start = vi.fn().mockReturnValue(promiseDelayResolve(5));
+						hubBackend.connection.stop = vi.fn().mockReturnValue(promiseDelayResolve(5));
+					});
+
+					it("should connect once", async () =>  {
+						const c1$ = lastValueFrom(SUT.connect());
+						const c2$ = lastValueFrom(SUT.connect());
+
+						await Promise.all([c1$, c2$]);
+
+						const state = await lastValueFrom(SUT.connectionState$.pipe(
+							delay(20),
+							first(),
+						));
+
+						expect(state.status).toBe(ConnectionStatus.connected);
+						expect(hubBackend.connection.start).toHaveBeenCalledTimes(1);
+					});
 
 				});
 
@@ -217,7 +242,7 @@ describe("HubConnection Specs", () => {
 
 			describe("when disconnect is invoked", () => {
 
-				it("should have status as disconnected", ()  => {
+				it("should have status as disconnected", () => {
 					const test$ = SUT.disconnect().pipe(
 						tap(() => hubBackend.disconnect()),
 						withLatestFrom(SUT.connectionState$, (_x, y) => y),

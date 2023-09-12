@@ -126,8 +126,8 @@ export class HubConnection<THub> {
 	connect(data?: () => Dictionary<string>): Observable<void> {
 		// console.warn("[connect] init", data);
 		this.desiredState$.next(DesiredConnectionStatus.connected);
-		if (this.internalConnStatus$.value === InternalConnectionStatus.connected) {
-			console.warn(`${this.source} session already connected`);
+		if (this._connectionState$.value.status !== ConnectionStatus.disconnected) {
+			console.warn(`${this.source} session already connecting/connected`);
 			return emptyNext();
 		}
 		if (data) {

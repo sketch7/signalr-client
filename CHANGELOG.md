@@ -5,6 +5,10 @@
 - **hub connection:** expose `HubConnection.connectionId`
 - **deps:** export `DesiredConnectionStatus`
 
+### Bug Fixes
+
+- **hub connection:** concurrent `connect()` remain in invalid state causing connecting/disconnecting
+
 ### BREAKING CHANGES
 
 - **deps:** changed `@microsoft/signalr: ^7.0.0` as `peerDependency`
