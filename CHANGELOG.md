@@ -2,24 +2,25 @@
 
 ### Features
 
-- **deps** export `DesiredConnectionStatus`
+- **hub connection:** expose `HubConnection.connectionId`
+- **deps:** export `DesiredConnectionStatus`
 
 ### BREAKING CHANGES
 
-- **deps** changed `@microsoft/signalr: ^7.0.0` as `peerDependency`
-- **build** output as `esm` and `cjs`
+- **deps:** changed `@microsoft/signalr: ^7.0.0` as `peerDependency`
+- **build:** output as `esm` and `cjs`
 
 ## [4.1.0](https://github.com/sketch7/signalr-client/compare/4.0.0...4.1.0) (2022-11-24)
 
 ### Features
 
-- **deps** update `@microsoft/signalr: ^7.0.0`
+- **deps:** update `@microsoft/signalr: ^7.0.0`
 
 ## [4.0.0](https://github.com/sketch7/signalr-client/compare/3.1.0...4.0.0) (2022-11-24)
 
 ### Features
 
-- **deps** update `@microsoft/signalr: ^6.0.11`
+- **deps:** update `@microsoft/signalr: ^6.0.11`
 
 ### BREAKING CHANGES
 
