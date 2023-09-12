@@ -25,8 +25,14 @@ const connectingState = Object.freeze<ConnectionState>({ status: ConnectionStatu
 // todo: rename HubClient?
 export class HubConnection<THub> {
 
+	/** Gets the connection state. */
 	get connectionState$(): Observable<ConnectionState> { return this._connectionState$.asObservable(); }
+
+	/** Gets the key for the hub client. */
 	get key(): string { return this._key; }
+
+	/** Gets the `connectionId` of the hub connection (from SignalR). */
+	get connectionId(): string | null { return this.hubConnection?.connectionId; }
 
 	private _key: string;
 	private source: string;
