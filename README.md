@@ -42,7 +42,7 @@ SignalR client library built on top of **@aspnet/signalr**. This gives you more 
 Get library via [npm]
 
 ```bash
-npm install @ssv/signalr-client
+npm install @ssv/signalr-client @microsoft/signalr
 ```
 
 ## API Documentation
