@@ -71,65 +71,64 @@ Continue from the [vanilla usage - step 2](#usage) onwards
 import { HubConnectionFactory } from "@ssv/signalr-client";
 
 @NgModule({
-	providers: [
-		HubConnectionFactory,
-		...
-	]
+  providers: [
+    HubConnectionFactory,
+    ...
+  ]
 })
 export class AppModule {
 
     constructor(factory: HubConnectionFactory) {
-		factory.create(
-			{ key: "hero", endpointUri: "/hero" },
-			{ key: "user", endpointUri: "/userNotifications" }
-		);
-	}
+    factory.create(
+      { key: "hero", endpointUri: "/hero" },
+      { key: "user", endpointUri: "/userNotifications" }
+    );
+  }
 }
 ```
 
 *sample usage in components:*
 ```ts
-import { ISubscription } from "rxjs/Subscription";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { HubConnectionFactory, HubConnection } from "@ssv/signalr-client";
 
 @Component({
-	selector: "hero-detail",
-	templateUrl: "./hero-detail.component.html"
+  selector: "hero-detail",
+  templateUrl: "./hero-detail.component.html"
 })
 export class HeroDetailComponent implements OnInit, OnDestroy {
 
-	private hubConnection: HubConnection<HeroHub>;
-	private hero$$: ISubscription;
-  private hubConnection$$: ISubscription;
+  private hubConnection: HubConnection<HeroHub>;
+  private readonly _destroy$ = new Subject<void>();
 
-	constructor(hubFactory: HubConnectionFactory) {
-		this.hubConnection = hubFactory.get<HeroHub>("hero");
-	}
+  constructor(hubFactory: HubConnectionFactory) {
+    this.hubConnection = hubFactory.get<HeroHub>("hero");
+  }
 
-	ngOnInit(): void {
-  	this.hubConnection$$ = this.hubConnection.connect()
-			.subscribe(() => console.log(`connected!!`));
-      
-		this.hero$$ = this.hubConnection.stream<Hero>("GetUpdates", "singed")
-		.subscribe(x => console.log(`hero stream :: singed :: update received`, x));
-	}
+  ngOnInit(): void {
+    this.hubConnection.connect().pipe(
+      takeUntil(this._destroy$),
+    ).subscribe(() => console.log(`connected!!`));
 
-	ngOnDestroy(): void {
-		if (this.hero$$) {
-			this.hero$$.unsubscribe();
-		}
-	}
+    this.hubConnection.on<Hero>("HeroChanged", "singed").pipe(
+      takeUntil(this._destroy$),
+    ).subscribe(x => console.log(`hero :: singed :: update received`, x));
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
 }
 
 export interface HeroHub {
-	GetUpdates: string;
+  HeroChanged: string;
 }
 
 export interface Hero {
-	id: string;
-	name: string;
-	health: number;
+  id: string;
+  name: string;
+  health: number;
 }
 ```
 
