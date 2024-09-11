@@ -10,12 +10,13 @@
     // "noUnusedParameters": false,
     // "noUnusedLocals": false,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "ES2022",
     "module": "esnext",
     "lib": [
-      "es2020",
+      "es2022",
       "dom"
     ],
+    // "composite": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",

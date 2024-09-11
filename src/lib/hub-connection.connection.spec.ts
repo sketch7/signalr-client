@@ -1,6 +1,6 @@
 import { HubConnection } from "./hub-connection";
 import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs";
-import type { Mock, SpyInstance } from "vitest";
+import type { Mock, MockInstance } from "vitest";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
 import { ConnectionStatus } from "./hub-connection.model";
@@ -21,9 +21,9 @@ describe("HubConnection Specs", () => {
 	let hubBackend: MockSignalRHubBackend;
 	let conn$$ = Subscription.EMPTY;
 	// let hubStartSpy: jest.SpyInstance<Promise<void>>;
-	let hubStartSpy: SpyInstance<[], Promise<void>>;
+	let hubStartSpy: MockInstance<[], Promise<void>>;
 	// let hubStopSpy: jest.SpyInstance<Promise<void>>;
-	let hubStopSpy: SpyInstance<[], Promise<void>>;
+	let hubStopSpy: MockInstance<[], Promise<void>>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();

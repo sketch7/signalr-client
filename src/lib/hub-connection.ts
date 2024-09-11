@@ -244,7 +244,7 @@ export class HubConnection<THub> {
 				scan((errorCount: number) => ++errorCount, 0),
 				delayWhen((retryCount: number) => {
 					if (this.retry.maximumAttempts && retryCount > this.retry.maximumAttempts) {
-						return throwError(new Error(errorCodes.retryLimitsReached));
+						return throwError(() => new Error(errorCodes.retryLimitsReached));
 					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
 					// eslint-disable-next-line max-len
