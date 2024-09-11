@@ -1,5 +1,5 @@
 import { lastValueFrom } from "rxjs";
-import { Mock, SpyInstance } from "vitest";
+import { Mock, MockInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
@@ -13,7 +13,7 @@ describe("HubConnection - dispose Specs", () => {
 	let SUT: HubConnection<HeroHub>;
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	let hubStopSpy: SpyInstance<[], Promise<void>>;
+	let hubStopSpy: MockInstance<[], Promise<void>>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();

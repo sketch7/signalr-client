@@ -4,26 +4,26 @@ on:
   push:
     branches:
       - master
-      - '*.x'
+      - "*.x"
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
   pull_request:
     branches:
       - master
-      - '*.x'
+      - "*.x"
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Publish 🚀'
+        description: "Publish 🚀"
         required: false
         type: boolean
         default: false
       force-prerelease:
-        description: 'Force Pre-release'
+        description: "Force Pre-release"
         required: false
         type: boolean
         default: true
@@ -31,9 +31,9 @@ on:
 jobs:
   package:
     name: Package
-    uses: sketch7/.github/.github/workflows/node-lib.yml@master
+    uses: sketch7/.github/.github/workflows/node-lib.yml@node-libs-v1
     with:
-      node-version: '18'
+      node-version: "18"
       publishable: ${{ contains(fromJSON('["develop", "master", "workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x') || github.event.inputs.publish == 'true' }}
       force-preid: ${{ github.event.inputs.force-prerelease == 'true' }}
     secrets:

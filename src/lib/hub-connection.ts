@@ -1,7 +1,7 @@
 import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, scan, delayWhen, distinctUntilChanged, takeUntil
+	retryWhen, delayWhen, distinctUntilChanged, takeUntil,retry
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
@@ -240,11 +240,10 @@ export class HubConnection<THub> {
 			tap(() => this._connectionState$.next(connectingState)),
 			switchMap(() => from(this.hubConnection.start())),
 			// tap(x => console.warn(">>>> [openConnection] - connection established", x)),
-			retryWhen(errors => errors.pipe(
-				scan((errorCount: number) => ++errorCount, 0),
-				delayWhen((retryCount: number) => {
+			retry({
+				delay: (error, retryCount) => {
 					if (this.retry.maximumAttempts && retryCount > this.retry.maximumAttempts) {
-						return throwError(new Error(errorCodes.retryLimitsReached));
+						return throwError(() => new Error(errorCodes.retryLimitsReached));
 					}
 					const nextRetryMs = getReconnectionDelay(this.retry, retryCount);
 					// eslint-disable-next-line max-len
@@ -258,8 +257,8 @@ export class HubConnection<THub> {
 					this.hubConnectionOptions$.next(this.hubConnectionOptions$.value);
 
 					return timer(nextRetryMs);
-				})
-			)),
+				}
+			}),
 			tap(() => this.internalConnStatus$.next(InternalConnectionStatus.connected)),
 			tap(() => this._connectionState$.next(connectedState)),
 			takeUntil(this.untilDesiredDisconnects$()),

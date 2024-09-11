@@ -3,6 +3,7 @@
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "src",
   "projectType": "library",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -32,10 +33,9 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["./**/*.ts", "./package.json"]
+        "lintFilePatterns": ["src", "{projectRoot}/**/*.ts", "{projectRoot}/package.json"]
       }
     },
     "test": {
@@ -46,6 +46,5 @@
         "reportsDirectory": "coverage/signalr-client"
       }
     }
-  },
-  "tags": []
+  }
 }

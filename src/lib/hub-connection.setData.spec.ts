@@ -1,5 +1,5 @@
 import { lastValueFrom, first, switchMap, tap, withLatestFrom  } from "rxjs";
-import { Mock, SpyInstance } from "vitest";
+import { Mock, MockInstance } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
@@ -13,9 +13,9 @@ describe("HubConnection - setData Specs", () => {
 	let SUT: HubConnection<HeroHub>;
 	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	let hubStartSpy: SpyInstance<[], Promise<void>>;
-	let hubStopSpy: SpyInstance<[], Promise<void>>;
-	let hubBuilderWithUrlSpy: SpyInstance<[], MockSignalRHubConnectionBuilder>;
+	let hubStartSpy: MockInstance<[], Promise<void>>;
+	let hubStopSpy: MockInstance<[], Promise<void>>;
+	let hubBuilderWithUrlSpy: MockInstance<[], MockSignalRHubConnectionBuilder>;
 
 	beforeEach(() => {
 		mockConnBuilder = new MockSignalRHubConnectionBuilder();
