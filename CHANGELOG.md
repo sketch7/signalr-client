@@ -1,3 +1,9 @@
+## [5.0.1](https://github.com/sketch7/signalr-client/compare/5.0.0...5.0.1) (2023-09-11)
+
+### Refactor
+
+- **hub connection:** convert `openConnection` `retryWhen` (deprecated) to `retry`
+
 ## [5.0.0](https://github.com/sketch7/signalr-client/compare/4.1.0...5.0.0) (2023-09-08)
 
 ### Features
