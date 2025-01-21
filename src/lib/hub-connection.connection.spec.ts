@@ -70,7 +70,7 @@ describe("HubConnection Specs", () => {
 						hubBackend.connection.stop = vi.fn().mockReturnValue(promiseDelayResolve(5));
 					});
 
-					it("should connect once", async () =>  {
+					it("should connect once", async () => {
 						const c1$ = lastValueFrom(SUT.connect());
 						const c2$ = lastValueFrom(SUT.connect());
 
@@ -225,6 +225,24 @@ describe("HubConnection Specs", () => {
 						}));
 
 					});
+
+				});
+
+				describe("and server is down", () => {
+
+					it("should emit error when retry attempts limit reached", () => new Promise<void>(done => {
+						// simulate websocket closed
+						hubBackend.connection.start = () => Promise.resolve().then(() => {
+							setTimeout(() => hubBackend.disconnect(new Error("Websocket closed.")), 500);
+						});
+
+						SUT.connect().subscribe({
+							error: () => {
+								expect(hubBackend.connection.start).toBeCalledTimes(4); // todo: should this be one extra then specified?
+								done();
+							},
+						});
+					}));
 
 				});
 
