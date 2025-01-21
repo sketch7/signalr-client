@@ -1,7 +1,7 @@
 import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, delayWhen, distinctUntilChanged, takeUntil, retry
+	retryWhen, delayWhen, distinctUntilChanged, takeUntil, retry,
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
@@ -108,10 +108,19 @@ export class HubConnection<THub> {
 			takeUntil(this._destroy$),
 		);
 
+		let retryCount = 0;
 		const reconnectOnDisconnect$ = this._connectionState$.pipe(
-			tap(x => console.warn(">>>> _connectionState$ state changed", x)),
+			// tap(x => console.warn(">>>> _connectionState$ state changed", x)),
 			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
-			tap(x => console.warn(">>>> reconnecting...", x)),
+			delayWhen(() => {
+				if (!retryCount) {
+					return emptyNext();
+				}
+				retryCount++
+				const delay = getReconnectionDelay(this.retry, retryCount);
+				// console.debug(`${this.source} reconnectWithThrottle :: retrying`, { retryCount, delay });
+				return timer(delay);
+			}),
 			switchMap(() => this.connect()),
 			takeUntil(this._destroy$),
 		);
