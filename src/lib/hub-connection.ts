@@ -297,11 +297,12 @@ export class HubConnection<THub> {
 		// this is a fallback for when max attempts are reached and will emit to reset the max attempt after a duration
 		const maxAttemptReset$ = onServerErrorDisconnect$.pipe(
 			switchMap(() => this._connectionState$.pipe(
-				filter(x => x.status === ConnectionStatus.connected),
 				switchMap(() => timer(this.retry.autoReconnectRecoverInterval || 900000)), // 15 minutes default
 				take(1),
 				takeUntil(
-					this.connectionState$.pipe(skip(1))
+					this.connectionState$.pipe(
+						filter(x => x.status === ConnectionStatus.connected)
+					)
 				),
 			)),
 			// tap(() => console.error(`${this.source} [reconnectOnDisconnect$] :: resetting max attempts`)),
