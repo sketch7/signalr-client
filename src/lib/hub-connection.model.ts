@@ -51,6 +51,7 @@ export interface ConnectionOptions extends IHttpConnectionOptions {
 
 export interface ReconnectionStrategyOptions {
 	maximumAttempts?: number;
+	autoReconnectRecoverIntervalMS?: number;
 	customStrategy?: (retryOptions: ReconnectionStrategyOptions, retryCount: number) => number;
 	randomBackOffStrategy?: RandomStrategyOptions;
 	randomStrategy?: RandomStrategyOptions;

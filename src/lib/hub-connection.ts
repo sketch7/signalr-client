@@ -1,11 +1,11 @@
-import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, EMPTY } from "rxjs";
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, EMPTY, merge } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
 	retryWhen, delayWhen, distinctUntilChanged, takeUntil, retry,
-	startWith,
 	scan,
 	catchError,
 	skip,
+	take,
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
@@ -290,10 +290,32 @@ export class HubConnection<THub> {
 	}
 
 	private reconnectOnDisconnect$(): Observable<void> {
-		return this.desiredState$.pipe(
-			filter(state => state === DesiredConnectionStatus.disconnected),
+		const onServerErrorDisconnect$ = this._connectionState$.pipe(
+			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+		);
+
+		// this is a fallback for when max attempts are reached and will emit to reset the max attempt after a duration
+		const maxAttemptReset$ = onServerErrorDisconnect$.pipe(
 			switchMap(() => this._connectionState$.pipe(
-				filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+				filter(x => x.status === ConnectionStatus.connected),
+				switchMap(() => timer(this.retry.autoReconnectRecoverIntervalMS || 900000)), // 15 minutes default
+				take(1),
+				takeUntil(
+					this.connectionState$.pipe(skip(1))
+				),
+			)),
+			// tap(() => console.error(`${this.source} [reconnectOnDisconnect$] :: resetting max attempts`)),
+		);
+
+		const onDisconnect$ = this.desiredState$.pipe(
+			filter(state => state === DesiredConnectionStatus.disconnected),
+		);
+
+		return merge(
+			onDisconnect$,
+			maxAttemptReset$,
+		).pipe(
+			switchMap(() => onServerErrorDisconnect$.pipe(
 				scan((attempts) => attempts += 1, 0),
 				map(retryCount => ({
 					retryCount,
