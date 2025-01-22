@@ -2,7 +2,9 @@
 
 ### Features
 
-- **hub connection:** throttle reconnect on disconnect
+- **hub connection:**
+  - throttle reconnect on disconnect and stop trying after max attempts
+  - add `autoReconnectRecoverIntervalMS` to reset max attempts after a duration
 
 ## [5.0.1](https://github.com/sketch7/signalr-client/compare/5.0.0...5.0.1) (2024-09-11)
 
