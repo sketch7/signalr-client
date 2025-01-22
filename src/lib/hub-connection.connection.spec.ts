@@ -1,5 +1,5 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs";
+import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize } from "rxjs";
 import type { Mock, MockInstance } from "vitest";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
@@ -7,6 +7,8 @@ import { ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@microsoft/signalr";
+
+const RETRY_MAXIMUM_ATTEMPTS = 3;
 function promiseDelayResolve(ms: number) {
 	return new Promise(r => setTimeout(r, ms));
 }
@@ -35,7 +37,7 @@ describe("HubConnection Specs", () => {
 		describe("given a disconnected connection", () => {
 
 			beforeEach(() => {
-				SUT = createSUT();
+				SUT = createSUT(RETRY_MAXIMUM_ATTEMPTS);
 				hubBackend = mockConnBuilder.getBackend();
 				hubStartSpy = vi.spyOn(hubBackend.connection, "start");
 				hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
@@ -235,7 +237,7 @@ describe("HubConnection Specs", () => {
 		describe("given a connected connection", () => {
 
 			beforeEach(() => {
-				SUT = createSUT();
+				SUT = createSUT(RETRY_MAXIMUM_ATTEMPTS);
 				hubBackend = mockConnBuilder.getBackend();
 				return lastValueFrom(SUT.connect());
 			});
@@ -273,6 +275,22 @@ describe("HubConnection Specs", () => {
 							expect(hubStopSpy).not.toBeCalled();
 						}),
 						first()
+					);
+					return lastValueFrom(reconnect$);
+				});
+
+				it("should stop reconnecting after maximum attempts", () => {
+					let retryCount = 0;
+					const reconnect$ = SUT.connectionState$.pipe(
+						filter(state => state.status === ConnectionStatus.connected),
+						takeWhile(() => retryCount < RETRY_MAXIMUM_ATTEMPTS),
+						tap(() => retryCount++),
+						tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+						finalize(() => {
+							expect(SUT.connectionState.status).toBe(ConnectionStatus.disconnected);
+							expect(hubStartSpy).toBeCalledTimes(3);
+							expect(hubStopSpy).not.toBeCalled();
+						})
 					);
 					return lastValueFrom(reconnect$);
 				});

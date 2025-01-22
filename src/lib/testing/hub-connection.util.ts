@@ -9,14 +9,14 @@ export interface HeroHub {
 	UpdateHero: string;
 }
 
-export function createSUT(): HubConnection<HeroHub> {
+export function createSUT(maximumAttempts: number): HubConnection<HeroHub> {
 	return new HubConnection<HeroHub>({
 		key: `hero-${nextUniqueId++}`,
 		endpointUri: "/hero",
 		defaultData: () => ({ tenant: "kowalski", power: "2000" }),
 		options: {
 			retry: {
-				maximumAttempts: 3,
+				maximumAttempts,
 				backOffStrategy: {
 					delayRetriesMs: 10,
 					maxDelayRetriesMs: 10

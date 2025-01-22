@@ -1,7 +1,11 @@
-import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, merge } from "rxjs";
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, EMPTY } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
 	retryWhen, delayWhen, distinctUntilChanged, takeUntil, retry,
+	startWith,
+	scan,
+	catchError,
+	skip,
 } from "rxjs/operators";
 import {
 	HubConnection as SignalRHubConnection,
@@ -24,6 +28,8 @@ const connectingState = Object.freeze<ConnectionState>({ status: ConnectionStatu
 
 // todo: rename HubClient?
 export class HubConnection<THub> {
+
+	get connectionState(): ConnectionState { return this._connectionState$.value; }
 
 	/** Gets the connection state. */
 	get connectionState$(): Observable<ConnectionState> { return this._connectionState$.asObservable(); }
@@ -108,7 +114,7 @@ export class HubConnection<THub> {
 			takeUntil(this._destroy$),
 		);
 
-		const reconnectOnDisconnect$ = this.getReconnectOnDisconnect$().pipe(
+		const reconnectOnDisconnect$ = this.reconnectOnDisconnect$().pipe(
 			takeUntil(this._destroy$),
 		);
 
@@ -283,40 +289,45 @@ export class HubConnection<THub> {
 		return data;
 	}
 
-	private getReconnectOnDisconnect$(): Observable<void> {
-		let retryCount = 0;
-		const timer$ = (): Observable<void> => {
-			if (!retryCount) {
-				return emptyNext();
-			}
-			retryCount++
-			const delay = getReconnectionDelay(this.retry, retryCount);
-			// console.debug(`${this.source} reconnectWithThrottle :: retrying`, { retryCount, delay });
-			return timer(delay).pipe(
-				map(() => undefined),
-			);
-		}
-
-		const reconnect$ = this._connectionState$.pipe(
-			// tap(x => console.warn(">>>> [reconnect$] _connectionState$ state changed", x)),
-			filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
-			// tap(() => console.warn(">>>> [reconnect$] reconnecting")),
-			switchMap(() => timer$().pipe(
-				switchMap(() => this.connect()),
-				takeUntil(this.untilDesiredDisconnects$()),
-			)),
-		);
-
-		const resetTimer$ = this.desiredState$.pipe(
+	private reconnectOnDisconnect$(): Observable<void> {
+		return this.desiredState$.pipe(
 			filter(state => state === DesiredConnectionStatus.disconnected),
-			map(() => undefined),
-			// tap(() => console.warn(">>>> [resetTimer$] reconnect$ timer reset")),
-			tap(() => retryCount = 0),
-		);
+			startWith(DesiredConnectionStatus.disconnected),
+			distinctUntilChanged(),
+			switchMap(() => this._connectionState$.pipe(
+				filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
+				scan((attempts) => attempts += 1, 0),
+				map(retryCount => ({
+					retryCount,
+					nextRetryMs: retryCount ? getReconnectionDelay(this.retry, retryCount) : 0
+				})),
+				switchMap(({ retryCount, nextRetryMs }) => {
+					if (this.retry.maximumAttempts && retryCount > this.retry.maximumAttempts) {
+						return throwError(() => new Error(errorCodes.retryLimitsReached));
+					}
 
-		return merge(
-			resetTimer$,
-			reconnect$,
+					const delay$ = !nextRetryMs
+						? emptyNext()
+						: timer(nextRetryMs).pipe(
+							map(() => undefined)
+						);
+					return delay$.pipe(
+						// tap(() => console.error(`${this.source} [reconnectOnDisconnect$] :: retrying`, {
+						// 	retryCount,
+						// 	nextRetryMs,
+						// 	maximumAttempts: this.retry.maximumAttempts,
+						// })),
+						switchMap(() => this.connect()),
+						// tap(() => console.error(">>>> [reconnectOnDisconnect$] connected")),
+						takeUntil(this.untilDesiredDisconnects$()),
+					);
+				}),
+				catchError(() => EMPTY),
+				takeUntil(this.desiredState$.pipe(
+					skip(1),
+					filter(state => state === DesiredConnectionStatus.disconnected),
+				)),
+			)),
 		);
 	}
 
