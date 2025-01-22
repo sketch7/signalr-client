@@ -298,7 +298,7 @@ export class HubConnection<THub> {
 		const maxAttemptReset$ = onServerErrorDisconnect$.pipe(
 			switchMap(() => this._connectionState$.pipe(
 				filter(x => x.status === ConnectionStatus.connected),
-				switchMap(() => timer(this.retry.autoReconnectRecoverIntervalMS || 900000)), // 15 minutes default
+				switchMap(() => timer(this.retry.autoReconnectRecoverInterval || 900000)), // 15 minutes default
 				take(1),
 				takeUntil(
 					this.connectionState$.pipe(skip(1))
