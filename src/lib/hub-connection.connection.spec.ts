@@ -1,5 +1,5 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize } from "rxjs";
+import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, concat } from "rxjs";
 import type { Mock, MockInstance } from "vitest";
 
 import { HeroHub, createSUT } from "./testing/hub-connection.util";
@@ -267,7 +267,7 @@ describe("HubConnection Specs", () => {
 					const reconnect$ = SUT.connectionState$.pipe(
 						first(),
 						tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-						tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+						tap(() => hubBackend.disconnect(new Error("Disconnected by the server for auto reconnect"))),
 						switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
 						tap(state => {
 							expect(state.status).toBe(ConnectionStatus.connected);
@@ -279,20 +279,36 @@ describe("HubConnection Specs", () => {
 					return lastValueFrom(reconnect$);
 				});
 
-				it("should stop reconnecting after maximum attempts", () => {
+				it("should stop reconnecting after maximum attempts and reset maximum attempts after retrigger disconnect + connect", () => {
 					let retryCount = 0;
 					const reconnect$ = SUT.connectionState$.pipe(
 						filter(state => state.status === ConnectionStatus.connected),
 						takeWhile(() => retryCount < RETRY_MAXIMUM_ATTEMPTS),
 						tap(() => retryCount++),
-						tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+						tap(() => hubBackend.disconnect(new Error("Disconnected by the server to exhaust max attempts"))),
 						finalize(() => {
 							expect(SUT.connectionState.status).toBe(ConnectionStatus.disconnected);
 							expect(hubStartSpy).toBeCalledTimes(3);
 							expect(hubStopSpy).not.toBeCalled();
 						})
 					);
-					return lastValueFrom(reconnect$);
+
+					const resetMaxAttempts$ = concat(reconnect$).pipe(
+						tap(() => SUT.disconnect()),
+						switchMap(() => SUT.connect()),
+						switchMap(() => SUT.connectionState$.pipe(
+							first(state => state.status === ConnectionStatus.connected),
+							tap(() => hubBackend.disconnect(new Error("Disconnected by the server to re-trigger auto reconnect"))),
+							switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+							tap(state => {
+								expect(hubStartSpy).toBeCalledTimes(4);
+								expect(state.status).toBe(ConnectionStatus.connected);
+							}),
+						)),
+						first(),
+					);
+
+					return lastValueFrom(resetMaxAttempts$);
 				});
 
 			});

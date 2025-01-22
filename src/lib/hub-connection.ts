@@ -292,8 +292,6 @@ export class HubConnection<THub> {
 	private reconnectOnDisconnect$(): Observable<void> {
 		return this.desiredState$.pipe(
 			filter(state => state === DesiredConnectionStatus.disconnected),
-			startWith(DesiredConnectionStatus.disconnected),
-			distinctUntilChanged(),
 			switchMap(() => this._connectionState$.pipe(
 				filter(x => x.status === ConnectionStatus.disconnected && x.reason === errorReasonName),
 				scan((attempts) => attempts += 1, 0),
