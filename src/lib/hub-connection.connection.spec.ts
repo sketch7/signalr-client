@@ -1,17 +1,29 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom } from "rxjs";
+import {
+	Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, Observable
+} from "rxjs";
 import type { Mock, MockInstance } from "vitest";
 
-import { HeroHub, createSUT } from "./testing/hub-connection.util";
-import { ConnectionStatus } from "./hub-connection.model";
+import { AUTO_RECONNECT_RECOVER_INTERVAL, HeroHub, RETRY_MAXIMUM_ATTEMPTS, createSUT } from "./testing/hub-connection.util";
+import { ConnectionState, ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@microsoft/signalr";
+
 function promiseDelayResolve(ms: number) {
 	return new Promise(r => setTimeout(r, ms));
 }
 function promiseDelayReject(ms: number, reason?: unknown) {
 	return new Promise((_, reject) => setTimeout(() => reject(reason), ms));
+}
+function exhaustHubRetryAttempts$(sut: HubConnection<HeroHub>, hubBackend: MockSignalRHubBackend): Observable<ConnectionState> {
+	let retryCount = 0;
+	return sut.connectionState$.pipe(
+		filter(state => state.status === ConnectionStatus.connected),
+		takeWhile(() => retryCount < RETRY_MAXIMUM_ATTEMPTS),
+		tap(() => retryCount++),
+		tap(() => hubBackend.disconnect(new Error("Disconnected by the server to exhaust max attempts"))),
+	);
 }
 
 describe("HubConnection Specs", () => {
@@ -70,7 +82,7 @@ describe("HubConnection Specs", () => {
 						hubBackend.connection.stop = vi.fn().mockReturnValue(promiseDelayResolve(5));
 					});
 
-					it("should connect once", async () =>  {
+					it("should connect once", async () => {
 						const c1$ = lastValueFrom(SUT.connect());
 						const c2$ = lastValueFrom(SUT.connect());
 
@@ -253,7 +265,7 @@ describe("HubConnection Specs", () => {
 
 			});
 
-			describe("when disconnects", () => {
+			describe("when disconnects from server", () => {
 
 				beforeEach(() => {
 					// todo: check if redundant
@@ -265,7 +277,7 @@ describe("HubConnection Specs", () => {
 					const reconnect$ = SUT.connectionState$.pipe(
 						first(),
 						tap(state => expect(state.status).toBe(ConnectionStatus.connected)),
-						tap(() => hubBackend.disconnect(new Error("Disconnected by the server"))),
+						tap(() => hubBackend.disconnect(new Error("Disconnected by the server for auto reconnect"))),
 						switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
 						tap(state => {
 							expect(state.status).toBe(ConnectionStatus.connected);
@@ -275,6 +287,54 @@ describe("HubConnection Specs", () => {
 						first()
 					);
 					return lastValueFrom(reconnect$);
+				});
+
+				describe("and server is encountering issues", () => {
+
+					it("should stop reconnecting after maximum attempts", () => {
+						const reconnect$ = exhaustHubRetryAttempts$(SUT, hubBackend).pipe(
+							finalize(() => {
+								expect(SUT.connectionState.status).toBe(ConnectionStatus.disconnected);
+								expect(hubStartSpy).toBeCalledTimes(3);
+								expect(hubStopSpy).not.toBeCalled();
+							})
+						);
+
+						return lastValueFrom(reconnect$);
+					});
+
+					it("should reset maximum attempts after trigger disconnect + connect", () => {
+						const resetMaxAttempts$ = exhaustHubRetryAttempts$(SUT, hubBackend).pipe(
+							tap(() => SUT.disconnect()),
+							switchMap(() => SUT.connect()),
+							switchMap(() => SUT.connectionState$.pipe(
+								first(state => state.status === ConnectionStatus.connected),
+								tap(() => hubBackend.disconnect(new Error("Disconnected by the server to re-trigger auto reconnect"))),
+								switchMap(() => SUT.connectionState$.pipe(first(x => x.status === ConnectionStatus.connected))),
+							)),
+							tap(state => {
+								expect(hubStartSpy).toBeCalledTimes(4);
+								expect(state.status).toBe(ConnectionStatus.connected);
+							}),
+						);
+
+						return lastValueFrom(resetMaxAttempts$);
+					});
+
+					it("should reset maximum attempts after exceeding the recover duration", () => {
+						const resetMaxAttempts$ = exhaustHubRetryAttempts$(SUT, hubBackend).pipe(
+							delay(AUTO_RECONNECT_RECOVER_INTERVAL),
+							switchMap(() => SUT.connectionState$.pipe(
+								first(state => state.status === ConnectionStatus.connected),
+							)),
+							tap(state => {
+								expect(hubStartSpy).toBeCalledTimes(3);
+								expect(state.status).toBe(ConnectionStatus.connected);
+							}),
+						);
+
+						return lastValueFrom(resetMaxAttempts$);
+					});
 				});
 
 			});

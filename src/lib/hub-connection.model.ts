@@ -51,6 +51,12 @@ export interface ConnectionOptions extends IHttpConnectionOptions {
 
 export interface ReconnectionStrategyOptions {
 	maximumAttempts?: number;
+	/**
+	 * Resets maximum attempts when exhausted after the given duration.
+	 * The duration is restarted for each connection attempt unless a Date is provided.
+	 * Supports number in MS or date. Defaults to 15 minutes.
+	 */
+	autoReconnectRecoverInterval?: number | Date;
 	customStrategy?: (retryOptions: ReconnectionStrategyOptions, retryCount: number) => number;
 	randomBackOffStrategy?: RandomStrategyOptions;
 	randomStrategy?: RandomStrategyOptions;

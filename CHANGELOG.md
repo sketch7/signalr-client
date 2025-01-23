@@ -1,4 +1,16 @@
-## [5.0.1](https://github.com/sketch7/signalr-client/compare/5.0.0...5.0.1) (2023-09-11)
+## [5.1.0](https://github.com/sketch7/signalr-client/compare/5.0.1...5.1.0) (2025-01-21)
+
+### Features
+
+- **hub connection:**
+  - throttle reconnect on disconnect and stop trying after max attempts
+  - add `autoReconnectRecoverIntervalMS` to reset max attempts after a duration
+
+### Refactor
+
+- **hub connection:** convert `on` + `stream` `retryWhen` (deprecated) to `retry`
+
+## [5.0.1](https://github.com/sketch7/signalr-client/compare/5.0.0...5.0.1) (2024-09-11)
 
 ### Refactor
 
