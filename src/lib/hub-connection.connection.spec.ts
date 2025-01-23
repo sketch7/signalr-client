@@ -2,14 +2,12 @@ import { HubConnection } from "./hub-connection";
 import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, Observable } from "rxjs";
 import type { Mock, MockInstance } from "vitest";
 
-import { HeroHub, createSUT } from "./testing/hub-connection.util";
+import { AUTO_RECONNECT_RECOVER_INTERVAL, HeroHub, RETRY_MAXIMUM_ATTEMPTS, createSUT } from "./testing/hub-connection.util";
 import { ConnectionState, ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
 import * as signalr from "@microsoft/signalr";
 
-const RETRY_MAXIMUM_ATTEMPTS = 3;
-const AUTO_RECONNECT_RECOVER_INTERVAL = 2000;
 function promiseDelayResolve(ms: number) {
 	return new Promise(r => setTimeout(r, ms));
 }
@@ -47,7 +45,7 @@ describe("HubConnection Specs", () => {
 		describe("given a disconnected connection", () => {
 
 			beforeEach(() => {
-				SUT = createSUT(RETRY_MAXIMUM_ATTEMPTS, AUTO_RECONNECT_RECOVER_INTERVAL);
+				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
 				hubStartSpy = vi.spyOn(hubBackend.connection, "start");
 				hubStopSpy = vi.spyOn(hubBackend.connection, "stop");
@@ -247,7 +245,7 @@ describe("HubConnection Specs", () => {
 		describe("given a connected connection", () => {
 
 			beforeEach(() => {
-				SUT = createSUT(RETRY_MAXIMUM_ATTEMPTS, AUTO_RECONNECT_RECOVER_INTERVAL);
+				SUT = createSUT();
 				hubBackend = mockConnBuilder.getBackend();
 				return lastValueFrom(SUT.connect());
 			});
