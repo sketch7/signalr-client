@@ -1,5 +1,7 @@
 import { HubConnection } from "./hub-connection";
-import { Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, Observable } from "rxjs";
+import {
+	Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, Observable
+} from "rxjs";
 import type { Mock, MockInstance } from "vitest";
 
 import { AUTO_RECONNECT_RECOVER_INTERVAL, HeroHub, RETRY_MAXIMUM_ATTEMPTS, createSUT } from "./testing/hub-connection.util";

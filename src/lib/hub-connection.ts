@@ -318,7 +318,7 @@ export class HubConnection<THub> {
 			maxAttemptReset$,
 		).pipe(
 			switchMap(() => onServerErrorDisconnect$.pipe(
-				scan((attempts) => attempts += 1, 0),
+				scan(attempts => attempts += 1, 0),
 				map(retryCount => ({
 					retryCount,
 					nextRetryMs: retryCount ? getReconnectionDelay(this.retry, retryCount) : 0
