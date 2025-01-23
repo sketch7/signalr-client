@@ -1,7 +1,7 @@
-import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, EMPTY, merge } from "rxjs";
+import { from, BehaviorSubject, Observable, Observer, timer, throwError, Subject, EMPTY, merge, } from "rxjs";
 import {
 	tap, map, filter, switchMap, skipUntil, delay, first,
-	retryWhen, delayWhen, distinctUntilChanged, takeUntil, retry,
+	delayWhen, distinctUntilChanged, takeUntil, retry,
 	scan,
 	catchError,
 	skip,
@@ -270,10 +270,11 @@ export class HubConnection<THub> {
 	private activateStreamWithRetry<TResult>(stream$: Observable<TResult>): Observable<TResult> {
 		return this.waitUntilConnect$.pipe(
 			switchMap(() => stream$.pipe(
-				retryWhen((errors: Observable<unknown>) => errors.pipe(
-					delay(1), // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
-					delayWhen(() => this.waitUntilConnect$)
-				))
+				retry({
+					delay: () => timer(1).pipe( // workaround - when connection disconnects, stream errors fires before `signalr.onClose`
+						delayWhen(() => this.waitUntilConnect$)
+					)
+				})
 			))
 		);
 	}

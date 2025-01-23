@@ -6,6 +6,10 @@
   - throttle reconnect on disconnect and stop trying after max attempts
   - add `autoReconnectRecoverIntervalMS` to reset max attempts after a duration
 
+### Refactor
+
+- **hub connection:** convert `on` + `stream` `retryWhen` (deprecated) to `retry`
+
 ## [5.0.1](https://github.com/sketch7/signalr-client/compare/5.0.0...5.0.1) (2024-09-11)
 
 ### Refactor
