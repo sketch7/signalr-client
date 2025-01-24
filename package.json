@@ -38,7 +38,7 @@
     "url": "git+https://github.com/sketch7/signalr-client.git"
   },
   "peerDependencies": {
-    "@microsoft/signalr": "^7.0.0",
+    "@microsoft/signalr": ">=7.0.0",
     "rxjs": ">=6.0.0"
   },
   "devDependencies": {
