@@ -1,3 +1,8 @@
+## [6.0.0](https://github.com/sketch7/signalr-client/compare/5.1.0...6.0.0) (2025-11-25)
+
+### Features
+- **deps:** update all deps + `@microsoft/signalr` `>=10.0.0`
+
 ## [5.1.0](https://github.com/sketch7/signalr-client/compare/5.0.1...5.1.0) (2025-01-24)
 
 ### Features

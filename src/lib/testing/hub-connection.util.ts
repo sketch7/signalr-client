@@ -1,8 +1,6 @@
 import { HubConnection } from "../hub-connection";
 import { vi } from "vitest";
 import { ReconnectionStrategyOptions } from "../hub-connection.model";
-// jest.genMockFromModule("@microsoft/signalr");
-vi.mock("@microsoft/signalr");
 
 let nextUniqueId = 0;
 

@@ -2,13 +2,60 @@ import { HubConnection } from "./hub-connection";
 import {
 	Subscription, lastValueFrom, merge, first, switchMap, tap, skip, delay, withLatestFrom, takeWhile, filter, finalize, Observable
 } from "rxjs";
-import type { Mock, MockInstance } from "vitest";
+import { vi, type Mock, MockInstance } from "vitest";
 
 import { AUTO_RECONNECT_RECOVER_INTERVAL, HeroHub, RETRY_MAXIMUM_ATTEMPTS, createSUT } from "./testing/hub-connection.util";
 import { ConnectionState, ConnectionStatus } from "./hub-connection.model";
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 
-import * as signalr from "@microsoft/signalr";
+let mockConnBuilder: any;
+
+vi.mock(import("@microsoft/signalr"), (): any => {
+	class MockBackend {
+		private _onclose: ((err?: Error) => void) | undefined;
+		constructor(public connection: any) {}
+		disconnect(err?: Error): void {
+			if (this._onclose) this._onclose(err);
+		}
+		registerOnclose(cb: (err?: Error) => void): void {
+			this._onclose = cb;
+		}
+	}
+
+	class MockConnection {
+		backend = new MockBackend(this);
+		start(): Promise<void> { return Promise.resolve(); }
+		stop(): Promise<void> {
+			this.backend.disconnect();
+			return Promise.resolve();
+		}
+		onclose(cb: (err?: Error) => void): void {
+			this.backend.registerOnclose(cb);
+		}
+	}
+
+	class MockBuilder {
+		private _lastHub = new MockConnection();
+		build() { return this._lastHub; }
+		withUrl(): this { return this; }
+		withHubProtocol(): this { return this; }
+		getBackend() { return this._lastHub.backend; }
+	}
+
+	return {
+		HubConnectionBuilder: vi.fn(function(this: any) {
+			mockConnBuilder = new MockBuilder();
+			return mockConnBuilder;
+		}),
+		HubConnectionState: {
+			Disconnected: 0,
+			Connecting: 1,
+			Connected: 2,
+			Disconnecting: 3,
+			Reconnecting: 4,
+		},
+	};
+});
 
 function promiseDelayResolve(ms: number) {
 	return new Promise(r => setTimeout(r, ms));
@@ -29,7 +76,6 @@ function exhaustHubRetryAttempts$(sut: HubConnection<HeroHub>, hubBackend: MockS
 describe("HubConnection Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;
-	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
 	let conn$$ = Subscription.EMPTY;
 	// let hubStartSpy: jest.SpyInstance<Promise<void>>;
@@ -38,8 +84,7 @@ describe("HubConnection Specs", () => {
 	let hubStopSpy: MockInstance<[], Promise<void>>;
 
 	beforeEach(() => {
-		mockConnBuilder = new MockSignalRHubConnectionBuilder();
-		(signalr.HubConnectionBuilder as unknown as Mock).mockImplementation(() => mockConnBuilder);
+		// Mock is set up in vi.mock factory above
 	});
 
 	describe("Connection Specs", () => {

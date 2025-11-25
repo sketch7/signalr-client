@@ -1,23 +1,68 @@
 import { lastValueFrom } from "rxjs";
-import { Mock, MockInstance } from "vitest";
+import { Mock, MockInstance, vi } from "vitest";
 
 import { MockSignalRHubConnectionBuilder, MockSignalRHubBackend } from "./testing";
 import { createSUT, HeroHub } from "./testing/hub-connection.util";
 import { HubConnection } from "./hub-connection";
 
-import * as signalr from "@microsoft/signalr";
+let mockConnBuilder: any;
+
+vi.mock(import("@microsoft/signalr"), (): any => {
+	class MockBackend {
+		private _onclose: ((err?: Error) => void) | undefined;
+		constructor(public connection: any) {}
+		disconnect(err?: Error): void {
+			if (this._onclose) this._onclose(err);
+		}
+		registerOnclose(cb: (err?: Error) => void): void {
+			this._onclose = cb;
+		}
+	}
+
+	class MockConnection {
+		backend = new MockBackend(this);
+		start(): Promise<void> { return Promise.resolve(); }
+		stop(): Promise<void> {
+			this.backend.disconnect();
+			return Promise.resolve();
+		}
+		onclose(cb: (err?: Error) => void): void {
+			this.backend.registerOnclose(cb);
+		}
+	}
+
+	class MockBuilder {
+		private _lastHub = new MockConnection();
+		build() { return this._lastHub; }
+		withUrl(): this { return this; }
+		withHubProtocol(): this { return this; }
+		getBackend() { return this._lastHub.backend; }
+	}
+
+	return {
+		HubConnectionBuilder: vi.fn(function(this: any) {
+			mockConnBuilder = new MockBuilder();
+			return mockConnBuilder;
+		}),
+		HubConnectionState: {
+			Disconnected: 0,
+			Connecting: 1,
+			Connected: 2,
+			Disconnecting: 3,
+			Reconnecting: 4,
+		},
+	};
+});
 
 // tslint:disable: no-consecutive-blank-lines
 describe("HubConnection - dispose Specs", () => {
 
 	let SUT: HubConnection<HeroHub>;
-	let mockConnBuilder: MockSignalRHubConnectionBuilder;
 	let hubBackend: MockSignalRHubBackend;
-	let hubStopSpy: MockInstance<[], Promise<void>>;
+	let hubStopSpy: MockInstance;
 
 	beforeEach(() => {
-		mockConnBuilder = new MockSignalRHubConnectionBuilder();
-		(signalr.HubConnectionBuilder as unknown as Mock).mockImplementation(() => mockConnBuilder);
+		// Mock is set up in vi.mock factory above
 	});
 
 	describe("given a connected connection", () => {
