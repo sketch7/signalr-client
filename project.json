@@ -16,11 +16,13 @@
         "compiler": "tsc",
         "project": "./package.json",
         "format": ["cjs", "esm"],
-        "assets": [{
-          "glob": "./README.md",
-          "input": ".",
-          "output": "."
-        }]
+        "assets": [
+          {
+            "glob": "./README.md",
+            "input": ".",
+            "output": "."
+          }
+        ]
       },
       "configurations": {
         "production": {
@@ -39,7 +41,7 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "passWithNoTests": true,

@@ -22,26 +22,29 @@ export class MockSignalRHubBackend {
 
 export class MockSignalRHubConnectionBuilder {
 
-	private _lastHub: MockSignalRHubConnection | undefined;
+	private _lastHub: MockSignalRHubConnection;
+
+	constructor() {
+		// Initialize the connection immediately so it's available for tests
+		this._lastHub = new MockSignalRHubConnection();
+	}
 
 	build(): MockSignalRHubConnection {
 		// console.info(">> [connectionBuilder] build");
-		// todo: find way to validate whether its the same hub key so it wont get misused
-		const hub = this._lastHub || new MockSignalRHubConnection();
-		this._lastHub = hub;
-		return hub;
+		// Return the existing hub connection
+		return this._lastHub;
 	}
 
 	withUrl(): this {
 		return this;
 	}
 
+	withHubProtocol(): this {
+		return this;
+	}
+
 	getBackend(): MockSignalRHubBackend {
-		if (!this._lastHub) {
-			throw Error("No connection!");
-		}
-		const hub = this._lastHub;
-		return hub.backend;
+		return this._lastHub.backend;
 	}
 
 }
