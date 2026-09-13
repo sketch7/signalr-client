@@ -1,40 +1,16 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - master
-      - "*.x"
-    paths-ignore:
-      - "**.md"
-
   pull_request:
-    branches:
-      - master
-      - "*.x"
-    paths-ignore:
-      - "**.md"
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master, "v*", "*.x"]
+    paths-ignore: ["**.md"]
 
-  workflow_dispatch:
-    inputs:
-      publish:
-        description: "Publish 🚀"
-        required: false
-        type: boolean
-        default: false
-      force-prerelease:
-        description: "Force Pre-release"
-        required: false
-        type: boolean
-        default: true
+permissions:
+  contents: read
 
 jobs:
-  package:
-    name: Package
-    uses: sketch7/.github/.github/workflows/node-lib.yml@node-libs-v1
+  ci:
+    uses: sketch7/.github/.github/workflows/node-ci.yml@feature/promotable-app-release-cycle
     with:
-      node-version: "18"
-      publishable: ${{ contains(fromJSON('["develop", "master", "workflow"]'), github.ref_name) || endsWith(github.ref_name, '.x') || github.event.inputs.publish == 'true' }}
-      force-preid: ${{ github.event.inputs.force-prerelease == 'true' }}
-    secrets:
-      npm-auth-token: ${{ secrets.NPM_KEY }}
+      node-version-file: .nvmrc

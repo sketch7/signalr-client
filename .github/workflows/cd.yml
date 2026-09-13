@@ -1,0 +1,80 @@
+name: CD
+
+on:
+  push:
+    branches: [master, "v*", "*.x"]
+    paths-ignore: ["**.md"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish packages
+        type: boolean
+        default: false
+      force-prerelease:
+        description: Force prerelease
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: package-release-${{ github.repository }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate manual publication
+    if: github.event_name == 'workflow_dispatch' && inputs.publish
+    uses: sketch7/.github/.github/workflows/node-ci.yml@feature/promotable-app-release-cycle
+    with:
+      node-version-file: .nvmrc
+
+  publish:
+    needs: validate
+    # Manual publication must pass CI; branch bootstrap must not publish.
+    if: >-
+      !cancelled() &&
+      ((github.event_name == 'push' && github.event.created == false) ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish && needs.validate.result == 'success'))
+    uses: sketch7/.github/.github/workflows/node-publish.yml@feature/promotable-app-release-cycle
+    with:
+      node-version-file: .nvmrc
+      force-preid: ${{ github.event_name == 'workflow_dispatch' && inputs.force-prerelease }}
+      private-npm-registry: https://registry.npmjs.org
+      private-npm-scope: "@ssv"
+      version-replace-glob: "src/lib/version.ts"
+    secrets:
+      private-npm-auth-token: ${{ secrets.NPM_KEY }}
+
+  prepare-release:
+    needs: publish
+    if: >-
+      !cancelled() && needs.publish.result == 'success' &&
+      github.event_name == 'push' && github.ref_name == 'master'
+    uses: sketch7/.github/.github/workflows/prepare-release.yml@feature/promotable-app-release-cycle
+    with:
+      base-version: ${{ needs.publish.outputs.baseVersion }}
+    secrets:
+      token: ${{ secrets.GH_PAT }}
+
+  release:
+    needs: publish
+    if: "!cancelled() && needs.publish.result == 'success' && github.event_name == 'push'"
+    uses: sketch7/.github/.github/workflows/create-release.yml@feature/promotable-app-release-cycle
+    with:
+      version: ${{ needs.publish.outputs.version }}
+
+  bump-main:
+    needs: [publish, release]
+    if: "!cancelled() && needs.release.result == 'success' && needs.release.outputs.is-latest == 'true'"
+    uses: sketch7/.github/.github/workflows/node-bump-main.yml@feature/promotable-app-release-cycle
+    with:
+      released-version: ${{ needs.publish.outputs.version }}
+      default-branch: master
+    secrets:
+      token: ${{ secrets.GH_PAT }}
