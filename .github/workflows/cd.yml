@@ -31,8 +31,6 @@ jobs:
     name: Validate manual publication
     if: github.event_name == 'workflow_dispatch' && inputs.publish
     uses: sketch7/.github/.github/workflows/node-ci.yml@feature/promotable-app-release-cycle
-    with:
-      node-version-file: .nvmrc
 
   publish:
     needs: validate
@@ -43,7 +41,6 @@ jobs:
        (github.event_name == 'workflow_dispatch' && inputs.publish && needs.validate.result == 'success'))
     uses: sketch7/.github/.github/workflows/node-publish.yml@feature/promotable-app-release-cycle
     with:
-      node-version-file: .nvmrc
       force-preid: ${{ github.event_name == 'workflow_dispatch' && inputs.force-prerelease }}
       version-replace-glob: "src/lib/version.ts"
 

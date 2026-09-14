@@ -12,5 +12,3 @@ permissions:
 jobs:
   ci:
     uses: sketch7/.github/.github/workflows/node-ci.yml@feature/promotable-app-release-cycle
-    with:
-      node-version-file: .nvmrc
