@@ -45,11 +45,7 @@ jobs:
     with:
       node-version-file: .nvmrc
       force-preid: ${{ github.event_name == 'workflow_dispatch' && inputs.force-prerelease }}
-      private-npm-registry: https://registry.npmjs.org
-      private-npm-scope: "@ssv"
       version-replace-glob: "src/lib/version.ts"
-    secrets:
-      private-npm-auth-token: ${{ secrets.NPM_KEY }}
 
   prepare-release:
     needs: publish
