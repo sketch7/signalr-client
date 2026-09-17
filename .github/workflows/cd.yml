@@ -30,7 +30,7 @@ jobs:
   validate:
     name: Validate manual publication
     if: github.event_name == 'workflow_dispatch' && inputs.publish
-    uses: sketch7/.github/.github/workflows/node-ci.yml@feature/promotable-app-release-cycle
+    uses: sketch7/.github/.github/workflows/node-ci.yml@node-libs-v3
 
   publish:
     needs: validate
@@ -39,7 +39,7 @@ jobs:
       !cancelled() &&
       ((github.event_name == 'push' && github.event.created == false) ||
        (github.event_name == 'workflow_dispatch' && inputs.publish && needs.validate.result == 'success'))
-    uses: sketch7/.github/.github/workflows/node-publish.yml@feature/promotable-app-release-cycle
+    uses: sketch7/.github/.github/workflows/node-publish.yml@node-libs-v3
     with:
       force-preid: ${{ github.event_name == 'workflow_dispatch' && inputs.force-prerelease }}
       version-replace-glob: "src/lib/version.ts"
@@ -49,7 +49,7 @@ jobs:
     if: >-
       !cancelled() && needs.publish.result == 'success' &&
       github.event_name == 'push' && github.ref_name == 'master'
-    uses: sketch7/.github/.github/workflows/prepare-release.yml@feature/promotable-app-release-cycle
+    uses: sketch7/.github/.github/workflows/prepare-release.yml@release-v2
     with:
       base-version: ${{ needs.publish.outputs.baseVersion }}
     secrets:
@@ -58,14 +58,14 @@ jobs:
   release:
     needs: publish
     if: "!cancelled() && needs.publish.result == 'success' && github.event_name == 'push'"
-    uses: sketch7/.github/.github/workflows/create-release.yml@feature/promotable-app-release-cycle
+    uses: sketch7/.github/.github/workflows/create-release.yml@release-v2
     with:
       version: ${{ needs.publish.outputs.version }}
 
   bump-main:
     needs: [publish, release]
     if: "!cancelled() && needs.release.result == 'success' && needs.release.outputs.is-latest == 'true'"
-    uses: sketch7/.github/.github/workflows/node-bump-main.yml@feature/promotable-app-release-cycle
+    uses: sketch7/.github/.github/workflows/node-bump-main.yml@release-v2
     with:
       released-version: ${{ needs.publish.outputs.version }}
       default-branch: master
