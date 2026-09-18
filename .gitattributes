@@ -1,0 +1,5 @@
+# Enforce Unix newlines to use LF line ending
+* text=auto eol=lf
+
+# Lockfiles — keep LF, mark as generated for diff/PR collapsing
+pnpm-lock.yaml -diff linguist-generated=true
