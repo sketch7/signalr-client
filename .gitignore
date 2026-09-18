@@ -1,42 +1,60 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# repo
+/apps/storybook/storybook-static
+
+
 # compiled output
 dist
 tmp
 /out-tsc
+*.tgz
 
-# dependencies
+# Node
 node_modules
+npm-debug.log
+.nx/cache
+.nx/polygraph
+.nx/workspace-data
+.nx/self-healing
+.nx/migrate-runs
+.sass-cache/
+.eslintcache
+.angular
+*.log
+
+.env.local
 
 # IDEs and editors
-/.idea
+.idea/
 .project
 .classpath
-.c9/
 *.launch
 .settings/
-*.sublime-workspace
+.vs/
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+
+# AI
+.cursor\rules\nx-rules.mdc
+.github\instructions\nx.instructions.md
+.worktrees/
+.claude/worktrees
+.claude/settings.local.json
+# Skills CLI derived/machine-local output (regenerate with: npx skills experimental_install)
+.claude/skills/
+agent/
+.superpowers
+.playwright-mcp
+
 
 # misc
-/.sass-cache
 /connect.lock
 /coverage
 /libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
 /typings
+
 
 # System Files
 .DS_Store
 Thumbs.db
-
-.nx/cache
-.nx/workspace-data
+nul

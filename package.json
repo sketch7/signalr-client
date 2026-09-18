@@ -1,5 +1,12 @@
 {
   "name": "@ssv/signalr-client",
+  "engines": {
+    "node": ">=24.14.0",
+    "npm": ">=11.5.1"
+  },
+  "volta": {
+    "node": "24.14.0"
+  },
   "version": "5.1.0",
   "versionSuffix": "",
   "description": "SignalR client library built on top of @microsoft/signalr. This gives you more features and easier to use.",
